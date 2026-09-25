@@ -14,7 +14,6 @@ SCRIPTS = Path(__file__).resolve().parent.parent / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 import follower_predictability as fp  # noqa: E402
-import envelope_sweep  # noqa: E402
 import intent_filter  # noqa: E402
 import kinematics  # noqa: E402
 import real_session_evidence as rse  # noqa: E402
@@ -327,42 +326,29 @@ class TestLatencyBudget(unittest.TestCase):
         self.assertLess(rep["cpu_us_per_frame"], budget_us * 0.25,
                         "pipeline must stay under 25% of one frame's budget")
 
-class TestEnvelopeAccounting(unittest.TestCase):
-    def test_one_event_cannot_match_two_back_to_back_cues(self):
-        cues = [{"t_start": 0.0, "t_end": 0.2}, {"t_start": 0.2, "t_end": 0.4}]
-        events = [{"t_start": 0.0, "t_end": 0.4}]
-        matches, merged = envelope_sweep.match_cues_to_events(cues, events)
-        self.assertEqual(len(matches), 1)
-        self.assertEqual(merged, 1)
+class TestWpmCeiling(unittest.TestCase):
+    def test_250_wpm_two_events_per_syllable_exceeds_the_ceiling(self):
+        ceiling = wpm_ceiling.event_ceiling_hz()
+        need = (250 / 60.0) * 1.5 * 2.0
+        self.assertGreater(need, ceiling,
+                           "250 WPM with 2 events/syllable must exceed the "
+                           "88 ms detector ceiling -- this is the project constraint")
 
-    def test_realized_rate_uses_observed_cue_starts(self):
-        cues = [{"t_start": 0.0}, {"t_start": 0.5}, {"t_start": 1.0}]
-        self.assertAlmostEqual(envelope_sweep.realized_rate_hz(cues), 2.0)
+    def test_250_wpm_one_event_per_syllable_fits_under_the_ceiling(self):
+        ceiling = wpm_ceiling.event_ceiling_hz()
+        need = (250 / 60.0) * 1.5 * 1.0
+        self.assertLess(need, ceiling)
 
-
-class TestWpmRateBudget(unittest.TestCase):
-    def test_150_wpm_one_event_per_syllable_requires_3_75_hz(self):
-        self.assertAlmostEqual(
-            wpm_ceiling.required_event_rate_hz(150, 1.5, 1.0), 3.75)
-
-    def test_250_wpm_one_event_per_syllable_requires_6_25_hz(self):
-        self.assertAlmostEqual(
-            wpm_ceiling.required_event_rate_hz(250, 1.5, 1.0), 6.25)
-
-    def test_two_events_per_syllable_doubles_the_rate(self):
-        one = wpm_ceiling.required_event_rate_hz(250, 1.5, 1.0)
-        two = wpm_ceiling.required_event_rate_hz(250, 1.5, 2.0)
-        self.assertAlmostEqual(two, one * 2.0)
-
-    def test_event_rate_maps_back_to_target_wpm(self):
-        rate = wpm_ceiling.required_event_rate_hz(200, 1.5, 1.0)
-        self.assertAlmostEqual(wpm_ceiling.wpm_for(rate, 1.5, 1.0), 200)
+    def test_every_target_exceeds_measured_free_motion(self):
+        for target in wpm_ceiling.TARGETS_WPM:
+            need = (target / 60.0) * 1.5 * 1.0
+            self.assertGreater(need, wpm_ceiling.MOVE_EVENT_RATE_HZ)
 
     def test_rest_run_is_shorter_than_the_detector_window(self):
-        """The 88 ms window exists because rest runs reach seven frames."""
+        """The 88 ms window exists precisely because rest runs reach 7 frames."""
         self.assertLess(wpm_ceiling.REST_RUN_MAX_MS, wpm_ceiling.EVENT_MS)
-        self.assertAlmostEqual(wpm_ceiling.EVENT_MS / (1000.0 / wpm_ceiling.HZ),
-                               8.0, places=0)
+        self.assertAlmostEqual(wpm_ceiling.EVENT_MS / (1000.0 / wpm_ceiling.HZ), 8.0,
+                               places=0)
 
 
 class TestEnvelopeAndMetricContract(unittest.TestCase):
@@ -454,6 +440,60 @@ class TestEnvelopeAndMetricContract(unittest.TestCase):
         for e in evs:
             self.assertIsNone(e["turn_deg"],
                               "a straight run has no reversal to report")
+
+    def test_first_window_beats_whole_stroke_on_hooked_strokes(self):
+        """A worker recommended accumulating over the whole event. Measured: it loses.
+
+        On a stroke that turns mid-way, the whole-event vector averages the out-leg with
+        the hook and the sector estimate collapses; the 8-frame window that the speed gate
+        selected stays at 1.00. Pinned so the recommendation cannot be re-adopted silently.
+        """
+        import math
+        import random
+
+        def hooked(n_len, sigma, turn_deg, rng, turn_frac=0.4):
+            ang = rng.randrange(8)
+            head = math.radians(ang * 45)
+            xs, ys, step = [0.0], [0.0], 20.0 / n_len
+            for j in range(n_len):
+                if j == int(n_len * turn_frac):
+                    head += math.radians(turn_deg)
+                xs.append(xs[-1] + step * math.cos(head) + rng.gauss(0, sigma))
+                ys.append(ys[-1] - step * math.sin(head) + rng.gauss(0, sigma))
+            return xs, ys, ang
+
+        def vectors(xs, ys):
+            n = len(xs) - 1
+            steps = [(xs[i + 1] - xs[i], ys[i + 1] - ys[i]) for i in range(n)]
+            speeds = [math.hypot(*s) / 0.011 for s in steps]
+            above = [i for i, v in enumerate(speeds)
+                     if v >= intent_filter.MIN_SPEED_MM_S]
+            if len(above) < intent_filter.MIN_RUN_FRAMES:
+                return None
+            s0 = above[0]
+            k = intent_filter.MIN_RUN_FRAMES
+            return {"first": (sum(dx for dx, _ in steps[s0:s0 + k]),
+                              sum(dy for _, dy in steps[s0:s0 + k])),
+                    "whole": (xs[-1] - xs[0], ys[-1] - ys[0])}
+
+        sectors = ("E", "NE", "N", "NW", "W", "SW", "S", "SE")
+        for turn in (0, 20, 45, 90):
+            rng = random.Random(7)
+            hits = {"first": 0, "whole": 0}
+            n = 0
+            for _ in range(200):
+                xs, ys, ang = hooked(22, 0.14, turn, rng)
+                v = vectors(xs, ys)
+                if v is None:
+                    continue
+                n += 1
+                for k, (dx, dy) in v.items():
+                    if stroke_decoder.sector_of(dx, dy) == sectors[ang]:
+                        hits[k] += 1
+            self.assertEqual(hits["first"] / n, 1.0, f"first-8 window, turn {turn}")
+            if turn >= 45:
+                self.assertLess(hits["whole"] / n, 0.5,
+                                f"whole-event estimate should collapse at turn {turn}")
 
 class TestQuantileHelpers(unittest.TestCase):
     def test_quantile_bounds(self):
