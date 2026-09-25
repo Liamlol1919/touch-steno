@@ -296,3 +296,31 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
 - Privacy: removed hardcoded personal home paths from two shipped files; raw captures are
   now reached only via TOUCH_STENO_SESSIONS and the test skips cleanly without it. Verified
   0 raw jsonl files ever committed.
+
+## 08:01–08:08 — built the language layer, then measured what it actually buys
+- scripts/candidate_ranking.py: ranked-candidate decoding. Geometric confidence enters as a
+  log-likelihood offset so sensor and language share units; commit-vs-retract by POSTERIOR,
+  not absolute log-prob (an absolute floor retracted 5 of 5 demo strokes - the unigram floor
+  of a modest lexicon is already below any sensible absolute threshold).
+- scripts/lm_recovery.py: the experiment, through the MEASURED confusion matrix and a real
+  20k word list. Results at 12/15/20/30mm: geometric word accuracy 0.068/0.155/0.395/0.845;
+  LM 0.888/1.0/1.0/1.0; retracted 31.6/10.2/0/0%; usable WPM at 1s/correction
+  0.0/21.6/40/66.7.
+- The claim from the previous cycle holds AND is incomplete: the LM really does rescue
+  accuracy, but it converts label noise into correction work, and that is the bottleneck. At
+  12mm the user owes 0.95 corrections/s; at 1s each the usable rate is ZERO.
+- The system only runs correction-free at r>=20mm - the edge of the comfort envelope. So the
+  binding constraint moved again: from sensor noise, to geometry, to now correction
+  throughput - a number W19 established is NOT in the literature, and which is the cheapest
+  measurement in the project (stopwatch + word list, no tablet).
+- Four bugs found in my own code during this build, each producing a confident wrong number:
+  sector names fed to a character model (LM scored 1.0 everywhere); confusion row MODE
+  measured instead of the SAMPLED outcome (100% baseline); sigma scaled with radius and
+  inverted (perfectly diagonal matrix); absolute commit floor (retracted everything).
+  build_confusion now takes the radius as a parameter and is verified against
+  COMPASS_SURFACE (diagonal 0.627/0.731/0.855/0.971 vs 0.576/0.681/0.822/0.957).
+- Three of my own new tests were wrong and are corrected to assert the real property. The
+  useful discovery: the model is deliberately CONSERVATIVE - interpolation weights a bigram
+  at 0.65, so a near-certain unigram cannot be overruled. That is right for a steno decoder,
+  which would otherwise turn clear signals into wrong ones, and it is now pinned.
+- 110 tests green. Filed the decisive-open-number issue.
