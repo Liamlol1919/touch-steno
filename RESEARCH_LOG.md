@@ -24,6 +24,8 @@
 - [x] Drei Standardbibliothek-Tests implementiert und erfolgreich ausgeführt.
 - [x] PTH-660 weiterhin nicht angeschlossen; keine Hardwarebehauptung ergänzt.
 
+- [x] `DECODER_DESIGN.md` mit Zustandsmaschine, Featurevertrag, Enslavement-Score und Plover-Bridge ergänzt.
+
 ## Next iteration
 
 - [ ] Datenformat für Rohereignisse stabilisieren.

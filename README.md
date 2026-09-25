@@ -11,6 +11,7 @@ Research and implementation notes for high-speed text input on a continuous touc
 - [EXPERIMENT_PROTOCOL.md](EXPERIMENT_PROTOCOL.md) — reproducible PTH-660 sensor, intent and ergonomics protocol.
 - [RESEARCH_LOG.md](RESEARCH_LOG.md) — iteration TODO and GitHub progress log.
 - [SYNTHETIC_BASELINE.md](SYNTHETIC_BASELINE.md) — reproducible synthetic zero-force detector sanity check.
+- [DECODER_DESIGN.md](DECODER_DESIGN.md) — state machine, feature contract, enslavement model and Plover bridge.
 - `scripts/audit_input.py` — safe evdev capability/event audit.
 - `scripts/synthetic_intent_benchmark.py` — deterministic tap/drift/rest/palm/ring synthetic test.
 - `tests/` — standard-library unit tests.
