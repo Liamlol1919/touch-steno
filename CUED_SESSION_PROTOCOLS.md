@@ -70,6 +70,18 @@ inter-hand interval spread, simultaneous onset error, and raw coupling before an
 suppression. This protocol produces no bimanual result by itself; stop for pain, numbness,
 cramp, or unusual reach.
 
+Analyze a completed capture separately; this path does not run intent suppression or
+anatomical attribution:
+
+```bash
+python3 scripts/bimanual_coupling.py messung/bimanual-coupling.jsonl --json
+```
+
+The report keeps contact episodes separate, reports realized cycle/onset rates, timing
+latencies, alternating interval spread, simultaneous onset error, and raw unfiltered pair
+lag profiles. See [BIMANUAL_ANALYSIS.md](BIMANUAL_ANALYSIS.md). A null statistic means the
+capture lacked sufficient valid overlap; it is not zero coupling.
+
 `correction_metrics.py --repair-log` accepts only JSONL records with numeric `t`,
 `type="text_repair"`, `action="undo"`, `cue_id` matching the manifest, and
 `clock="monotonic"`. A final transcript file or sensor timestamp is not treated as proof

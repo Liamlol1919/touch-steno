@@ -19,6 +19,8 @@ Research and implementation notes for high-speed text input on a continuous touc
   for complete and legacy paired cue manifests.
 - `scripts/session_runner.py` and [CUED_SESSION_PROTOCOLS.md](CUED_SESSION_PROTOCOLS.md) —
   hardware-aware, dry-run-capable cued measurement sessions including bimanual coupling.
+- [BIMANUAL_ANALYSIS.md](BIMANUAL_ANALYSIS.md) and `scripts/bimanual_coupling.py` —
+  offline raw-contact timing, episode, and unfiltered pair analysis.
 - [RAW_FRAME_SCHEMA.md](RAW_FRAME_SCHEMA.md) and `scripts/raw_schema.py` — versioned raw-frame
   JSONL contract with legacy replay compatibility.
 - `scripts/identity_dataset_check.py` — identity-capture gate; `VALID` requires an explicit

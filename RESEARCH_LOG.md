@@ -242,3 +242,11 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Added bimanual capture to the session runner and made dry-run print the hardware plan without a tablet.
 - [x] Added schedule, manifest, runner, and dry-run regression tests.
 - [ ] No bimanual hardware result is claimed; raw capture and a later analyzer remain required.
+
+## Iteration 27 — 2026-09-25
+
+- [x] Added `bimanual_coupling.py` for offline raw-contact episode and block analysis.
+- [x] Reported realized cycle/onset rates, cue latency, alternating interval spread, simultaneous onset error, and unfiltered pair lag profiles.
+- [x] Preserved the unverified tracking-ID/anatomical-label boundary in the report.
+- [x] Added synthetic in-memory analyzer tests for timing, episodes, invalid cues, correlation, and manifest identity.
+- [ ] No hardware bimanual result is claimed; the analyzer now needs a real cued capture.
