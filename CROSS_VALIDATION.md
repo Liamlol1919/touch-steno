@@ -212,46 +212,6 @@ statement about human capability. Please separate the two explicitly: "no publis
 0G-surface system reaches this rate" is true; "this rate is beyond human capability" is
 false, and a 360 WPM steno record exists.
 
-### 1.8 The caveat that matters most: nobody has shown keyless steno works
-
-1.6 established that a *human* sustains 360 WPM on a 23-key mechanical steno machine. W10
-(`W10_STENO_ON_TOUCH.md`) establishes the uncomfortable companion fact: **that performance has
-never been reproduced on a 0-force surface**, and the closest published numbers are far below
-the steno bar.
-
-| evidence | number | source |
-|---|---:|---|
-| best flat-surface **sequential** typing, two thumbs | 38 WPM, 2.3 % uncorrected error (n = 37,370) | mobile typing study |
-| best flat-surface sequential typing, ten fingers **with local haptics** | 55.1 WPM | W10 |
-| best **keyless chording** found (instrumented glove, not glass) | **16.8 WPM, 17.4 % error** | https://www.obscure.org/rosenberg/toc.pdf |
-| real steno-on-glass attempt (iStenoPad, 2012) | qualitative failure: drift, wrong keys, hit/miss indistinguishable without looking; **no numbers published** | http://plover.stenoknight.com/2012/02/istenopad-overlay-bust.html |
-| ASETNIOP (touchscreen chord keyboard) | ~30 WPM after hours; 37–50+ WPM are **vendor anecdotes**, no error rate, no peer review | https://www.asetniop.com/faq/ |
-| peer-reviewed chording **with physical keys** (Twiddler) | 47 WPM average, 67 max, after ~25 h | ISWC 2004 |
-| mechanical stenography, expert | 180–225 WPM required for certification; record 360 WPM at 97.23 % | NCRA / Guinness |
-
-So the gap is not "can a human do it" (yes) and not "is our sensor fast enough" (yes, 1.8×
-headroom over the record rate). The gap is: **does removing key travel, key force and the
-per-key depression event preserve any of it?** On the published evidence, the best keyless
-chording result is 16.8 WPM at a 17.4 % error rate, and the best flat-surface sequential
-typing is 38–55 WPM — 4–6× below the 180–225 WPM certification bar. Nobody has published a
-number between those.
-
-This reframes the project's success criterion honestly:
-
-- **Not** "reach 150–250 WPM on a 0G pad" (no precedent, and 1.6/1.7 give the headroom, but
-  nobody has closed the substitution).
-- **Rather:** how far above the published keyless-chording floor (16.8 WPM / 17.4 % error) and
-  the flat-surface sequential band (38–55 WPM) can a per-user coupling model with an
-  adaptive rest baseline get? That is measurable, falsifiable, and a real contribution
-  even if the answer is "60 WPM".
-
-The honest claim this project can make today: *we have removed the two failure modes that
-made a previous on-glass steno attempt fail* — drift (adaptive baseline, 11.96 → 5.04 mm
-residual) and neighbour enslavement (per-pair suppression, 175 followers removed at
-r² 0.55–0.93) — and the *next* measurable step is the cued chord session, which no
-published system has. That is a defensible research position, and it is a smaller claim
-than 360 WPM.
-
 ### 1.7 A concrete layout rule that follows: put the targets on the axes
 
 Kurtenbach & Buxton 1993 (verified directly, https://www.billbuxton.com/MMExpert.html,
@@ -281,6 +241,34 @@ Agent 1's report already refused to quote 150–250 WPM as an evidenced property
 (`COMPREHENSIVE_RESEARCH_REPORT.md:13`); this document now agrees with that from the
 hardware side as well, and identifies why: not sensor bandwidth, but simultaneity,
 individuation at high frequency, and per-stroke reliability.
+
+### 1.8.1 The ceiling claim was actively searched for counterexamples, and held
+
+W11 (`W11_VERIFY_KEYLESS_CEILING.md`) was tasked specifically with *refuting* the claim in
+1.8 ("nobody has published a touch-surface number above 60 WPM with a measured error rate").
+It searched commercial steno-on-touch products, the 2024–2026 handwriting literature and HCI
+touch-chord studies, and returned **CLAIM HOLDS / NO COUNTEREXAMPLE FOUND**. The candidates
+it had to exclude, and why each fails to count:
+
+| candidate | number | why it does not count |
+|---|---:|---|
+| CharaChorder One | 300 WPM claimed | **mechanical** chord keyboard, and a vendor claim |
+| Swype | "over 50", personally 55 WPM | phone, vendor claim, no sustained error rate |
+| Guinness 25-word passage timings | 82.5 / 88.2 / 112.9 WPM | **physical keyboard burst tests**; the 112.9 figure uses the 5-char convention that inflates WPM |
+| **handwriting recognition on tablets, 2024–2026** | **15–18 WPM with measured error** | the strongest continuous-input datapoint, and it is *slower* than two-thumb tapping |
+| screen-reader / blind touch typing | 5–20 WPM | assistive context, not a target |
+| two-thumb mobile typing (n = 37,370) | 36.2 WPM mean, 2.3 % uncorrected | the best *shipped* touch figure |
+
+Two conclusions, the second of which corrects an assumption we had been carrying:
+
+1. The gap between 16.8 WPM (best keyless chording found) and 180 WPM (stenography
+   certification) is real and unbridged in the published record.
+2. **Machine learning has not fixed the input layer.** Peer-reviewed handwriting recognition
+   on tablets in 2024–2026 measures 15–18 WPM *with* a real error rate — below two-thumb
+   tapping at 36 WPM. The assumption that a better model closes the gap by improving
+   continuous input is not supported; the measured evidence instead favours discrete
+   event/chord input over trajectory input on this surface, which is the direction this
+   project already took.
 
 ## 5. What this changes in the plan
 
