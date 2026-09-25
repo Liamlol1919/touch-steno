@@ -316,6 +316,55 @@ where `c_user` is extra repair UI beyond a complete replacement candidate. Equiv
 At `p = 0.90`, `T_draw = 0.4 s`, `c_ext = 0.576 s`, **R = 0.982 accepted words/s.** The
 naive `(1 − p)/A` omits failed-candidate occupancy and is wrong when counting accepted words.
 
+## 3.7 The validation verdict, and a limit the project cannot get past
+
+**The decisive metric is the joint held-out correct-word rate, where an incorrect word and
+"no word" both count as failure.** Its value is **unmeasured**; **below 0.90 is fatal.**
+Conditional top-1 accuracy alone is gameable: a recogniser that abstains on everything
+scores 100 % on it while producing nothing.
+
+**The 293-bit figure is weaker than stated.** It is a gross quantisation upper bound. After
+translation, scale and speed normalisation, temporally correlated and biomechanically
+constrained thumb trajectories are **not** 293 independent, label-relevant bits.
+
+**Computation is not the risk; generalisation is.** A 40-point DTW over 128 templates is
+128 × 40 × 40 = 204,800 cells per event, about 1.17 M cells/s at the certified ceiling. That
+is cheap. The risk is entirely in whether it generalises to a held-out gesture.
+
+### The limit this project cannot get past
+
+**One operator in one session means universal accuracy is unidentifiable, not merely
+unmeasured.** The number of independent operators is one. Whatever a pilot produces is a
+within-operator, within-session result, and no amount of additional data from the same hand
+changes that. Any future document must say so in the same sentence as the figure.
+
+**Sample size, for the record:** about **492 balanced held-out gestures** estimate aggregate
+accuracy to roughly **±5 percentage points at 95 % confidence** near 80 %. For ±10 points
+per word you need about **62 test gestures per word — 7,936 total.**
+
+**The ten-minute pilot:** 128 words × 5 enrolment + 5 temporally separated test repetitions
+= 1,280 events, about 225 s of motion at the ceiling plus reset. Run a minimal 40-point DTW
+and count incorrect **plus** abstentions. Settle only at ≥ 0.90 joint, labelled explicitly
+as within-operator and within-session.
+
+## 3.8 Privacy: the verdict is retention, not collection
+
+**Do not build the area modifier yet.** `log₂3 = 1.585` bits assumes three predictably
+selectable states; with unmeasured, unlabelled thresholds it is only quantisation
+arithmetic, and tripling the class count can destabilise an already-unknown base recogniser.
+
+**Raw traces are content-bearing behavioural and possibly biometric data, and persistent
+collection is unnecessary for the vertical slice.** The correct design is **privacy by
+retention**:
+
+1. Compute the recognition result **at lift-off**.
+2. **Discard the raw trajectory and the contact ellipse immediately.**
+3. Retain only the emitted word plus aggregate, opt-in validation metrics.
+
+This is the same conclusion the earlier telemetry work reached from the other direction, and
+it is stronger: not "consent before upload" but "do not retain the raw signal at all unless
+a specific experiment requires it."
+
 ## 4. The measurement that now has top priority
 
 **Fit Fitts' `a` and `b` for this thumb in this array.** 60 timed moves, adjacent and
