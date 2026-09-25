@@ -182,3 +182,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Kept `selection_basis=rest_clean_only` explicit when coverage is absent.
 - [x] Added replay-safe coverage tests; no unmeasured coverage values were fabricated.
 - [ ] Real gesture-length coverage data remains required for a production operating point.
+
+## Iteration 19 — 2026-09-25 08:06–08:14 CEST
+
+- [x] Added `candidate_ranker.py` for confidence/language ranked candidates.
+- [x] Preserved candidate provenance and explicit language-availability state.
+- [x] Added `CANDIDATE_RANKING.md` and tests; no LM or accuracy claim was added.
+- [ ] A real-radius labelled benchmark and Plover/LM adapter remain outstanding.

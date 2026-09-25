@@ -31,6 +31,8 @@ Research and implementation notes for high-speed text input on a continuous touc
   covariance/sweep artifact with source hashes and replay comparison.
 - [PLOVER_BRIEFS.md](PLOVER_BRIEFS.md) and `scripts/plover_dictionary_check.py` — layered
   Plover JSON outline/translation validation with collision lint.
+- [CANDIDATE_RANKING.md](CANDIDATE_RANKING.md) and `scripts/candidate_ranker.py` —
+  confidence/language ranked candidates without committing text.
 - `tests/` — standard-library unit tests for decoder invariants, measured constants and benchmark artefacts.
 
 ## Important evidence note
