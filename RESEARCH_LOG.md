@@ -272,3 +272,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Created issue #24 for a consented local language-layer capture and held-out corpus.
 - [x] Kept translation accuracy, correction time, and WPM outside the aggregate event-count tool.
 - [x] No language-layer performance number was fabricated.
+
+## Iteration 31 — 2026-09-25
+
+- [x] Added `language_event_recorder.py` as a Plover-agnostic local producer boundary.
+- [x] Recorder writes only the documented semantic event schema and never accepts raw content or identifiers.
+- [x] Added recorder-to-metrics integration tests and overwrite/word-balance validation.
+- [ ] A real Plover hook adapter and consented local capture remain outstanding in issue #24.
