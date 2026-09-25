@@ -150,8 +150,14 @@ def main() -> int:
     args = ap.parse_args()
 
     frames, cues = load(args.session, args.manifest)
-    if not frames or not cues:
-        print("need both a session and a manifest with cued labels")
+    if not frames:
+        print("The capture is empty: the device reported no contacts at all.")
+        print("That means nothing was on the pad during the session - the run is")
+        print("void, not failed. Repeat it with both hands resting on the surface.")
+        return 2
+    if not cues:
+        print("No manifest with cued labels was found, so there is nothing to score")
+        print("against. Pass --manifest, or record with field_gesture_probe.py.")
         return 1
 
     trials = []

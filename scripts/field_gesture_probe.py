@@ -124,7 +124,13 @@ def main() -> int:
     print("These are NOT compass directions. Move the whole hand shape.")
     print(f"{len(seq)} cues at {args.seconds:.0f}s each, ~{len(seq) * args.seconds:.0f}s total.")
     print(f"{'=' * 68}\n")
-    input("Press ENTER when your hands are in position...")
+    try:
+        input("Press ENTER when your hands are in position...")
+    except EOFError:
+        # Ohne TTY (geleitet, CI, nicht-interaktiv) nicht sterben: die Aufnahme
+        # startet sofort. Sonst bricht das Skript ab, bevor es irgendetwas
+        # aufzeichnet - genau der Fehler, der hier beim Smoke-Test auffiel.
+        print("no TTY, starting immediately")
 
     stop = threading.Event()
     threading.Thread(target=reader.run, kwargs={"stop": stop}, daemon=True).start()
