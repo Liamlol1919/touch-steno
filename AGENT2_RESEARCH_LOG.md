@@ -89,3 +89,19 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
 - Also unresolved and NOT claimed: direction accuracy differs between the two synthetic
   generators (0.19-1.0 vs 1.00). No direction-accuracy capability is quoted from either until
   the cued real session settles it.
+
+## 06:18–06:21 — envelope corrected, return phase quantified
+- Third metric bug found and fixed: sector_acc compared a block label to a block label, so
+  the reported 'direction accuracy' never looked at the decoded direction. Real error was
+  2-20deg, i.e. every sector inside its 22.5deg half-width.
+- Root cause of the generator discrepancy: chaining sector targets without a return produces
+  a CONSTANT 67.5deg direction error (1/8 correct); from a common centre, 0.0deg (8/8).
+- Final envelope: 100ms 0% detected; 150-350ms 100% detection AND 100% direction accuracy at
+  1-6Hz; 500ms 75-89% detection, 100% accuracy of those; zero idle false events everywhere.
+  No 3Hz ceiling, no 5.5 ev/s ceiling - both retracted.
+- `scripts/compass_geometry.py`: the repositioning contamination exceeds the 22.5deg
+  half-width at EVERY thumb-plausible radius (r<=25mm), and even r=30mm leaves only 1.5deg
+  margin. So the return phase is mandatory, not an optimisation.
+- 42 tests, each envelope claim and each previously-wrong metric now pinned.
+- Rule adopted and recorded: a number is not a finding until the metric that produced it has
+  a test. The harness, not the pipeline, was the weak link.
