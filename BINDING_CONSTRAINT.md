@@ -234,6 +234,47 @@ exist — its guard logic is reusable.
 
 ---
 
+## 3.1 The code layer, designed before the gesture
+
+An independent information-theory pass produced the layer that sits under any of the above:
+an **arithmetic code over a 1.6 mm cell lattice**, sized from the hand, not from convenience.
+
+- 1.6 mm ≈ 4× the measured 0.4 mm median jitter, inside the 24.6 × 18.2 mm envelope, gives
+  **15 × 11 = 165 cells** = **7.366 bits/event** (at 3× jitter: 300 cells, 8.229 bits;
+  at 2×: 660 cells, 9.366 bits).
+- **Measured corpus entropies, not guesses:** English unigram **9.476 bits/token**
+  (725,119,374 tokens), German **10.024 bits/token** (151,705,378). One-event uniform
+  vocabulary therefore needs `2^9.476 = 712` English or `2^10.024 = 1041` German entries —
+  **more than 165 cells**, so rare words need a 3-event code: `165³ = 4,492,125`.
+- **Coverage is the real limit:** English top-1000 covers 83.8 % of tokens, top-5000 covers
+  93.7 %; German top-1000 79.9 %, top-5000 91.2 %. No one-event scheme covers general text.
+- Variable-length chunks preserve entropy: a syllable at p = 0.1 costs 3.322 bits, p = 0.01
+  costs 6.644, p = 0.001 costs 9.966.
+
+**Honest limit the author states:** the actual information is
+`5.7 · [log₂ M − H(symbol | decoded)]`, and without a confusion matrix the conditional
+entropy is unknown. The supplied facts **cannot identify** the usable capacity. The numbers
+above are planning arithmetic, not a measurement.
+
+## 3.2 A space-time lattice is dead, and the arithmetic says why
+
+The space-time lattice (position × onset phase) scored 25/50 and was killed. The kill is
+worth recording because it is arithmetic, not opinion: the measured compass accuracy of
+47.6 % gives `H₂(0.476) = 0.9983`, so the position axis contributes
+`1 − 0.9983 = 0.0017` effective bits/event. **Any concept that inherits a position axis from
+the compass inherits essentially zero information on that axis**, no matter how cleverly the
+time axis is added.
+
+## 3.3 Two further self-corrections, recorded
+
+- **Critic3Timing corrected its own formula.** Steady-state word rate is
+  `R = 1 / [T_draw + 0.176 + p · c_ext]`, not `(1−p)/(T_draw+0.176)`. With `T_draw = 0.8 s`
+  and zero UI tail, `p = 0.10` gives 0.901 word/s and `p = 0.50` gives 0.735. The qualitative
+  objection stands; the formula did not.
+- **NewInformationTheory corrected its own exponentiation.** `2^9.476 = 712.3` and
+  `2^10.024 = 1041.4`, not 716.8 and 1071.6. Contextual English 4.62 bits/word gives
+  `2^4.62 = 24.6`, German 6.5 bits gives 90.5.
+
 ## 4. The measurement that now has top priority
 
 **Fit Fitts' `a` and `b` for this thumb in this array.** 60 timed moves, adjacent and
