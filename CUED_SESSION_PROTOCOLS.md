@@ -24,6 +24,10 @@ open question has a specific measurement attached to it.
 5. **`chord`**, **`identity`** — only after the above, because they are the most expensive
    interpretation per minute of capture.
 
+`correction_metrics.py --repair-log` accepts only JSONL records with numeric `t`,
+`type="text_repair"`, `action="undo"` and `clock="monotonic"`. A final transcript file or
+sensor timestamp is not treated as proof of text repair.
+
 ## Scoring, and the trap to avoid
 
 `scripts/evaluate_session.py <session.jsonl>` scores against the sidecar manifest. Three

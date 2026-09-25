@@ -132,3 +132,5 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Text repair metrics require an explicit timestamped repair log; absence is explicit.
 - [x] Added correction metric tests and updated the cued protocol/README.
 - [ ] A real cued correction capture and text-sink repair log remain outstanding.
+- [x] Hardened correction metrics: motion is named as detected-event latency, rates use total
+  correction exposure, and text repair requires typed monotonic undo records.
