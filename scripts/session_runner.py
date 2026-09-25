@@ -144,6 +144,37 @@ def run(label: str, cmd: list[str], results: list, timeout: int = 300,
     return ok
 
 
+def wait_for_hand(device, timeout=120.0, poll=0.5):
+    """Block until the pad reports at least two contacts.
+
+    A session run with an empty pad produces empty files and a report that looks
+    superficially valid, which is worse than refusing to start. This gate makes the
+    missing precondition explicit before any step runs.
+    """
+    import evdev  # lazy: keeps --replay device-free
+    dev = evdev.InputDevice(device)
+    fd = dev.fd
+    import select as _select
+    t0 = time.monotonic()
+    print("Warte auf mindestens zwei Kontakte auf dem Pad ...", flush=True)
+    while time.monotonic() - t0 < timeout:
+        r, _, _ = _select.select([fd], [], [], poll)
+        if not r:
+            continue
+        live = 0
+        for ev in dev.read():
+            if ev.type == evdev.ecodes.EV_ABS and ev.code == evdev.ecodes.ABS_MT_TRACKING_ID:
+                live = live + 1 if ev.value >= 0 else max(0, live - 1)
+        if live >= 2:
+            print(f"  Kontakte erkannt ({live}) - Start in 3 s.", flush=True)
+            time.sleep(3.0)
+            return True
+    dev.close()
+    print(f"FEHLER: nach {timeout:.0f} s weniger als zwei Kontakte. Der Lauf wird NICHT")
+    print("als leerer Lauf gespeichert, weil das als Messung fehlgelesen werden koennte.")
+    return False
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, default=Path("messung"))
