@@ -15,6 +15,14 @@
 - [ ] Plover-Abhängigkeiten in einer isolierten Umgebung installieren.
 - [ ] Ersten Zero-Force-Prototyp implementieren.
 
+## Iteration 2 — 2026-09-25 05:17–05:20 CEST
+
+- [x] Plover-/8VIM-/DasherCore-/Linux-Repositories mit festen SHAs lokal geklont.
+- [x] `scripts/synthetic_intent_benchmark.py` implementiert: Tap, Drift, Rest, Palm, Ring-Kopplung.
+- [x] `SYNTHETIC_BASELINE.md` als ausdrücklich nicht gemessene Baseline ergänzt.
+- [x] Drei Standardbibliothek-Tests implementiert und erfolgreich ausgeführt.
+- [x] PTH-660 weiterhin nicht angeschlossen; keine Hardwarebehauptung ergänzt.
+
 ## Next iteration
 
 - [ ] Datenformat für Rohereignisse stabilisieren.
