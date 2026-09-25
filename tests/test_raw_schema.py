@@ -46,6 +46,23 @@ class TestRawFrameSchema(unittest.TestCase):
             self.assertEqual(record["schema"], raw_schema.SCHEMA)
             self.assertEqual(kinematics._load(path),
                              [{"t": 0.25, "c": {"3": [1.0, 2.0, 3.0]}}])
+    def test_v1_and_legacy_replay_produce_identical_analysis(self):
+        frame = {"t": 0.25, "c": {"3": [1.0, 2.0, 3.0]}}
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            v1 = root / "v1.jsonl"
+            legacy = root / "legacy.jsonl"
+            v1.write_text(json.dumps(raw_schema.encode_frame(frame["t"], frame["c"])) + "\n",
+                          encoding="utf-8")
+            legacy.write_text(json.dumps(frame) + "\n", encoding="utf-8")
+            self.assertEqual(kinematics.analyze(kinematics._load(v1)),
+                             kinematics.analyze(kinematics._load(legacy)))
+
+
+    def test_boolean_version_is_not_accepted_as_integer(self):
+        with self.assertRaises(ValueError):
+            raw_schema.decode_record({"schema": raw_schema.SCHEMA, "version": True,
+                                      "t": 0.0, "c": {}})
 
 
 if __name__ == "__main__":

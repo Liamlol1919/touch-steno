@@ -30,16 +30,17 @@ def decode_record(record: dict) -> dict:
     when they have the historical ``t``/``c`` shape and no schema marker.
     """
     schema = record.get("schema")
+    version = record.get("version")
     if schema is None:
-        if "version" in record:
+        if version is not None:
             raise ValueError("raw frame has version without schema")
         if "t" not in record or "c" not in record:
             raise ValueError("legacy raw frame requires t and c")
         return {"t": float(record["t"]), "c": record["c"]}
     if schema != SCHEMA:
         raise ValueError(f"unsupported raw frame schema: {schema}")
-    if record.get("version") != VERSION:
-        raise ValueError(f"unsupported raw frame version: {record.get('version')}")
+    if type(version) is not int or version != VERSION:
+        raise ValueError(f"unsupported raw frame version: {version}")
     if "t" not in record or "c" not in record:
         raise ValueError("raw frame v1 requires t and c")
     return {"t": float(record["t"]), "c": record["c"]}
