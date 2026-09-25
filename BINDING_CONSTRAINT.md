@@ -715,3 +715,57 @@ Reproducibility across hands, sessions and capture conditions is entirely unmeas
 hand performs a field-level gesture that is NOT a thumb compass. If separability collapses
 to chance there, the signal is a thumb artefact and the space is dead. If it holds, a
 field-based input method is real.
+
+---
+
+## 10. The ENGLISH syllable inventory — the premise survives here, unlike German
+
+Computed on a pinned corpus: **hermitdave/FrequencyWords 2018 `en_50k.txt` at commit
+`525f9b5`, sha256 `5351ff…b458`**, segmented with **eSpeak-ng 1.52.0** `--ipa=3`, stress and
+length stripped, maximum legal onset including the English `sC` rule and stop+fricative+liquid
+clusters (`str`, `spr`, `skr`, `spl`), with sonority fallback. 49 997 / 50 000 types valid
+(three had no vowel: `psst`, `qu`, `ís`), covering 725 114 237 / 725 119 374 tokens.
+
+| Quantity | Value |
+|---|---|
+| Unique phonemic syllables, top 20k | 7 577 (`log₂` 12,887) |
+| Unique phonemic syllables, top 50k | **12 870** (`log₂` 13,652) |
+| Weighted syllable entropy | **9,085 bits/syllable** |
+| Mean syllables per word | **1,2916** |
+| Mean syllables per 5-letter word | **1,3965** |
+| Word unigram entropy | 9,476 bits/token → `2^H` = **712,30** |
+
+Token-mass coverage: 128 → 61,60 % · 256 → 73,50 % · 512 → 83,33 % · 1024 → **91,15 %** ·
+2048 → 96,19 % · 4096 → 98,82 % · 8192 → 99,81 % · 12 870 → 100 %.
+
+### Why English is structurally easier than German, and by how much
+
+| | German | English |
+|---|---|---|
+| syllables / 5-letter word | 1,695 | **1,3965** |
+| 2 events per syllable | 3,39 events/word | **2,79 events/word** |
+| 3 events per syllable | 5,09 events/word | **4,19 events/word** |
+
+**The "1–2 events per 5-letter word" premise is incompatible with a fixed syllable code in
+German at 2 events per syllable (3,39 needed) but only *just* misses in English at 2 events
+(2,79 needed) and comes close at 3 events (4,19).** A 2-event English syllable code needs
+2,79 events per word where the premise allows 2 — a 39 % overshoot rather than German's 70 %.
+Neither language reaches it, but English is materially closer, and English's 1,15 % top-1024
+coverage is better positioned for a compact code than most designs assume.
+
+Event arithmetic at the certified 5,7 events/s ceiling, all ceilings and not user rates:
+
+| Event alphabet | events/syllable | syll/s | WPM (5-letter) | events/5-letter word |
+|---|---|---|---|---|
+| 8 classes | 5 | 1,14 | 48,98 | 6,98 |
+| 16 classes | 4 | 1,425 | 61,22 | 5,59 |
+| 32 or 64 classes | 3 | 1,90 | 81,63 | 4,19 |
+
+**The honest English conclusion:** a 3-event, 32-class code reaches 81,6 WPM *arithmetically*
+and needs 4,19 events per 5-letter word against a 1–2 premise. The 1–2 premise has to be
+abandoned for English as well, but the overshoot is 4,19 against 2 rather than 5,09 against
+2, and a word-level code remains the better-fitting frame.
+
+**Caveats carried with the numbers:** eSpeak G2P and this onset table are an approximation,
+not a linguistic universal; the corpus is frequency-weighted English, and a different
+register or a German corpus changes every figure. Nothing here is a measured user rate.
