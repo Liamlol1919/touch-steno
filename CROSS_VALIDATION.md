@@ -164,7 +164,55 @@ Decisions that follow, stated as constraints rather than opinions:
     channel capacity (~10 reliable bits), but **the user's sustainable deliberate event
     rate per hand**, and the independence degradation that starts around 3 Hz.
 
-### 1.5 A concrete layout rule that follows: put the targets on the axes
+### 1.6 The human anchor: 360 WPM is a verified human record
+
+This section corrects the tone of 1.4. The table there says 250 WPM needs 2.44× the
+event rate that *untrained free motion* produced. That is true but misleading if read as
+"the target is biomechanically unreachable". It is not.
+
+Verified primary source: New York Magazine's interview with **Mark Kislingbury**, who holds
+the Guinness world record for fastest real-time court reporter — **360 words in one minute
+at 97.23 % accuracy** (set at the NCRA convention, 2004; he later trained at 450 WPM for
+stretches). https://nymag.com/speed/2016/12/how-to-type-360-words-a-minute.html
+
+Three facts from that interview that settle the architecture question:
+
+1. **A 23-key mechanical steno machine sustains 360 WPM.** 360 WPM with word-level
+    shortcuts is ≈ **6 strokes/s**. Our 250 WPM target needs 6.25 events/s. Those are the
+    same number. The 88 ms detector ceiling is 11.4 events/s, i.e. **1.8× the record
+    rate**. The sensor and the detector are not the constraint; they have roughly a
+    factor of two of headroom over a world-record human.
+2. **Steno is one simultaneous chord per syllable** — "you push them all at once. That's
+    where the speed comes in." So the "1 event per syllable" requirement in 1.4 is not a
+    compromise forced by our detector; it is *the proven steno model*. The design's
+    one-event encoding is aligned with 180 years of stenographic practice.
+3. **The speed came from the dictionary, not the fingers.** "The reason I'm so fast is
+    that I don't write every syllable. I memorize a shortcut for each common name, phrase,
+    word" — he reports ~100,000 memorized short forms, and explicitly credits his system
+    rather than talent. He also notes "your fingers just physically top out on any
+    keyboard", i.e. the motor channel saturates long before the language layer does.
+
+Consequences for this project:
+
+- **Drop the framing that 150–250 WPM is a speculative target.** It is a *demonstrated
+  human rate* on a chorded device, and our sensing budget covers it with ~1.8× margin.
+  What is unproven is whether a *new* user reaches it on a 0G surface, and how long
+  training takes — which is exactly what the tempo session measures.
+- **The binding constraint is the language layer, not the motor layer.** Plover
+  dictionaries, an LM, and per-user shortcuts are the levers that moved Kislingbury from
+  200 to 360 WPM. That re-prioritises the work: decoder effort belongs in the dictionary/LM
+  and in the correction path, not in squeezing more events out of the fingers.
+- **The free-motion 2.56 events/s is an untrained baseline**, and should be labelled as
+  such. It is the "day 0" number, not a ceiling.
+
+Open question this raises for agent 1: `RECOMMENDED_ARCHITECTURES.md` and
+`COMPREHENSIVE_RESEARCH_REPORT.md:13` both currently frame 150–250 WPM as not evidenced.
+That framing is right for *published touch/steno research on 0G surfaces* and wrong as a
+statement about human capability. Please separate the two explicitly: "no published
+0G-surface system reaches this rate" is true; "this rate is beyond human capability" is
+false, and a 360 WPM steno record exists.
+
+### 1.7 A concrete layout rule that follows: put the targets on the axes
 
 Kurtenbach & Buxton 1993 (verified directly, https://www.billbuxton.com/MMExpert.html,
 InterCHI '93, 482–487) report that **on-axis menu items are selected faster and with fewer
