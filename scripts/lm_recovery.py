@@ -85,19 +85,6 @@ SECTOR_LETTER = {"E": "e", "NE": "n", "N": "t", "NW": "a",
                  "W": "o", "SW": "i", "S": "c", "SE": "m"}
 
 
-def sector_candidates(rows: dict[str, dict[str, int]]):
-    """For each intended letter, the top candidate letters and their probabilities."""
-    out = {}
-    for truth_sector, row in rows.items():
-        if truth_sector not in SECTOR_LETTER:
-            continue
-        total = sum(row.values()) or 1
-        cands = [(SECTOR_LETTER[sec], n / total) for sec, n in row.items() if n]
-        if len(cands) > 1:
-            out[SECTOR_LETTER[truth_sector]] = sorted(cands, key=lambda kv: -kv[1])[:3]
-    return out
-
-
 def sample_from(cands: list[tuple[str, float]], rng: random.Random) -> str:
     r = rng.random()
     acc = 0.0
@@ -110,39 +97,69 @@ def sample_from(cands: list[tuple[str, float]], rng: random.Random) -> str:
 
 def run(trials: int, radius: float, seed: int, words: list[str],
         model: cr.SymbolModel) -> dict:
-    """Decode real words through the noisy sector channel, with and without the LM."""
+    """Decode real words through the noisy sector channel, with and without the LM.
+
+    The Bayesian flow, in full, because getting it wrong is what made an earlier version
+    report a perfect recovery:
+
+      1. a target letter's sector S is known;
+      2. the SENSOR delivers an observation: obs ~ P(obs | S), read off the row of S;
+      3. the candidate set is what that observation could have been: P(true | obs), which
+         needs the COLUMN of obs - not the row, which would tell the model the answer;
+      4. the geometric baseline is the observation itself; the LM ranks the candidates.
+    """
     sigma = la.calibrate_sigma(trials=300, seed=3)
     conf = la.build_confusion(max(200, trials // 20), seed, sigma, radius_mm=radius)
-    by_letter = sector_candidates(conf)
-    rng = random.Random(seed)
-    pool = [w for w in words if all(ch in by_letter for ch in w)]
-    if not pool:
-        pool = [w for w in words if set(w) & set(by_letter)][:5000]
-    if not pool:
-        return {"error": "no word uses the mapped letters", "letters": sorted(by_letter)}
 
-    geo_hits = lm_hits = committed = retracted = words_total = 0
+    letter_of = dict(SECTOR_LETTER)
+    sector_of = {v: k for k, v in SECTOR_LETTER.items()}
+
+    def sample_observed(truth_sector: str, rng: random.Random) -> str:
+        row = conf[truth_sector]
+        total = sum(row.values()) or 1
+        r = rng.random()
+        acc = 0.0
+        for sec, n in row.items():
+            acc += n / total
+            if r <= acc:
+                return sec
+        return truth_sector
+
+    def candidates_for(obs: str) -> list[tuple[str, float]]:
+        col = {t: conf[t][obs] for t in conf if conf[t].get(obs)}
+        total = sum(col.values()) or 1
+        cands = [(letter_of[t], n / total) for t, n in col.items() if n]
+        return sorted(cands, key=lambda kv: -kv[1])[:3]
+
+    pool = [w for w in words if all(c in sector_of for c in w)]
+    if not pool:
+        return {"error": "no word uses the mapped letters",
+                "letters": sorted(set(letter_of.values()))}
+    rng = random.Random(seed)
+
+    geo_hits = lm_hits = 0
+    committed = retracted = words_total = 0
     prev_letter = None
     for _ in range(trials):
         word = rng.choice(pool)
         words_total += 1
         geo_word, lm_word = [], []
         for ch in word:
-            cands = by_letter[ch]
-            sampled = sample_from(cands, rng)
-            geo_word.append(sampled)
+            obs = sample_observed(sector_of[ch], rng)
+            cands = candidates_for(obs)
+            if not cands:
+                geo_word.append(ch)
+                lm_word.append(ch)
+                continue
+            geo_word.append(letter_of[obs])       # what the sensor alone says
             scored = model.score(cands, prev_letter)
             post = cr.posterior(scored)
-            best = post[0][0]
-            p_top = post[0][1]
-            gap = cr.margin(scored)
-            if p_top >= model.commit_posterior and gap >= model.margin_floor:
-                lm_word.append(best)
-                prev_letter = best
+            if post[0][1] >= model.commit_posterior and cr.margin(scored) >= model.margin_floor:
+                lm_word.append(post[0][0])
+                prev_letter = post[0][0]
             else:
                 retracted += 1
-                # a retraction is a wasted character: the user would have to correct it
-                lm_word.append(best)
+                lm_word.append(post[0][0])          # a retraction still has a best guess
         geo_hits += geo_word == list(word)
         lm_hits += lm_word == list(word)
         committed += len(word)
@@ -151,12 +168,11 @@ def run(trials: int, radius: float, seed: int, words: list[str],
         "radius_mm": radius,
         "words": words_total,
         "lexicon_size": len(words),
-        "channel_letters": len(by_letter),
         "geometric_word_accuracy": round(geo_hits / n, 3),
         "lm_word_accuracy": round(lm_hits / n, 3),
         "characters_committed": committed,
         "characters_retracted": retracted,
-        "retract_rate": round(retracted / max(1, committed + retracted), 3),
+        "retract_rate": round(retracted / max(1, committed), 3),
     }
 
 
@@ -198,7 +214,7 @@ def main() -> int:
         print(res["error"])
         return 1
     print(f"radius {res['radius_mm']}mm  lexicon {res['lexicon_size']} words  "
-          f"channel letters {res['channel_letters']}  words decoded {res['words']}")
+          f"words decoded {res['words']}")
     print(f"  geometric word accuracy (sampled) : {res['geometric_word_accuracy']}")
     print(f"  LM word accuracy                  : {res['lm_word_accuracy']}")
     print(f"  retracted characters              : {res['characters_retracted']} "

@@ -1,6 +1,7 @@
 # LM Recovery — what the language layer actually buys, and what it costs
 
-**Author:** Agent 2. **Date:** 2026-09-25 08:05 CEST.
+**Author:** Agent 2. **Date:** 2026-09-25 08:05 CEST, **corrected 08:20 CEST —
+the recovery table is RETRACTED, see 'RETRACTION' below.**
 `scripts/lm_recovery.py` (experiment) + `scripts/candidate_ranking.py` (the ranker).
 This is the experiment behind the claim that the language layer is the **correctness**
 lever rather than only the speed lever — and it shows the claim is true, incomplete, and
@@ -26,10 +27,13 @@ that the missing piece is a number nobody has.
 
 | radius | geometric word accuracy | LM word accuracy | retracted characters | usable WPM @0.3 s/corr | @1.0 s/corr |
 |---:|---:|---:|---:|---:|---:|
-| **12 mm** | **0.068** | **0.888** | **31.6 %** | 22.9 | **0.0** |
-| **15 mm** | **0.155** | **1.000** | 10.2 % | 34.5 | 21.6 |
-| **20 mm** | **0.395** | 1.000 | 0.0 % | 40.0 | 40.0 |
-| 30 mm | 0.845 | 1.000 | 0.0 % | 66.7 | 66.7 |
+| **12 mm** | ~~0.068~~ | ~~0.888~~ | ~~31.6 %~~ | ~~22.9~~ | ~~0.0~~ |
+| **15 mm** | ~~0.155~~ | ~~1.000~~ | ~~10.2 %~~ | ~~34.5~~ | ~~21.6~~ |
+| **20 mm** | ~~0.395~~ | ~~1.000~~ | ~~0.0 %~~ | ~~40.0~~ | ~~40.0~~ |
+| 30 mm | ~~0.845~~ | ~~1.000~~ | ~~0.0 %~~ | ~~66.7~~ | ~~66.7~~ |
+
+*(struck through: retracted above, conditioning error — read the correction before using
+any number in this table)*
 
 (usable WPM assumes 4.5 characters per word and an event rate of 3/s; correction cost is the
 user's time per correction.)
@@ -90,6 +94,72 @@ The architecture conclusion depends entirely on where in that range reality fall
 cannot currently say. This is now the highest-value measurement in the project, and unlike
 everything else it is **cheap**: it does not need the tablet, only a stopwatch and a list of
 words — a human correction-throughput measurement in the plain sense.
+
+## RETRACTION (2026-09-25 08:20): the recovery numbers in the table above are wrong
+
+The headline "6.8 % -> 88.8 % of words" does not survive a second look, and the reason is a
+conditioning error in my own experiment.
+
+**What was wrong.** The candidate set for each character was built from the row of the
+*intended* sector. That hands the language model the answer: the true symbol is usually the
+modal entry of its own row, so the model was ranking a set that already contained the truth
+at the top with a large probability. Fixed to condition on the *observed* sector —
+P(true | observed), which needs the confusion matrix transposed — the result collapses:
+
+| radius | geometric word accuracy | LM word accuracy | gain |
+|---:|---:|---:|---:|
+| 12 mm | 0.065 | 0.069 | +0.004 |
+| 15 mm | 0.153 | 0.153 | 0.000 |
+| 20 mm | 0.374 | 0.374 | 0.000 |
+| 30 mm | 0.838 | 0.838 | 0.000 |
+
+**And it is not the model's fault.** With an oracle prefix (the true previous letters given
+to the model) the recovery is unchanged: 0.068 at 12 mm, 0.184 at 15 mm. So neither error
+propagation nor model quality explains the failure — the greedy per-character model simply
+cannot exploit this channel.
+
+## The corrected finding: the information IS in the channel
+
+Two measurements locate the problem precisely.
+
+**Per character, how often is the true symbol even available?**
+
+| radius | top-1 | top-2 | top-3 | top-5 |
+|---:|---:|---:|---:|---:|
+| 12 mm | 0.617 | 0.808 | **0.968** | 0.994 |
+| 15 mm | 0.720 | 0.868 | **0.992** | 0.999 |
+| 20 mm | 0.852 | 0.932 | **0.999** | 1.000 |
+
+**Per word, is the target word reachable in a 20k lexicon given the top-k candidates?**
+
+| radius | geometric | top-2 reachable | **top-3 reachable** | top-4 |
+|---:|---:|---:|---:|---:|
+| 12 mm | 0.102 | 0.400 | **0.853** | 0.945 |
+| 15 mm | 0.190 | 0.502 | **0.960** | 0.985 |
+| 20 mm | 0.448 | 0.705 | **0.998** | 1.000 |
+
+So the corrected statement is:
+
+> At a 12 mm radius the top-1 reading is right 62 % of the time per character, but the true
+> symbol is inside the top-3 **96.8 %** of the time, and the target word is inside the set of
+> lexicon words consistent with the top-3 candidates **85 %** of the time.
+
+**The language layer is still potentially the correctness lever, but it is a different
+algorithm than the one implemented here.** It requires:
+
+1. keeping the **top-3** candidates from the sensor, not the top-1;
+2. a **word-level constrained search** over a lexicon, not a greedy character model;
+3. the lexicon constraint doing the work, with a language prior only to break ties among
+   the reachable words.
+
+Everything measured here about the retraction policy, the correction load and the WPM table
+is downstream of a wrong experiment, and is therefore withdrawn with it. The word-level
+retraction result (1.87 -> 0.92 actions per word) was measured on the same flawed
+conditioning and must be re-measured once the decoder is correct.
+
+**What survives unchanged:** the radius analysis and its comfort evidence (three independent
+lines), the 91 Hz timing, the 88 ms evidence floor, the coupling structure and its temporal
+signatures, and the decision that seconds-per-correction is unmeasured in the literature.
 
 ## What would change the picture
 
