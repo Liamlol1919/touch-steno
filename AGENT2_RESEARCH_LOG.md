@@ -126,3 +126,20 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
   hidden behind a pipe (`unittest | tail` returns tail's exit code). Caught it in the same
   minute and amended. Verifying the test exit code explicitly from now on.
 - 44 tests green.
+
+## 06:24–06:26 — the speed ceiling, and two more of my own wrong claims
+- Hypothesis 'the reversal threshold is under-tuned': WRONG. turn_deg 30-120 give identical
+  results; only 150 breaks. The threshold is not the limiter.
+- The real limiter is the CYCLE BUDGET: accuracy holds at 1.00 while the cue rate is below
+  1/(t_out + t_return) and collapses above it, because the next out-stroke starts during the
+  return and contaminates its first 8 frames.
+- Derived ceiling: out 150ms + return 33ms = 183ms cycle = 5.45 ev/s = 218 WPM (best corner);
+  250ms out = 141 WPM; 350ms out = 104 WPM. 150 WPM needs a 267ms cycle, 250 WPM a 160ms one -
+  and a 160ms cycle cannot contain a 150ms out-stroke plus a return. So 250 WPM is NOT
+  reachable with out-and-back on this device.
+- Honest claim now measured: a plausible path into 100-200 WPM - above every published touch
+  system (16.8-55 WPM), at or below professional steno (180-225 WPM), consistently, because
+  professional steno has a key release to segment on. The 0G surface spends its speed budget
+  on the return stroke. Filed as issue #14, superseding #4, #5, #11.
+- Process: I also committed once while a test was failing (failure hidden behind a pipe).
+  Caught in the same minute, fixed, amended. Checking exit codes explicitly now.
