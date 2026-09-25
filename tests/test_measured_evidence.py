@@ -784,6 +784,25 @@ class TestCouplingTimingSignature(unittest.TestCase):
         prof = {0: 0.5, 1: 0.4, 2: 0.3}
         self.assertIsNone(fp.half_width_frames(prof),
                           "a profile that never halves has no half-width")
+    def test_sharp_pair_passes_opt_in_temporal_gate(self):
+        import follower_predictability as fp
+        decision = fp.suppression_decision(0.8, {0: 1.0, 1: 0.4, 2: 0.2})
+        self.assertTrue(decision["suppress"])
+        self.assertEqual(decision["half_width_frames"], 1)
+
+    def test_broad_pair_fails_opt_in_temporal_gate(self):
+        import follower_predictability as fp
+        decision = fp.suppression_decision(0.8, {0: 1.0, 1: 0.9, 2: 0.8,
+                                                 3: 0.7, 4: 0.4})
+        self.assertFalse(decision["suppress"])
+        self.assertEqual(decision["half_width_frames"], 4)
+
+    def test_low_magnitude_fails_opt_in_temporal_gate(self):
+        import follower_predictability as fp
+        decision = fp.suppression_decision(0.2, {0: 1.0, 1: 0.1})
+        self.assertFalse(decision["suppress"])
+        self.assertIn("r2", decision["reason"])
+
 class TestQuantileHelpers(unittest.TestCase):
     def test_quantile_bounds(self):
         vals = [float(i) for i in range(100)]

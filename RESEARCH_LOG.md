@@ -93,3 +93,10 @@ measured PTH-660 throughput.
 
 The cue label is not anatomical attribution. Issue #9 remains open until a confirmed
 mapping is collected and the resulting identity model is evaluated across sessions.
+
+## Iteration 8 — 2026-09-25 07:02–07:08 CEST
+
+- [x] Added opt-in `suppression_decision()` requiring both r² and temporal sharpness.
+- [x] Kept shipped magnitude-only suppression unchanged pending cued two-hand evidence.
+- [x] Added sharp/broad/low-magnitude policy tests and documented the opt-in boundary.
+- [ ] Issue #16 cued alternating-vs-simultaneous session remains necessary for adoption.

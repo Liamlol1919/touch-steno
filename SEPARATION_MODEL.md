@@ -115,6 +115,20 @@ long is not a finger-slaved neighbour, and its suppression should not be trusted
 magnitude alone. This is also why the cross-hand structure survived a rigid-body fit
 (issue #16): it is not a translation-plus-rotation signature at all.
 
+### Opt-in suppression gate
+
+`follower_predictability.suppression_decision()` evaluates the proposed stricter rule without
+changing the shipped magnitude-only filter. It suppresses only when both conditions hold:
+
+```text
+r² >= 0.5
+half_width_frames <= 3
+```
+
+The default `intent_filter` behaviour remains unchanged until the cued alternating-vs-
+simultaneous two-hand session (issue #16) validates the policy. A broad cross-hand relation
+therefore remains visible as an ambiguous contact rather than being silently suppressed.
+
 ## What this model does not cover
 
 - **Chords.** Step 5 uses an $r^2$ threshold with a single global value; the measured structure

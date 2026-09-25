@@ -165,3 +165,26 @@ def half_width_frames(profile: dict) -> int | None:
         if abs(profile[lag]) < 0.5 * peak:
             return lag
     return None
+
+
+def suppression_decision(r2: float | None, profile: dict,
+                          r2_threshold: float = 0.5,
+                          max_half_width: int = 3) -> dict:
+    """Evaluate the opt-in temporal-shape gate without changing default filtering.
+
+    The existing decoder suppresses on magnitude/r2 alone. This helper is deliberately
+    separate: a caller must explicitly opt in after validating the policy on cued data.
+    """
+    half_width = half_width_frames(profile)
+    enough_magnitude = r2 is not None and r2 >= r2_threshold
+    sharp_enough = half_width is not None and half_width <= max_half_width
+    if not enough_magnitude:
+        reason = "r2 below threshold"
+    elif not sharp_enough:
+        reason = "relation is broad; standing coordination is not mechanical suppression"
+    else:
+        reason = "magnitude and temporal sharpness both pass"
+    return {"suppress": bool(enough_magnitude and sharp_enough),
+            "r2": r2, "half_width_frames": half_width,
+            "r2_threshold": r2_threshold, "max_half_width_frames": max_half_width,
+            "reason": reason}
