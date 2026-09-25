@@ -423,6 +423,30 @@ The stability arithmetic is sound (5 examples per root gives a 95 % prototype ra
 learnability axis scored **2/10**. A system that makes the user invent and rehearse fresh
 mnemonics every session has not removed a learning burden; it has made it recurring.
 
+## 3.11 The one-event variant, and the complete WPM ladder
+
+The agent's final split separates three regimes, and the first one changes the picture:
+
+| Scheme | bits/event | capacity | WPM, 5-letter | WPM, general |
+|---|---|---|---|---|
+| **One-event Pathbook** — one geometric trajectory per syllable | 14 | 11,230 exactly | **207,7** | **229,2** |
+| Onset-Coda Pair — two 128-way path classes | 7+7 | 16,384 | 103,8 | 114,6 |
+| Glyph-Triplet — three 32-way classes | 15 | 32,768 | 69,2 | 76,4 |
+
+**The one-event case has enough capacity.** 11,230 classes from ~39 samples is arithmetically
+possible, and it reaches 207,7 WPM on the 5-letter subset — well above the pair scheme. The
+agent's own caveat is the whole answer: **biomechanical separability across 11,230 path
+templates is unmeasured**, and it is very likely that one event is not realistic at the full
+inventory. This is the concept to kill first, because it is the one carrying the highest
+claim.
+
+The explicit hardware ceiling from the project's own "1–2 strokes per 5-letter word"
+assumption is **341 / 170,5 WPM**, independent of how words are segmented into syllables.
+
+**Every figure in this table is an arithmetic ceiling at the certified event rate, not a
+user rate.** Section 1's motor limits apply on top of all of them, and none has been
+measured on this hand.
+
 ## 4. The measurement that now has top priority
 
 **Fit Fitts' `a` and `b` for this thumb in this array.** 60 timed moves, adjacent and
