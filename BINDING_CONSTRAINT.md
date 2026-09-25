@@ -275,6 +275,47 @@ time axis is added.
   `2^10.024 = 1041.4`, not 716.8 and 1071.6. Contextual English 4.62 bits/word gives
   `2^4.62 = 24.6`, German 6.5 bits gives 90.5.
 
+## 3.4 What the observability critic found in our own data
+
+**10 simultaneous contacts appear in 94.2 % (`test.jsonl`) and 94.5 % (`test-daumen.jsonl`)
+of all frames in the existing captures.** No frame in either file is a labelled whole-word
+trial.
+
+This reframes the observability question. The 293-bit capacity figure is *sampling*
+capacity; it says nothing about **contact identity**. A zero-force digitiser estimates the
+centroid and ellipse of a changing conductive area — not a fingertip. Thumb flexion, roll
+and partial edge contact all move that centroid, and a tracking ID can stay numerically
+continuous while the centroid jumps or merges.
+
+**The number that decides observability: the stable intended-thumb-frame fraction.** Its
+value is **unmeasured**. Fatal below **90 %**, or with fewer than **30 usable centroid
+samples** inside a nominal 39.4-sample event.
+
+**The minor axis is recoverable live at each 224 Hz `SYN_REPORT` with no extra latency —
+but not retrospectively from existing JSONL.** The recorder has to change before it can be
+measured.
+
+## 3.5 The Area Register is weaker than claimed
+
+The same review found that **current major-axis readings are coarsely quantised and often
+0–2.5 mm.** If major itself spans only a few millimetres in 0.5 mm units, then
+`major × minor` is **not yet a credible three-level modifier.** The roll-invariance argument
+is correct; the claim that the product resolves into short/ordinary/long registers is
+currently unsupported. Area Register moves from *proposed* to *untested and possibly
+unresolvable with this hardware's current quantisation*.
+
+## 3.6 The throughput formula, settled
+
+Three reviewers corrected this formula twice. The correct form uses **geometric attempts**:
+
+    A = T_draw + 0.176 s          (one candidate, including its overhead)
+    R = p / [ A + (1 − p) · c_user ]
+
+where `c_user` is extra repair UI beyond a complete replacement candidate. Equivalently with
+`c_ext = A + c_user` as the complete extra time after an error, `R = p / [A + (1 − p)·c_ext]`.
+At `p = 0.90`, `T_draw = 0.4 s`, `c_ext = 0.576 s`, **R = 0.982 accepted words/s.** The
+naive `(1 − p)/A` omits failed-candidate occupancy and is wrong when counting accepted words.
+
 ## 4. The measurement that now has top priority
 
 **Fit Fitts' `a` and `b` for this thumb in this array.** 60 timed moves, adjacent and
