@@ -596,3 +596,69 @@ work:
 
 **Any concept proposed before step 1 is arithmetic about a sensor that cannot report what
 the concept needs.**
+
+---
+
+## 8. THE GATE NUMBERS, measured
+
+`scripts/geometry_probe.py` computes the two quantities every remaining concept was gated
+on. Run against the real captures from the operator's session, not against simulation.
+
+### 8.1 U — the contact-ambiguity rate. FATAL.
+
+| Capture | frames | with contact | frames with exactly 10 contacts | **U (lower bound)** |
+|---|---|---|---|---|
+| `s12.jsonl` (12 mm sectors) | 4 394 | 4 323 | **3 659 (84,6 %)** | **0,9491** |
+| `tempo.jsonl` (1–5 Hz) | 6 918 | 6 915 | **6 841 (98,9 %)** | **0,9980** |
+
+**Threshold: U ≤ 0,10. Measured: 0,95 and 1,00.**
+
+U is a *lower bound* on ambiguity — the capture carries no slot identity, so every frame
+with two or more contacts is counted as "more than one plausible thumb". It can only
+overstate ambiguity, never understate it.
+
+**The observability critic's prediction is confirmed, and by a wide margin.** Every
+single-thumb concept in this document is dead on the measured data, regardless of design
+quality. This is not a close call: the measured rate is an order of magnitude past the gate.
+
+### 8.2 The major axis has almost no dynamic range. This kills the ellipse channel outright.
+
+| Capture | major median | p05 – p95 | distinct values |
+|---|---|---|---|
+| `s12.jsonl` | 1,5 mm | 1,0 – 1,5 mm | 6 |
+| `tempo.jsonl` | 1,0 mm | 1,0 – 1,5 mm | 5 |
+
+**The major axis spans 0,5 mm of range across the entire capture, with 5–6 discrete
+values.** The critics described it as "coarsely quantised and often 0–2,5 mm". The
+measurement is worse: **1,0–1,5 mm.**
+
+Therefore `A = π · major · minor / 4` cannot resolve three registers. If major barely moves
+and minor is quantised the same way, the product has no usable dynamic range. **Area
+Register is dead — not "untested", dead — on the measured quantisation of this device.**
+
+The roll-invariance argument was always correct and is now irrelevant: an invariant of a
+signal with no range carries no information.
+
+### 8.3 What this means for the whole project
+
+Two independent findings, both measured, both fatal to the current design space:
+
+1. **Contact identity.** At U ≈ 0,95–1,00, the system cannot tell which of ten contacts is
+   the thumb. Every concept predicated on "the thumb does X" is unfounded.
+2. **Contact geometry.** The major axis spans 0,5 mm. The ellipse cannot encode a
+   modifier, a register or a symbol.
+
+The next action is therefore **not** another design round. It is a hardware-claim question
+that only the operator can answer, and it should be asked before any further design work:
+
+> Is the 10-contact condition a property of how the pad is being used — a resting hand
+> placed flat, with the thumb among nine other contacts — or is it inherent to this
+> digitiser? A ten-finger rest is a legitimate ergonomic choice, but it means the input
+> method must be built for a **ten-contact field**, not for a single thumb. Every
+> single-thumb concept in this document, including the sprint winner, was answering a
+> question the device was never being asked.
+
+The `q` coordination measure from section 2.3 — distinguishing a hand that moved as one
+from two independent gestures — is the only approach in this document that was designed for
+a ten-contact field rather than against it. It remains unmeasured and is now the most
+promising surviving direction precisely because it stops pretending there is one thumb.
