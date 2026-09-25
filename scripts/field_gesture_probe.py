@@ -72,6 +72,23 @@ def resolve_reader_src(explicit=None):
     raise SystemExit("wacom_touch.py not found; pass --src <dir>")
 
 
+def validate_jsonl(path: Path) -> None:
+    """Reject unreadable or malformed JSONL before starting analysis."""
+    try:
+        with path.open(encoding="utf-8") as stream:
+            for line_number, line in enumerate(stream, 1):
+                if not line.strip():
+                    continue
+                try:
+                    json.loads(line)
+                except json.JSONDecodeError as exc:
+                    raise ValueError(
+                        f"invalid JSONL in {path} at line {line_number}: {exc.msg}"
+                    ) from exc
+    except (OSError, UnicodeError) as exc:
+        raise ValueError(f"cannot read JSONL file {path}: {exc}") from exc
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--seconds", type=float, default=4.0,
@@ -87,7 +104,13 @@ def main() -> int:
 
     if args.replay:
         if not args.manifest:
-            print("--replay needs --manifest")
+            print("ERROR: --replay needs --manifest")
+            return 1
+        try:
+            validate_jsonl(args.replay)
+            validate_jsonl(args.manifest)
+        except ValueError as exc:
+            print(f"ERROR: {exc}".replace("\n", " "))
             return 1
         print("Re-analysing an existing capture with field_separability.py:\n")
         cmd = [sys.executable, str(ROOT / "scripts" / "field_separability.py"),
@@ -112,11 +135,13 @@ def main() -> int:
         frames.append({"t": time.monotonic(),
                        "c": {str(k): list(v) for k, v in g.items()}})
 
-    reader = WacomTouchReader(path=args.device, on_geometry=on_geometry)
     try:
+        reader = WacomTouchReader(path=args.device, on_geometry=on_geometry)
         dev = reader.open()
-    except SystemExit as exc:
-        print(f"ERROR: {exc}")
+    except (OSError, SystemExit) as exc:
+        detail = str(exc).replace("\n", " ")
+        print(f"ERROR: no usable touch device: {detail}; pass --device /dev/input/eventN "
+              "or check that the Wacom finger device is attached.")
         return 1
     print(f"Device: {dev.name} ({reader.path})")
     print(f"\n{'=' * 68}")

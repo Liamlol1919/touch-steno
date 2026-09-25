@@ -51,10 +51,17 @@ the hand**, and the decoder never asks which finger did what.
 - Word spelling is handled by a session dictionary mapping the accepted shape to a word.
   Out-of-vocabulary words are a **separate escape gesture**, not a guess.
 
-**This deliberately abandons the "1–2 strokes per 5-letter word" premise.** Measured
-English needs 4,189 events per 5-letter word at 3 events per syllable, so a syllable-level
-code cannot honour that premise at any alphabet size. A word-level code sidesteps it, and
-pays for it by requiring the user to remember which shape means which word.
+**This deliberately abandons the "1–2 strokes per 5-letter word" premise.** The
+token-weighted, pinned-corpus English figure needs **4.189 events per 5-letter word at 3
+events per syllable**, which is 109.5 percent (about 110 percent) over the 2-event cap.
+At **2 events per syllable**, the same corpus arithmetic needs **2.79 events per
+5-letter word**, 39.7 percent (about 40 percent) over the cap. A syllable-level code
+therefore cannot honour that premise at any alphabet size. A word-level code sidesteps
+it, and pays for it by requiring the user to remember which shape means which word.
+
+> **Overshoot correction (2026-09-25):** the audit found that the prior 39 percent
+> overshoot had been attached to the 4.189 count. The correct 39.7 percent pairing is
+> 2.79 events per 5-letter word at 2 events per syllable, over the 2-event cap.
 
 ## 4. State machine
 

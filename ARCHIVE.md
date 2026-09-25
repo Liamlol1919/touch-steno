@@ -146,9 +146,15 @@ The following four branches are research records, not silently implemented featu
    **ninth retraction** is recorded by `scripts/field_null_test.py`; this entry remains so
    the killed branch cannot be revived under a new name.
 
-4. **English syllable-pair arithmetic** — 1.3965 syllables per 5-letter word means a fixed
-   syllable code needs 4.189 events per word, a 39 percent overshoot of the 1–2 event
-   premise (derived from the measured corpus arithmetic).
+4. **English syllable-pair arithmetic** — the token-weighted, pinned-corpus figure is
+   1.3965 syllables per 5-letter word. At 2 events per syllable, a fixed syllable code
+   needs 2.79 events per 5-letter word, about 40 percent over the 2-event cap. At 3
+   events per syllable, it needs 4.189 events per 5-letter word, about 110 percent over
+   that cap.
+
+> **Overshoot correction (2026-09-25):** the audit found that the prior 39 percent
+> overshoot had been attached to the 4.189 count. The correct 39.7 percent pairing is
+> 2.79 events per 5-letter word at 2 events per syllable, over the 2-event cap.
  
 
 ## Archive tag
