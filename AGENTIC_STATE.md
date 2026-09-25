@@ -1,14 +1,14 @@
 # Agentic State Ledger
 
 **Loop:** 10× autonomous product-engineering meta-plan  
-**Current phase:** 2 — Contract conformance
+**Current phase:** 3 — Innovation branch prototypes
 **Evidence class of current product slice:** `IMPLEMENTED`
-**Active candidate:** Clean English steno transport prototype
+**Active candidate:** Clean English steno transport plus offline contract validator
 **Last promoted candidate:** English steno transport plus offline contract validator in `nextgen/`
 **Last rejected candidate:** Legacy sector-fitting as the product core
 **Open falsification test:** Real PTH-660 anatomy, identity, and false-commit study
-**Next executable action:** Run the three registered innovation-branch research gates; do not
-connect, vendor, or modify any external repository
+**Next executable action:** Red-team the three offline branch prototypes against a shared
+held-out synthetic contract; do not connect, vendor, or modify any external repository
 
 ## Decisions
 
@@ -39,13 +39,14 @@ unimplemented.
 - **Simplex-10:** retain as the **IMPLEMENTED PROTOTYPE** baseline. Its next gate is
   real anatomy/identity/false-commit and held-out chord evidence, plus a frozen profile
   identifier and layout fingerprint before any adapter.
-- **FCPT:** **HOLD** as `DESIGN`, pending a real movement-cost fit after its language and
-  observability prerequisites. Provisional Fitts arithmetic is not human evidence.
-- **Word-as-event:** **HOLD** as `DESIGN`, pending instrument/segmentation correction and
-  held-out trajectory, abstention, and correction-cost tests.
-- **Contact-field:** **HOLD the branch and REJECT the current scripts as evidence.**
-  Advancement requires methodological correction and non-compass held-out separability,
-  false-commit, nuisance, and cross-session results.
+- **FCPT:** **OFFLINE PROTOTYPE / HOLD.** The bounded target-cost model is executable, but
+  coefficients, language compiler, anatomy, and human timing remain unvalidated.
+- **Word-as-event:** **OFFLINE PROTOTYPE / HOLD.** Normalization and abstention are
+  executable on synthetic trajectories; segmentation, held-out words, and correction cost
+  remain unvalidated.
+- **Contact-field:** **OFFLINE PROTOTYPE / HOLD; current legacy scripts rejected as
+  evidence.** The corrected descriptor handles variable cardinality and nuisance transforms;
+  separability, false commits, and cross-session robustness remain unvalidated.
 
 ## Reference integration targets
 
