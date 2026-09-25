@@ -64,6 +64,10 @@ python3 scripts/session_runner.py --dry-run --quick \
   --session-id dry-run --dominant-hand unknown
 ```
 
+A non-dry run exits with status 1 if any recorded step fails or times out, even though
+the runner continues collecting later steps and writes the complete report. A dry run
+remains status 0 because its steps are explicitly marked `dry`.
+
 It prints the bimanual command without creating capture or manifest files. Do not add this
 task to generic sector/tempo scoring yet. A later analyzer must report realized rate,
 inter-hand interval spread, simultaneous onset error, and raw coupling before any follower

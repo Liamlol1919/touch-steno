@@ -335,3 +335,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Added `requirements-plot.txt` and documented the optional dependency boundary.
 - [x] Added CLI regression coverage; no figure or hardware result was regenerated without dependencies.
 - [x] Propagated `evaluate_session.py` failures from the confusion figure instead of reporting a false successful write.
+
+## Iteration 40 — 2026-09-25
+
+- [x] Fixed `session_runner.py` so failed or timed-out steps produce a non-zero process status after the complete report is written.
+- [x] Preserved the deliberate continue-after-failure behavior and dry-run status.
+- [x] Added a mocked offline regression test for the failed-step exit contract.
+- [x] No hardware session, capture, or performance result was added.

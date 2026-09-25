@@ -42,5 +42,30 @@ class TestSessionRunner(unittest.TestCase):
                             if "cmd" in step))
 
 
+    def test_failed_step_sets_nonzero_exit_status(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            report_path = root / "report.json"
+            argv = [
+                "session_runner.py", "--quick", "--device", "offline-test-device",
+                "--out", str(root), "--json", str(report_path),
+            ]
+
+            def fake_run(label, cmd, results, timeout=300, dry_run=None):
+                ok = label != "rest floor 60 s"
+                results.append({"step": label, "cmd": cmd, "ok": ok})
+                return ok
+
+            previous = session_runner.DRY_RUN
+            try:
+                with patch.object(session_runner, "run", side_effect=fake_run), \
+                     patch.object(sys, "argv", argv):
+                    result = session_runner.main()
+            finally:
+                session_runner.DRY_RUN = previous
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(result, 1)
+        self.assertEqual(report["failed"], ["rest floor 60 s"])
+
 if __name__ == "__main__":
     unittest.main()

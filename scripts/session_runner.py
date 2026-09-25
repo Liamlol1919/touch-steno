@@ -216,7 +216,7 @@ def main() -> int:
     print(f"session summary: {ok} ok, {len(bad)} failed -> {bad}")
     print("raw JSONL stays local (biometric). Do not commit messung/.")
     print("=" * 64)
-    return 0
+    return 1 if bad else 0
 
 
 if __name__ == "__main__":
