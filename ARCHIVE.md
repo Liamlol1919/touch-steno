@@ -45,6 +45,8 @@ not revive any killed branch.
 | `VECTOR_DESIGN_CRITIQUE.md` | feasibility of the 4-finger / 16-zone design |
 | `NOVELTY_STATEMENT.md` | what is known, what we measured, what is ours |
 | `RECOMMENDED_ARCHITECTURES.md` | the architecture options considered |
+| `KILLED_BRANCHES.md` | consolidated branch kill/hold register and the nine retractions in force |
+| `MEASURED_REJECTION.md` | current real-capture contract rejection and field-null measurement record |
 
 ## Tier 2 — measured this session, one operator, not yet replicated
 
@@ -55,6 +57,7 @@ not revive any killed branch.
 | `models/02_confusion_gemessen.png` | 63 measured strokes, 47.6 %, 180° error pattern |
 | `models/03_decoder_decke.png` | what the language layer can buy — simulated channel |
 | `CROSS_VALIDATION.md` | literature numbers against our measurements |
+| `models_confusion_analysis.md` | folded and unfolded analysis of the 63-stroke real compass capture |
 
 **Standing caveat:** the confusion matrix, the 47.6 % and the 0.4 mm jitter come from **one
 person, one session, one thumb**. `n = 63`. No error bars are claimed for them.
@@ -79,6 +82,7 @@ a live design surface. The files remain listed so readers can find the historica
 | `EXPERIMENT_PROTOCOL.md`, `TRAINING_PATH.md`, `PLOVER_BRIEFS.md` | how to evaluate and what to build |
 | `PRIVACY_TELEMETRY.md`, `RAW_FRAME_SCHEMA.md` | consent and data format |
 | `DECISION_HOLEMASK_VS_SOFTWARE.md` | **closed decision:** build the software coupling-suppression path first; do not build a hole mask. See this decision record. |
+| `CANDIDATE_RANKING.md` | confidence and language candidate-ranking seam retained without a text commit |
 
 ## Tier 4 — retracted or superseded. Kept for audit, do not cite as current.
 
@@ -93,6 +97,38 @@ a live design surface. The files remain listed so readers can find the historica
 | `AGENT2_RESEARCH_LOG.md`, `RESEARCH_LOG.md` | chronological logs, not sources of truth |
 | `SYSTEMKOMPENDIUM.md` | the full system walkthrough, 64 KB, written before the retraction |
 | `COMPREHENSIVE_RESEARCH_REPORT.md`, `CODE_REFERENCES.md` | literature and citations |
+| `ARCHIVE.md` | this index of current, superseded, historical, and retracted record material |
+| `README.md` | repository entry point and deliverable index |
+| `RECORD_AUDIT.md` | root-record consistency audit that identified missing, stale, and incomplete provenance |
+| `AGENTIC_META_PLAN.md` | partner-agent planning and branch-registry process record, not a live technical direction |
+| `AGENTIC_STATE.md` | partner-agent implementation and evidence state ledger retained as a process record, not current work |
+| `BRANCH_REDTEAM.md` | partner-agent adversarial process audit of the frozen synthetic branch comparison |
+| `LOOP.md` | partner-agent coordination process instructions for two-agent GitHub work |
+| `POST_FAILURE_BRANCH_DECISION.md` | historical process decision selecting RCI after the frozen failure |
+| `RCI_FALSIFIER_DECISION.md` | historical, unimplemented RCI design and proposed-falsifier process record |
+| `SCIENTIFIC_COMPARATOR_TEST0_RESULTS.md` | frozen synthetic comparator-integrity result retained as a research record |
+| `SYNTH_BRANCH_1_RESULTS.md` | frozen and audited synthetic branch-comparison output retained as a research record |
+| `TSF_FALSIFIER_RESULTS.md` | frozen synthetic TSF falsifier failure retained as a research record |
+| `SYSTEM_COMPARISON_MATRIX.md` | cross-system literature comparison retained as a research reference |
+| `W1_ACADEMIC_ENSLAVEMENT.md` | sourced academic finger-enslavement literature review |
+| `W2_STENO_HARDWARE.md` | sourced stenography and chording-hardware literature review |
+| `W3_OPEN_SOURCE.md` | verified open-source component and license inventory |
+| `W4_ZERO_FORCE_ALGORITHMS.md` | sourced zero-force input and intent-detection literature review |
+| `W5_POINTING_MOTOR_LIMITS.md` | sourced pointing and motor-control limits review |
+| `W6_THUMB_BIMANUAL_VIABILITY.md` | sourced thumb-direction and bimanual viability review |
+| `W7_PHYSICAL_MASKS_HAND_ERGONOMICS.md` | sourced physical-mask and hand-ergonomics review |
+| `W8_LAYOUT_VECTOR_DECODING.md` | sourced layout, vector-decoding, and chord-disambiguation review |
+| `W9_STENO_LANGUAGE_LAYER.md` | sourced language-layer and dictionary review |
+| `W12_DRIFT_AND_ENSLAVEMENT_PRIOR_ART.md` | prior-art search for drift and finger-coupling evidence |
+| `W13_GESTURE_SEGMENTATION_NOLIFT.md` | prior-art search for gesture segmentation without lift-off |
+| `W16_LAYOUT_OPTIMISATION.md` | prior-art review of layout optimization methods |
+| `W17_FEEDBACK_AND_HAPTICS.md` | prior-art review of feedback and sensory substitution |
+| `W18_BIMANUAL_AND_DRIFT.md` | external bimanual, drift, fatigue, and support evidence review |
+| `W19_CORRECTION_LATENCY.md` | literature search for correction-latency evidence |
+| `W20_THUMB_REACH.md` | sourced thumb reach and comfort evidence review |
+| `W22_CORRECTION_TIME.md` | literature search for seconds-per-correction evidence |
+| `RESEARCH_STARTED_AT.txt` | root process timestamp recording when research started |
+| `requirements-plot.txt` | optional plotting-dependency manifest for the model-figure script |
 
 ---
 
@@ -118,6 +154,7 @@ Tier 4 files.
 | `FIVE_HOURS_REPORT.md` | the honest accounting of that day |
 | `scripts/geometry_probe.py` | measures U and the ellipse dynamic range |
 | `scripts/field_separability.py` | the withdrawn contact-field separability result; use the ninth retraction in `scripts/field_null_test.py` |
+| `NEXT_SESSION.md` | runbook for the next physical session: preconditions, startup gate, the three unrun instruments, and what the session cannot establish |
 | `scripts/field_gesture_probe.py` | the control experiment that has not produced a verdict |
 
 
