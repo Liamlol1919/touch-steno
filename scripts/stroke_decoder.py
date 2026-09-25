@@ -78,9 +78,16 @@ def event_descriptor(ev: dict, positions: dict[str, tuple[float, float]]) -> dic
     contacts = [c for c in contacts if c]
     p0 = positions.get(ev["mover"])
     p1 = positions.get(ev["mover"] + "@end")
-    if p0 is None or p1 is None:
-        return {"descriptor": None, "reason": "no position reference for mover"}
-    dx, dy = p1[0] - p0[0], p1[1] - p0[1]
+    dx = ev.get("mover_dx_mm")
+    dy = ev.get("mover_dy_mm")
+    if dx is None or dy is None:
+        p0 = positions.get(ev["mover"])
+        p1 = positions.get(ev["mover"] + "@end")
+        if p0 is None or p1 is None:
+            return {"descriptor": None, "reason": "no mover vector available"}
+        dx, dy = p1[0] - p0[0], p1[1] - p0[1]
+    else:
+        p0, p1 = (0.0, 0.0), (dx, dy)
     disp = ev.get("mover_displacement_mm") or math.hypot(dx, dy)
     # A real chord needs a second *unexplained* mover, not merely a second contact.
     chord = len(unexplained) >= 1

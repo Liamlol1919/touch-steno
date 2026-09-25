@@ -118,6 +118,7 @@ def analyse(path: Path, min_speed: float, min_run: int) -> dict:
     for start, end, involved in events:
         acc: dict[str, list[float]] = {}
         mover_frames: dict[str, int] = {}
+        acc_vec = [0.0, 0.0]        # mover displacement accumulated inside the window
         for row in rows[start + 1:end + 1]:
             if not row:
                 continue
@@ -127,6 +128,9 @@ def analyse(path: Path, min_speed: float, min_run: int) -> dict:
                 p = acc.setdefault(tid, [0.0, 0.0])
                 p[0] += dx
                 p[1] += dy
+                if tid == a:
+                    acc_vec[0] += dx
+                    acc_vec[1] += dy
         if not acc:
             continue
         ranked = sorted(acc.items(),
@@ -152,6 +156,11 @@ def analyse(path: Path, min_speed: float, min_run: int) -> dict:
             "duration_ms": round((payload[end]["t"] - payload[start]["t"]) * 1000, 1),
             "mover": mover,
             "mover_displacement_mm": round(math.hypot(*acc[mover]), 2) if mover else None,
+            # Vector accumulated *inside* the event window. Consumers must use this rather
+            # than re-reading positions at t_start/t_end: a lookup by timestamp can cross a
+            # block boundary and silently measure the vector between two different gestures.
+            "mover_dx_mm": round(acc_vec[0], 3) if mover else None,
+            "mover_dy_mm": round(acc_vec[1], 3) if mover else None,
             "suppressed_as_dragged": suppressed,
             "unexplained_contacts": reported,
         })
@@ -173,7 +182,6 @@ def main() -> int:
     if args.json:
         print(json.dumps(results, indent=2))
         return 0
-    for r in results:
         n_sup = sum(len(e["suppressed_as_dragged"]) for e in r["events"])
         n_rep = sum(len(e["unexplained_contacts"]) for e in r["events"])
         print(f"\n## {r['session']}  frames={r['frames']}  "

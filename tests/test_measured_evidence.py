@@ -226,6 +226,51 @@ class TestChordCriterion(unittest.TestCase):
             self.assertIn(key, c)
 
 
+
+class TestBenchmarkArtefacts(unittest.TestCase):
+    """The benchmark must not manufacture signals that the detector then has to survive."""
+
+    def test_blocks_are_physically_continuous(self):
+        """A cue change must not teleport a contact; that fakes an idle false trigger."""
+        import argparse
+        import make_benchmark as mb
+        a = argparse.Namespace(seed=7, sector_reps=1, tempo=[], chord_reps=1,
+                                rest_blocks=1)
+        frames, manifest = mb.build(a.seed, a.sector_reps, a.tempo, a.chord_reps,
+                                    a.rest_blocks)
+        by_tid = {}
+        for fr in frames:
+            for tid, (x, y, _m) in fr["c"].items():
+                by_tid.setdefault(tid, []).append((x, y))
+        for tid, pts in by_tid.items():
+            jumps = [max(abs(pts[i + 1][0] - pts[i][0]),
+                         abs(pts[i + 1][1] - pts[i][1])) for i in range(len(pts) - 1)]
+            # no step may exceed a plausible fast stroke frame (5 mm)
+            self.assertLess(max(jumps), 5.0,
+                            f"contact {tid} teleports by {max(jumps):.1f} mm")
+
+    def test_gestures_exceed_the_detector_window(self):
+        """Sector cues must be longer than the persistence window or they cannot be scored."""
+        import argparse
+        import make_benchmark as mb
+        a = argparse.Namespace(seed=7, sector_reps=1, tempo=[], chord_reps=0,
+                                rest_blocks=1)
+        _frames, manifest = mb.build(a.seed, a.sector_reps, a.tempo, a.chord_reps,
+                                     a.rest_blocks)
+        min_s = intent_filter.MIN_RUN_FRAMES * 0.011
+        for rec in manifest:
+            if (rec.get("label") or "").startswith(("sector_", "chord", "single")):
+                self.assertGreater(rec["t_end"] - rec["t_start"], min_s,
+                                   f"{rec['label']} is shorter than the window")
+
+    def test_label_lookup_is_half_open(self):
+        import evaluate_session as ev
+        man = [{"t_start": 0.0, "t_end": 1.0, "label": "a"},
+               {"t_start": 1.0, "t_end": 2.0, "label": "b"}]
+        self.assertEqual(ev.label_at(man, 0.999)["label"], "a")
+        self.assertEqual(ev.label_at(man, 1.0)["label"], "b",
+                         "a boundary timestamp belongs to the later block")
+
 class TestWpmCeiling(unittest.TestCase):
     def test_250_wpm_two_events_per_syllable_exceeds_the_ceiling(self):
         ceiling = wpm_ceiling.event_ceiling_hz()
