@@ -19,6 +19,7 @@ import kinematics  # noqa: E402
 import real_session_evidence as rse  # noqa: E402
 import wpm_ceiling  # noqa: E402
 
+import stroke_decoder  # noqa: E402
 DT = 0.011  # ~91 Hz, the measured frame interval
 
 
@@ -154,6 +155,53 @@ class TestPersistenceDetector(unittest.TestCase):
         pairs = intent_filter.fit_pairs(intent_filter.steps_of(payload))
         self.assertIn(("1", "2"), pairs)
         self.assertGreater(pairs[("1", "2")]["r2"], 0.5)
+
+
+class TestChordCriterion(unittest.TestCase):
+    """A chord is a temporally aligned second mover, not merely a second contact."""
+
+    def _rows(self, series):
+        """series: list of {tid: (dx, dy, speed)} -> list of rows."""
+        return [s for s in series]
+
+    def test_two_aligned_peaks_are_a_chord(self):
+        row = {"1": (1.0, 0.0, 100.0), "2": (0.8, 0.0, 90.0)}
+        rows = [row] * 8
+        chord, diag = stroke_decoder.chord_candidates(rows, 0, 7, "1")
+        self.assertEqual(chord, ["2"])
+        self.assertTrue(diag["2"]["chord"])
+
+    def test_weak_follower_is_not_a_chord(self):
+        row = {"1": (1.0, 0.0, 100.0), "2": (0.1, 0.0, 10.0)}
+        rows = [row] * 8
+        chord, diag = stroke_decoder.chord_candidates(rows, 0, 7, "1")
+        self.assertEqual(chord, [])
+        self.assertFalse(diag["2"]["chord"])
+
+    def test_delayed_peer_is_not_a_chord(self):
+        """Same magnitude, but the second peak arrives 5 frames later."""
+        rows = []
+        for i in range(8):
+            rows.append({"1": (1.0, 0.0, 100.0),
+                         "2": (0.9, 0.0, 95.0 if i >= 5 else 5.0)})
+        chord, diag = stroke_decoder.chord_candidates(rows, 0, 7, "1")
+        self.assertEqual(chord, [])
+
+    def test_sector_mapping_is_axis_aligned(self):
+        self.assertEqual(stroke_decoder.sector_of(10.0, 0.0), "E")
+        self.assertEqual(stroke_decoder.sector_of(0.0, -10.0), "N")
+        self.assertEqual(stroke_decoder.sector_of(0.0, 10.0), "S")
+        self.assertEqual(stroke_decoder.sector_of(-10.0, 0.0), "W")
+        self.assertEqual(stroke_decoder.sector_of(10.0, -10.0), "NE")
+
+    def test_band_boundaries(self):
+        self.assertEqual(stroke_decoder.band_of(1.0), "micro")
+        self.assertEqual(stroke_decoder.band_of(3.0), "small")
+        self.assertEqual(stroke_decoder.band_of(7.0), "medium")
+        self.assertEqual(stroke_decoder.band_of(30.0), "large")
+
+    def test_unmapped_descriptors_are_reported_not_guessed(self):
+        self.assertNotIn("N|small|chord3", stroke_decoder.DEFAULT_MAP)
 
 
 class TestWpmCeiling(unittest.TestCase):
