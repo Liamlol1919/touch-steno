@@ -23,6 +23,11 @@ correction is auditable.
 > were generated, 0 validated, and 0 signals survive. See
 > `scripts/field_null_test.py`.
 
+**Record correction (2026-09-25):** `RECORD_AUDIT.md` §3 found four stale claims in this
+index—the live Tier 3 framing, the supposedly open hole-mask decision, the supposedly open
+vertical slice, and the optimiser priority claim. They were corrected here; the audit did
+not revive any killed branch.
+
 
 **Before quoting any number, check which tier it is in.**
 
@@ -54,7 +59,11 @@ correction is auditable.
 **Standing caveat:** the confusion matrix, the 47.6 % and the 0.4 mm jitter come from **one
 person, one session, one thumb**. `n = 63`. No error bars are claimed for them.
 
-## Tier 3 — current, and the live design surface
+## Tier 3 — sprint-closed historical document set; retained for discoverability, not current work
+
+The sprint closed with 22 candidate records, human `n=0` operators and `0` sessions:
+0 candidates were validated and 0 signals survive. Nothing in this tier is current work or
+a live design surface. The files remain listed so readers can find the historical records.
 
 | File | Role |
 |---|---|
@@ -69,7 +78,7 @@ person, one session, one thumb**. `n = 63`. No error bars are claimed for them.
 | `SEPARATION_MODEL.md`, `REST_MODEL.md` | the decision rules |
 | `EXPERIMENT_PROTOCOL.md`, `TRAINING_PATH.md`, `PLOVER_BRIEFS.md` | how to evaluate and what to build |
 | `PRIVACY_TELEMETRY.md`, `RAW_FRAME_SCHEMA.md` | consent and data format |
-| `DECISION_HOLEMASK_VS_SOFTWARE.md` | an open design decision, still open |
+| `DECISION_HOLEMASK_VS_SOFTWARE.md` | **closed decision:** build the software coupling-suppression path first; do not build a hole mask. See this decision record. |
 
 ## Tier 4 — retracted or superseded. Kept for audit, do not cite as current.
 
@@ -103,7 +112,7 @@ Tier 4 files.
 | File | What it settles |
 |---|---|
 | `BINDING_CONSTRAINT.md` | **The record to read first.** Every candidate generated, every critic verdict, every correction, the measured gate numbers, the corpus arithmetic, and the eleven-section execution log |
-| `VERTICAL_SLICE.md` | the one concept the evidence leaves open — unvalidated, with its acceptance test and a fixed verdict in advance |
+| `VERTICAL_SLICE.md` | the historical field-set vertical slice, **killed** rather than unvalidated: its measured permutation null had mean `0.5685` and one-sided `p = 0.9460` over 1,000 permutations (seed 20260925, descriptor dimension 57) for `n=24` measured cued trials, 8 compass classes, 3 per class, one operator, one session, `n=63` strokes, thumb-compass labels, and no error bars; provenance: `scripts/field_null_test.py` |
 | `DESIGN_DECISION_FINAL.md` | the three finalists and why none survived |
 | `DESIGN_DECISION.md` | the earlier kill of the direction-quantisation frame |
 | `FIVE_HOURS_REPORT.md` | the honest accounting of that day |
@@ -131,9 +140,13 @@ boundary and evidence limits.
 
 The following four branches are research records, not silently implemented features:
 
-1. **FCPT / Fitts-cost phoneme target layout** — the optimiser is the strongest idea in
-   the project (recommendation), but its Fitts coefficients `a` and `b` have never been
-   fitted to this hand (unmeasured).
+1. **FCPT / Fitts-cost phoneme target layout** — its selected-thumb primitive was rejected
+   by a measured contract replay with `n=24` cued trials, one operator, one session, and no
+   error bars: it produced 0 key events, rejected all 24 trials as
+   `ambiguous_attribution`, and obtained coverage `0.0`. The optimiser arithmetic is
+   suspended only as a non-recognition research tool, and its Fitts coefficients `a` and
+   `b` remain unfitted to this hand (`n=0` fitted hand trials, one operator, one session;
+   unmeasured). See `KILLED_BRANCHES.md`.
 2. **Continuous elastic word-as-event** — specified and self-scored 25/50; the acceptance
    test ran and returned void because the pad was empty.
 3. **Contact-field / permutation-invariant gesture representation — KILLED.** The branch

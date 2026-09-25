@@ -3,6 +3,12 @@
 **Sprint synthesis, 2026-09-25.** Supersedes the "5.7 events/s ceiling" framing used
 throughout the project, including in the two earlier decision documents.
 
+**Record audit correction, 2026-09-25.** `RECORD_AUDIT.md` audited this file and
+identified stale status language in the FCPT, Synergy Field Chords, and Thread-Rosette
+entries and in the revised-decision passage. Those claims are corrected below in place;
+the historical analysis, retraction records, and measurement tables remain part of the
+record.
+
 ---
 
 ## 1. The finding that reorganises the project
@@ -38,9 +44,10 @@ from a common home with a large effective target width is a different motor prob
 does not settle it.
 
 The corrected claim: **for a 24-cell target array, 5.7 events/s is unreachable and 2.1–3.4/s
-is the realistic band.** Whether a drawn-path primitive can beat that band is **open** and
-requires the same ten-minute Fitts fit plus a separate drawing-time measurement. I stated a
-conclusion where an assumption about the primitive was required; that was wrong.
+is the realistic band under the provisional model.** The proposed ten-minute Fitts fit has
+not run: instrument `n=1`, hardware runs `n=0`, human operators `n=0`, sessions `n=0`.
+Whether a drawn-path primitive can beat that band was not settled by this record; it is not
+an open selected branch or a validated alternative.
 
 If movement and the full 176 ms processing delay are serialised rather than streamed, the
 rates fall further: **2.12 /s adjacent, 1.96 /s diagonal — 63–65 % below the sensor ceiling.**
@@ -57,35 +64,45 @@ rates fall further: **2.12 /s adjacent, 1.96 /s diagonal — 63–65 % below the
 
 ---
 
-## 2. What survives, and what each buys
+## 2. Historical candidate ledger and current status
 
-Every concept below abandons direction classification. Scores are out of 50 on the
-five-axis contract.
+The concepts below originally abandoned direction classification. Their `/50` values are
+historical review self-assessments for one candidate (human `n=0` operators, `0` sessions;
+operator and session not applicable), not measurements or viability results. **No concept
+below survived; the current 22-generated, 0-validated, 0-surviving record controls.**
 
-### 2.1 FCPT — Fitts-Cost Phoneme Targets — **the new baseline**
+### 2.1 FCPT — Fitts-Cost Phoneme Targets — measured-killed baseline proposal
 
 **Primitive:** one event is one phoneme, emitted by moving the thumb to one cell of a
 **6 × 4 = 24-cell target array** inside the 24.6 × 18.2 mm envelope. The 24th code is
 SPACE. Two simultaneous contacts are deliberately **one ambiguous event → silence**, never
 two addressable events.
 
-**The optimiser — this is the novel part.** Let `T_ij` be the count of phoneme
-transitions `i → j` in a user corpus and `π(i)` the assigned cell centre. Minimise
+**Measured disposition:** the contract replay rejected **24 of 24 real cued trials**
+(`n=24`, one operator, one session, no error bars), with closed reason
+`ambiguous_attribution` and coverage `0.0`. The selected-thumb primitive is therefore not
+viable on measurement, and FCPT is not a baseline.
+
+**Retained non-recognition research tool:** let `T_ij` be the count of phoneme transitions
+`i → j` in a user corpus and `π(i)` the assigned cell centre. Minimise:
 
     J(π) = Σ_ij T_ij [ a + b·log₂(1 + d(π(i), π(j))/W) + λ·A_ij ]
 
-over all bijections `π` from 24 symbols to 24 cells. The layout is **fitted to motor cost
-and transition statistics**, not chosen to maximise alphabet size. That is a different
-organising principle from anything the project has used.
+over all bijections `π` from 24 symbols to 24 cells. The layout is fitted to modelled motor
+cost and transition statistics, not chosen to maximise alphabet size. This optimiser
+arithmetic remains useful as a **non-recognition research tool only**. The frozen
+optimisation has `n=27` modelled-cost settings, `0` human operators, and `0` hardware
+sessions; the Fitts coefficients are assumed, not fitted.
 
-**Why it is not the compass:** it never classifies a movement angle. The symbol is a
-*target*, and the design objective is the *time between* targets.
+**Why it was not the compass:** it never classifies a movement angle. The proposed symbol
+was a target, and the design objective was the time between targets.
 
-**Kill test (10 min):** fit `a`, `b` to 60 timed adjacent/diagonal moves in the real 24-cell
-array. **Kill if the fitted adjacent MT exceeds 0.35 s** — that would put the rate below
-2.9/s and make any density argument moot.
+**Historical kill test (not run):** fit `a`, `b` to 60 timed adjacent/diagonal moves in the
+real 24-cell array. The proposed gate was adjacent MT above 0.35 s. This instrument has
+`n=1`; hardware runs, human operators, and sessions are each `n=0`. The later measured
+contract rejection, not this unrun gate, is the current kill basis.
 
-### 2.2 GAEC — Guarded Affine Envelope Chords — the highest information rate
+### 2.2 GAEC — Guarded Affine Envelope Chords — nominal information arithmetic; primitive killed
 
 **Primitive:** a simultaneous **two-thumb frame** is a chord. Each thumb has its own
 6 × 4 envelope (24 cells). Ordered left/right pairs give `A² = 576` states =
@@ -95,36 +112,51 @@ array. **Kill if the fitted adjacent MT exceeds 0.35 s** — that would put the 
 **The guard is the point.** A frame is accepted only if it passes an integrity check;
 otherwise it is **silence**. A coupled frame fails closed rather than being trusted.
 
-**The honest cost:** the project's 68 % involuntary-coupling figure means accepting only
-~32 % of frames. At 5.7 events/s that is **1.82 chords/s**, and 1.82 × 9.17 = **16.7
-useful bits/s** — still better than the compass's 2.00 bits/event, but only if rejection
-happens *before* the 176 ms segmentation cost is paid. If rejection is post-segmentation,
-the rate is not survivable for steno-like density.
+**Measured disposition:** GAEC requires the same distinguishable selected thumbs as FCPT.
+The contract replay rejected **24 of 24 real cued trials** (`n=24`, one operator, one
+session, no error bars), closed reason `ambiguous_attribution`, coverage `0.0`. Its
+information arithmetic and guard proposal do not restore contact identity; the primitive is
+killed and is not a fallback or second arm.
 
-**Kill test:** 40 labelled two-thumb frames, 20 intended-couples and 20 coupled
-accidentally. **Kill if guard precision < 95 % at a rejection rate that leaves fewer than
-1.5 accepted chords/s.**
+**Historical, non-result arithmetic:** the original analysis applied a coupling percentage
+whose `n`, operator count, and session count are not recorded beside that figure. It is
+therefore retained only as part of the historical proposal, not as a measured result. Its
+assumed rejection/segmentation timing did not restore contact identity.
 
-### 2.3 Synergy Field Chords — the coupling test made measurable
+**Historical kill-test proposal (not run):** 40 labelled two-thumb frames, 20 intended
+couples and 20 accidental couples, with a proposed guard-precision gate. The proposed
+hardware run is `n=0`, human operators `n=0`, sessions `n=0`.
 
-**Primitive:** in one 176 ms capture the whole hand moves into one of 32 rehearsed
-contact-field shapes. 5 nominal bits/event.
+### 2.3 Synergy Field Chords — coupling measure; suspended, no current advancement
 
-**The contribution is the measure, not the alphabet.** Fit one similarity transform `G` to
-all contact displacements and define
+**Primitive:** in one proposed 176 ms capture the whole hand moves into one of 32
+rehearsed contact-field shapes (5 nominal bits/event). This is assumed design arithmetic;
+device evaluations are `n=0`, human operators `n=0`, sessions `n=0`.
+
+**Historical proposal:** fit one similarity transform `G` to all contact displacements and
+define
 
     q = 1 − Σ_i ‖Δp_i − G(Δp_i)‖² / Σ_i ‖Δp_i‖²
 
-A hand translating and rotating together has **high `q` with tightly clustered residuals**;
-two independent gestures have lower, variable `q`. **This is the first concrete test in the
-project that can distinguish "the hand moved as one" from "two independent gestures"** —
-which every bimanual concept has needed and none had.
+The intended hypothesis was that a hand translating and rotating together would have high
+`q` with tightly clustered residuals, while two independent gestures would have lower,
+variable `q`. The identity-free control and field/null tests needed to support that
+hypothesis were never run on hardware, so this is not a demonstrated contribution or a
+current direction.
 
-**Honest dimensionality:** ten 2-D points carry at most **18 independent degrees** after
-translation; the squared distance matrix has **rank ≤ 4**. The 45 pair distances are
-redundant derived features, not 45 channels.
+**Historical dimensionality analysis:** ten 2-D points carry at most 18 independent
+degrees after translation; the squared distance matrix has rank ≤ 4. The 45 pair distances
+are redundant derived features, not 45 channels. This is assumed model geometry, with
+human `n=0` operators and `0` sessions.
 
-**Score 28/50, verdict ADVANCE.**
+**Dimension provenance:** the point-count and distance-count figures are assumed model
+geometry, not measured recognition results; device evaluations are `n=0`, human operators
+`n=0`, sessions `n=0`.
+
+**Current status: suspended; no current advancement.** The historical **28/50 sponsor
+self-assessment** concerned one candidate (`n=1`; human `n=0` operators, `0` sessions,
+therefore operator/session not applicable). It is not a measured result. The measure
+remained unmeasured, so the score cannot support advancement.
 
 ### 2.4 Session Seedbook — personal, session-local, forgetful
 
@@ -140,17 +172,24 @@ already `1/n`, so one stroke cannot move a prototype.
 **Caveat the agent states itself:** the system cannot learn *meaning* from unlabelled
 motion. The gesture code becomes personal; the semantics must be supplied externally.
 
-### 2.5 Area Register — the one usable discarded channel
+**Current status: killed on reasoning.** This was one candidate's historical 28/50 sponsor
+self-assessment (`n=1`; human `n=0` operators, `0` sessions), followed by a `KILL` verdict.
+It does not describe a current direction.
 
-`A = π·M·m/4`, three registers (short/ordinary/long) = **1.585 modifier bits/event**.
+### 2.5 Area Register — historical proposal; killed on measurement
 
-**It is the only contact-ellipse concept that is roll-invariant by construction**: a 90°
-roll swaps M and m and preserves their product. Aspect ratio is *not* (a roll gives `1/r`);
-orientation is *not* (a roll moves it two bins and produces a wrong symbol).
+`A = π·M·m/4`, with a proposed three-register code of **1.585 modifier bits/event**. That
+figure is assumed quantisation arithmetic for `n=3` proposed registers, with human `n=0`
+operators and `0` hardware sessions; it is not a measurement.
 
-**The device already reports `ABS_MT_TOUCH_MINOR`; the recorder discards it.** No new driver
-code is needed — the parser drops it today. None of the three geometry features is
-certified for a cold or sweaty hand.
+The roll-invariance argument was correct: a 90° roll swaps M and m and preserves their
+product. Aspect ratio and orientation are not roll-invariant. The device already reported
+`ABS_MT_TOUCH_MINOR` even though the recorder discarded it.
+
+**Current status: killed on measurement.** Across two captures (`n=4,394` and `n=6,918`
+frames; one operator in the operator capture set; exact cross-file session identity not
+preserved; no error bars), the major axis had only **0.5 mm** dynamic range. The proposed
+register therefore has no usable measured range and is not a current channel.
 
 ### 2.6 The false premise, stated by the learnability analysis
 
@@ -165,14 +204,14 @@ bindings. Timing needs 8 labels *plus 7 ordered thresholds* — **15 landmarks, 
 emitted symbol** — and is prohibited as input. Semantics remove the *arbitrary* codebook but
 never the motor-to-text association.
 
-Two viable paths exist: **trainable semantic motor features** (articulation contours: three
-binary predicates — open/closed, curved/straight, crossed/uncrossed — giving 3 bits from
-three *reusable* rules instead of eight arbitrary sectors), or **accept predictive
-completion with an explicit correction cost**.
+Two **unvalidated hypotheses** were trainable semantic motor features (articulation
+contours: `n=3` assumed binary predicates—open/closed, curved/straight, crossed/uncrossed)
+or predictive completion with an explicit correction cost. Human `n=0` operators, `0`
+hardware sessions; neither path is a selected, viable, or validated design direction.
 
 ---
 
-## 2.7 Thread-Rosette — the highest-scoring concept of the sprint (36/50)
+## 2.7 Thread-Rosette — historical sponsor score (36/50); later killed
 
 **Primitive:** in one touch-down/up the thumb sweeps across **exactly two of nine
 neighbouring steno anchors** within its 30.7 mm diagonal. Crossing an anchor toggles it.
@@ -181,44 +220,55 @@ neighbouring steno anchors** within its 30.7 mm diagonal. Crossing an anchor tog
 `log₂ 31 = 4.954` gross bits/event. **Order reversal cannot change the symbol** — the code is
 the visited *set*, not an angle.
 
-**The correction insight, which is the real contribution:** re-crossing an anchor **adds or
-removes** that key *before lift*. The decoder previews continuously and commits only on
-lift-off. **A wrong key is repaired inside the same contact event**, so correction costs no
-additional event — which is exactly the condition under which low raw accuracy can beat high
-raw accuracy.
+**Historical correction hypothesis:** re-crossing an anchor would add or remove that key
+before lift. The decoder would preview continuously and commit on lift-off. This proposed
+same-event repair had no validation measurement (hardware `n=0`, human operators `n=0`,
+sessions `n=0`) and did not make the branch viable.
 
-**Scores:** anatomy 8, observability 6, timing 7, learnability 7, implementation 8 —
-**36/50, verdict ADVANCE.** Highest of every concept generated in this sprint.
+**Historical sponsor self-assessment:** anatomy 8, observability 6, timing 7, learnability
+7, implementation 8 — **36/50, initial verdict `ADVANCE`** for one candidate (`n=1`; human
+`n=0` operators, `0` sessions). The initial verdict was not a measurement or current
+selection; the branch was later killed.
 
 **Its own kill tests:** 310 labelled strokes, kill below 60 % unassisted; 60 seeded-error
 strokes, kill below 90 % in-event recovery; 60 visible-state updates, kill below 95 % correct
 by lift or above 5 % wrong commits.
 
+These were proposed tests only: hardware runs `n=0`, human operators `n=0`, sessions
+`n=0`. Their later negative verdict is measurement/observability-based, not a pass on this
+unrun test plan.
+
 ## 2.8 Correction of the correction-cost claim
 
 An independent reviewer checked the arithmetic behind "60 % accuracy with cheap repair beats
 90 % with expensive repair" and found it **does not hold as stated.** The comparison is only
-valid when repair consumes no event. Charging a repair event:
+valid when repair consumes no event. Under assumed inputs (human `n=0` operators, `0`
+sessions), charging a repair event gives:
 
     90 % accuracy, c = 0.18 s        → 0.215 s per accepted output
     60 % accuracy, c = 0.176 s (one event) → 0.411 s per accepted output
 
-**90 % wins.** The "low accuracy plus cheap repair" advantage exists only for repairs that
-happen *within* the same contact event. Thread-Rosette is the concept that earns that
-advantage by construction; concepts that spend an event on repair do not have it.
+The historical arithmetic says repair within the same contact event avoids a second-event
+charge; it does not make Thread-Rosette viable. The branch was later killed.
 
-## 3. Revised decision
+## 3. Historical revised decision — superseded
 
-**Build Thread-Rosette as the baseline.** It scores highest (36/50) and, unlike every other
-concept, its correction mechanism is *inside* the same contact event rather than a second
-event. FCPT remains the strongest target-array fallback; GAEC carries the most information
-per event and becomes a second arm once Fitts coefficients are fitted.
+**Superseded decision:** build Thread-Rosette as the baseline. It then had the highest
+sponsor score (36/50) and proposed correction inside the same contact event. The same record
+later killed Thread-Rosette; FCPT's selected-thumb primitive and GAEC were subsequently
+rejected by the 24-of-24 contract replay (`n=24`, one operator, one session, no error bars;
+closed reason `ambiguous_attribution`; coverage `0.0`). None is a current baseline, fallback,
+or second arm.
 
-The previous decision chose a word-as-event recogniser. The Fitts analysis undermines it:
-a recogniser that must resolve a whole word's trajectory competes for exactly the motor
-time that makes the word recognisable, and the crossover calculation for the continuous
-channel shows that below **≈7.1 Hz** of independent shape bandwidth — plausible for smooth
-thumb paths — **trajectory coding loses to quantised targets even before vocabulary errors**.
+The previous decision historically chose a word-as-event recogniser. The Fitts/model
+comparison then argued that whole-word trajectory recognition and target quantisation make
+different motor-time trade-offs. Those are assumed design calculations (hardware `n=0`,
+human operators `n=0`, sessions `n=0`), not a measured comparison. The word-as-event branch
+is suspended as a historical control, not selected or viable.
+
+The table below is a historical design comparison, not a result table. Its capacity and
+rate entries are model arithmetic or unmeasured assumptions: hardware measurements `n=0`,
+human operators `n=0`, sessions `n=0`.
 
 | | FCPT | GAEC | Synergy Field | Word-as-event |
 |---|---|---|---|---|
@@ -227,15 +277,19 @@ thumb paths — **trajectory coding loses to quantised targets even before vocab
 | Design principle | motor-cost-fitted layout | guarded simultaneous chord | whole-field shape | lexicon recognition |
 | Main risk | Fitts coefficients unmeasured | coupling rejection cost | anatomy not observable | writing speed unmeasured |
 
-FCPT wins because its dominant risk is **measurable in ten minutes**, and because it is the
-only concept whose design objective is the actual binding constraint. GAEC carries the most
-information per event and should be built as a **second arm** once FCPT's fitted `a` and `b`
-exist — its guard logic is reusable.
+**Historical reasoning, now withdrawn:** FCPT appeared to win because its dominant risk was
+described as measurable in ten minutes, and GAEC was proposed as a second arm after a
+fictional FCPT fit. The contract replay rejected both selected-thumb premises in **24 of 24
+real cued trials** (`n=24`, one operator, one session, no error bars), closed reason
+`ambiguous_attribution`, coverage `0.0`. No current winner, fallback, or build order follows.
 
 ---
 
-## 3.1 The code layer, designed before the gesture
+## 3.1 Historical code-layer arithmetic
 
+This was designed before the gesture and does not describe a current branch. The analysis
+below is corpus/model arithmetic: hardware measurements `n=0`, human operators `n=0`,
+sessions `n=0`.
 An independent information-theory pass produced the layer that sits under any of the above:
 an **arithmetic code over a 1.6 mm cell lattice**, sized from the hand, not from convenience.
 
@@ -287,22 +341,20 @@ centroid and ellipse of a changing conductive area — not a fingertip. Thumb fl
 and partial edge contact all move that centroid, and a tracking ID can stay numerically
 continuous while the centroid jumps or merges.
 
-**The number that decides observability: the stable intended-thumb-frame fraction.** Its
-value is **unmeasured**. Fatal below **90 %**, or with fewer than **30 usable centroid
-samples** inside a nominal 39.4-sample event.
+**Historical observability gate:** the stable intended-thumb-frame fraction was described
+as unmeasured, with a proposed fatal threshold below 90 % or fewer than 30 usable centroid
+samples in a nominal 39.4-sample event. No such validation population existed: human `n=0`
+operators, `0` sessions for this proposed gate. Section 8.1 later measured the broader
+contact-ambiguity rate and killed the single-thumb branches.
 
-**The minor axis is recoverable live at each 224 Hz `SYN_REPORT` with no extra latency —
-but not retrospectively from existing JSONL.** The recorder has to change before it can be
-measured.
+## 3.5 Area Register — intermediate critique, later killed
 
-## 3.5 The Area Register is weaker than claimed
-
-The same review found that **current major-axis readings are coarsely quantised and often
-0–2.5 mm.** If major itself spans only a few millimetres in 0.5 mm units, then
-`major × minor` is **not yet a credible three-level modifier.** The roll-invariance argument
-is correct; the claim that the product resolves into short/ordinary/long registers is
-currently unsupported. Area Register moves from *proposed* to *untested and possibly
-unresolvable with this hardware's current quantisation*.
+The initial review found major-axis readings described as coarsely quantised and often
+0–2.5 mm. That was historical review context, not a measured result with recoverable
+`n`, operator, and session provenance. The proposal was unsupported at that stage.
+Section 8.2 later measured two captures (`n=4,394` and `n=6,918` frames, one operator in
+the operator capture set, exact cross-file session identity not preserved, no error bars)
+and killed Area Register on **0.5 mm** major-axis dynamic range.
 
 ## 3.6 The throughput formula, settled
 
@@ -347,11 +399,12 @@ per word you need about **62 test gestures per word — 7,936 total.**
 and count incorrect **plus** abstentions. Settle only at ≥ 0.90 joint, labelled explicitly
 as within-operator and within-session.
 
-## 3.8 Privacy: the verdict is retention, not collection
+## 3.8 Privacy: historical retention verdict
 
-**Do not build the area modifier yet.** `log₂3 = 1.585` bits assumes three predictably
-selectable states; with unmeasured, unlabelled thresholds it is only quantisation
-arithmetic, and tripling the class count can destabilise an already-unknown base recogniser.
+**The later instruction was not merely “do not build yet”: Area Register was killed on
+measurement.** Its historical `log₂3 = 1.585` bits assumed three predictably selectable
+states (`n=3` assumed states, human `n=0` operators, `0` hardware sessions). The arithmetic
+never established measurable registers.
 
 **Raw traces are content-bearing behavioural and possibly biometric data, and persistent
 collection is unnecessary for the vertical slice.** The correct design is **privacy by
@@ -464,21 +517,21 @@ with any fixed syllable code.** That assumption came from steno, where a stroke 
 simultaneous chord of many keys. On a pad where one event is one contact event, a syllable
 code needs three to five times more events per word than the premise allowed.
 
-**Consequence:** any design in this space must either abandon the 1–2 stroke premise,
-adopt a chord-style event where one frame carries a set, or use a word-level code instead of
-a syllable-level one. Thread-Rosette is a **set-per-event** design and therefore sits on the
-right side of this constraint; fixed syllable codes do not.
+**Historical consequence:** the code-design arithmetic required abandoning the 1–2-event
+premise or changing the code shape. Thread-Rosette's set-per-event framing and the
+word-level alternative were historical design responses, not current selections; both
+branches were later rejected or suspended.
 
 
 
-## 4. The measurement that now has top priority
+## 4. Historical priority proposal — instrument still unrun
 
-**Fit Fitts' `a` and `b` for this thumb in this array.** 60 timed moves, adjacent and
-diagonal, inside the real 24-cell layout. Ten minutes. Everything above rests on provisional
-coefficients, and this is the one number that determines whether any of it is real.
+The record proposed fitting Fitts' `a` and `b` from 60 timed adjacent/diagonal moves in a
+24-cell array. That instrument has `n=1`; hardware runs, human operators, and sessions are
+each `n=0`. The coefficients remain assumptions, not a current baseline result.
 
-Until it is measured, the honest statement about this project is: **the hand is slower than
-the sensor, by a factor that has never been measured.**
+Until measured, the Fitts-derived rate band remains model arithmetic. The later contract
+replay killed the selected-thumb primitives independently of this unrun instrument.
 
 ---
 
@@ -562,22 +615,17 @@ What is solid, and is the actual output of this sprint:
 5. **Privacy by retention:** compute at lift-off, discard raw traces immediately.
 6. **Universal accuracy is unidentifiable at n = 1 operator** — not merely unmeasured.
 
-## 7. The next action is an instrument fix, not a design
+## 7. Historical instrument-fix sequence — superseded
 
-Every remaining concept is blocked on the same missing signal. Before any further design
-work:
+The record historically proposed extending the recorder, recapturing, and measuring U
+before considering another single-thumb design. U was subsequently measured on two
+captures (`n=4,394` and `n=6,918` frames; one operator in the operator capture set; exact
+cross-file session identity not preserved; no error bars) and failed the 0.10 gate. This
+sequence is not authority to reopen design or revive a killed branch. The current status
+remains 22 candidates generated, 0 validated, and 0 surviving signals.
 
-1. **Extend the recorder** to store **slot/tracking ID, minor axis and orientation.** The
-   device already reports all three; the parser discards them. This cannot be done
-   retrospectively — the existing JSONL does not contain it.
-2. **Recapture** with the hand in a known, labelled pose.
-3. **Measure U**, the fraction of event frames with more than one plausible thumb. The
-   observability critic's threshold: **U ≤ 10 %** is required; above that every
-   single-thumb concept is dead regardless of design.
-4. **Only then** re-open design.
-
-**Any concept proposed before step 1 is arithmetic about a sensor that cannot report what
-the concept needs.**
+The recorder capability change and the never-run physical instruments remain separate
+research prerequisites; none is evidence for a current design.
 
 ---
 
@@ -630,21 +678,15 @@ Two independent findings, both measured, both fatal to the current design space:
 2. **Contact geometry.** The major axis spans 0,5 mm. The ellipse cannot encode a
    modifier, a register or a symbol.
 
-The next action is therefore **not** another design round. It is an instrument-interpretation
-question that only the operator can answer, and it should be asked before any further design work:
+The later action was an instrument-interpretation question:
 
-> Is the 10-contact condition a property of how the pad is being used — a resting hand
-> placed flat, with the thumb among nine other contacts — or is it inherent to this
-> digitiser? A ten-finger rest is a legitimate ergonomic choice, but it means the input
-> method must be built for a **ten-contact field**, not for a single thumb. Every
-> single-thumb concept in this document, including the sprint winner, was answering a
-> question the device was never being asked.
+> Is the 10-contact condition a property of how the pad was being used, or is it inherent
+> to this digitiser?
 
-The `q` coordination measure from section 2.3 — distinguishing a hand that moved as one
-from two independent gestures — was the only approach in this document designed for a
-ten-contact field rather than against it. It remains unmeasured, but it is **not a surviving
-direction**. The later permutation null test withdrew the only apparent field signal, so the
-ten-contact design space is closed.
+That question did not reopen the ten-contact design space. The historical ten-contact
+field framing and the `q` coordination measure were not selected or validated. The `q`
+measure remains unmeasured, and the later permutation null withdrew the only apparent field
+signal. The ten-contact design space is closed.
 
 ---
 
@@ -703,13 +745,18 @@ does not treat that experiment as an open design direction.
 
 ---
 
-## 10. The ENGLISH syllable inventory — the premise survives here, unlike German
+## 10. The English syllable inventory — structural arithmetic, not a surviving design premise
 
 Computed on a pinned corpus: **hermitdave/FrequencyWords 2018 `en_50k.txt` at commit
 `525f9b5`, sha256 `5351ff…b458`**, segmented with **eSpeak-ng 1.52.0** `--ipa=3`, stress and
 length stripped, maximum legal onset including the English `sC` rule and stop+fricative+liquid
 clusters (`str`, `spr`, `skr`, `spl`), with sonority fallback. 49 997 / 50 000 types valid
 (three had no vowel: `psst`, `qu`, `ís`), covering 725 114 237 / 725 119 374 tokens.
+
+This inventory does not preserve a current design premise. The later analysis in this
+document abandons the historical one-to-two-event premise for English as well; the
+arithmetic is corpus-derived (token `n=725,119,374`, human `n=0` operators, `0` sessions),
+not a human or hardware result.
 
 | Quantity | Value |
 |---|---|
@@ -729,7 +776,12 @@ inventory from 12 870 to **12 853** and the entropy from 9,085 to **9,0796**. Th
 conclusion is untouched, because it depends on the mean syllables per 5-letter word, which
 did not move: 1,396494.
 
-### Why English is structurally easier than German, and by how much
+### Why English appeared structurally easier than German — comparison withdrawn
+
+The historical table compared German and English under a later-found weighting mismatch.
+It is retained as arithmetic, not a valid cross-language result: the English corpus has
+`n=725,119,374` tokens and the German source has `n=151,705,378` tokens, with human `n=0`
+operators and `0` sessions; the German count may be unweighted.
 
 | | German | English |
 |---|---|---|
@@ -737,12 +789,9 @@ did not move: 1,396494.
 | 2 events per syllable | 3,39 events/word | **2,79 events/word** |
 | 3 events per syllable | 5,09 events/word | **4,19 events/word** |
 
-**The "1–2 events per 5-letter word" premise is incompatible with a fixed syllable code in
-German at 2 events per syllable (3,39 needed) but only *just* misses in English at 2 events
-(2,79 needed) and comes close at 3 events (4,19).** A 2-event English syllable code needs
-2,79 events per word where the premise allows 2 — a 39 % overshoot rather than German's 70 %.
-Neither language reaches it, but English is materially closer, and English's 1,15 % top-1024
-coverage is better positioned for a compact code than most designs assume.
+The comparison and its claimed ease gap are withdrawn until German token weighting is
+matched. The structural conclusion retained below is only that, under each language's own
+stated method, the historical 1–2-event premise does not fit the listed code sizes.
 
 Event arithmetic remains a structural check rather than a behavior claim. Using the
 token-weighted English inventory (1,3965 syllables per 5-letter word and 1,2916 overall), the
@@ -750,14 +799,17 @@ event counts per 5-letter word are 6,98 for an 8-class alphabet, 4,19 for a 32- 
 alphabet, and 2,79 for a 16-class alphabet when compared with the historical one- to
 three-events-per-syllable schemes. These are code-design counts, not measured behavior.
 
-**The honest English conclusion:** even the 32- or 64-class option needs 4,19 events per
-5-letter word under a three-events-per-syllable assumption, beyond the historical 1–2 event
-premise. The premise has to be abandoned for English as well, and a word-level code remains
-the better-fitting frame.
+**The historical English conclusion:** even the 32- or 64-class option needs 4,19 events
+per 5-letter word under a three-events-per-syllable assumption, beyond the historical 1–2
+event premise. The premise was therefore abandoned for English as well. Calling a
+word-level code the better-fitting frame was historical design reasoning; that branch is
+not selected, viable, or validated here.
 
 **Caveats carried with the code-design counts:** eSpeak G2P and this onset table are an
 approximation, not a linguistic universal; the corpus is frequency-weighted English, and a
-different register or a German corpus changes every figure. Nothing here is measured behavior.
+different register or a German corpus changes every figure. The source corpus has
+`n=725,119,374` tokens, human `n=0` operators, and `0` sessions. Nothing here is measured
+behavior.
 
 **Caveats carried with the numbers:** eSpeak G2P and this onset table are an approximation,
 not a linguistic universal; the corpus is frequency-weighted English, and a different
@@ -787,10 +839,10 @@ to five decimals. The earlier German figure of 1 041 was correct and the 1 025 w
 For the record: `2^9.476 = 712.30` (English word unigram), `2^9.085 = 543.21` (English
 syllable entropy), `2^8.852 = 461.98` (German syllable entropy).
 
-**The structural conclusion is unchanged by the method:** English needs
-`1.396494 × e` events per 5-letter word — **4.189** at 3 events per syllable, 5.586 at 4,
-6.982 at 5. All exceed the 1–2 premise. English's lower syllable count makes the overshoot
-smaller than German's, not absent.
+**The historical structural conclusion:** English event counts were
+`1.396494 × e` per 5-letter word — 4.189 at 3 events per syllable, 5.586 at 4, and 6.982
+at 5. All exceed the historical 1–2 premise. The claimed cross-language overshoot gap is
+withdrawn under the weighting caveat in section 10.2.
 
 ---
 
@@ -810,36 +862,33 @@ difference matters:
 | Field separability | 1 experiment | **run on real data; the positive result was subsequently withdrawn** |
 | Instruments | — | reader ellipse capture, geometry probe, field separability script |
 
-**All ten round-1 candidates were killed at 10–21 / 50.** The sprint winner scored 36/50 on
-sponsor scores and **11/50 across five adversarial critics**. No concept survived. The
-apparent ten-contact field result is the ninth retraction, not a surviving result: the
-class-mean top-1 of 0.4583 was below the permutation-null mean of 0.5685, with one-sided
-p=0.9460 under the pre-fixed p ≥ 0.05 withdrawal rule. The ten-contact design space is closed.
+**All ten round-1 candidates were killed at 10–21 / 50.** The historical sprint winner
+received a 36/50 sponsor self-assessment and **11/50 across five adversarial critics**
+(`n=1` candidate, `n=5` critic reviews; human `n=0` operators, `0` sessions). No concept
+survived. The apparent ten-contact field result is the ninth retraction, not a surviving
+result: the measured class-mean top-1 of 0.4583 (`n=24` trials, 8 classes, 3 per class;
+one operator, one session, `n=63` strokes, no error bars) was below the permutation-null
+mean of 0.5685, with one-sided `p=0.9460` under the pre-fixed `p ≥ 0.05` withdrawal rule.
+The ten-contact design space is closed.
 
 **Historical summary corrected.** This record originally said that the field result was the
 surviving outcome and reopened the design space. It is the ninth retraction instead: the
 ten-contact design space is closed and no signal survives.
 
-### 10.2 Weighting caveat — the German/English comparison is not yet apples-to-apples
+### 10.2 Weighting caveat — cross-language gap withdrawn
 
-The English figures are **token-weighted**: 1,2916 syllables per word overall and 1,3965 per
-5-letter word. The type-unweighted means on the same corpus are markedly different — 2,3317
-overall and 1,6710 for 5-letter items — because rare multiword and proper-noun expansions
-dominate when every type counts once.
+The English figures are token-weighted over `n=725,119,374` tokens: 1,2916 syllables per
+word overall and 1,3965 per 5-letter word. Type-unweighted means on that corpus are 2,3317
+overall and 1,6710 for 5-letter items. Human operators and sessions are `n=0`.
 
-**The German 1,695 figure may be an unweighted pyphen count.** If so, the comparison in
-section 10 is between a weighted English number and an unweighted German one, and the
-"English is materially easier" conclusion is **not safe** until the German figure is
-recomputed with the same weighting.
+The German 1,695 figure comes from a method that may be an unweighted pyphen count over
+`n=151,705,378` tokens; human operators and sessions are `n=0`. The cross-language
+"English is materially easier" conclusion and the size of its gap are **withdrawn** until
+the German inventory is recomputed with matched token weighting.
 
-What survives the caveat regardless: English at its own token-weighted 1,3965 needs
-`1,3965 × e` events per 5-letter word — 4,189 at 3 events per syllable, 5,586 at 4, 6,982 at
-5 — and **every one of those exceeds the 1–2 premise.** That conclusion depends only on the
-English weighting and is unaffected.
-
-What is now marked provisional: the size of the English-versus-German gap. Recomputing the
-German inventory with token weighting is a short job and should be done before any
-cross-language claim is made in a design document.
+What remains from the English arithmetic alone is that the historical one- to
+three-events-per-syllable schemes produce event counts above the 1–2 premise. This does not
+select or validate any branch.
 
 ### 10.3 Reproducible method specification
 
