@@ -219,3 +219,24 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
   every measurement so far is within-hand.
 - 73 tests green in the merged tree after agent1's schema-version work; verified the old
   captures still load and analyse.
+
+## 06:45–06:55 — dataset validation, correction task, and a seventh rejected hypothesis
+- identity_dataset_check.py: validates a finger-identity capture before it trains anything.
+  The label is only the cue; nothing verified the operator lifted the right finger. Checks the
+  presence GAP per cue, reports VALID/MISSING/AMBIGUOUS, exits non-zero unless all valid.
+  Clean capture 6/6 VALID; 3-frame jitter MISSING; two fingers at once AMBIGUOUS.
+- --task correction added: alternating sector stroke and deliberate undo, because W19 found
+  NO published number for correction throughput at 3-5 events/s - the one number that
+  decides whether the 100-218 WPM ceiling is reachable.
+- CUED_SESSION_PROTOCOLS.md: the six tasks in one place, ordered by information per minute,
+  with the three scoring traps that produced wrong numbers pinned.
+- W18 (bimanual/drift/fatigue) ranked body drift as the primary threat. TESTED AND REJECTED:
+  a static-anchor rigid fit (translation + in-plane rotation) removes only ~20% of the
+  cross-hand anti-correlation (73->55: -0.858 -> -0.660) and leaves within-hand couplings
+  untouched. So the cross-hand structure is NOT simple rigid-body motion.
+  - trap 1: fitting on ALL contacts reported -0.858 -> +0.602, a convincing false
+    confirmation; when every contact moves together the fit reads the gesture as rotation.
+  - trap 2: the normal equations returned half the true omega; caught by a rotation test.
+- Consequence: bimanual interference, not drift, is the top open hardware question. W18 has
+  the protocol (alternating vs simultaneous two-hand taps, cross-correlation at lag 0/1).
+- 76 tests green.
