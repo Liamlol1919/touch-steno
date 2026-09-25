@@ -14,7 +14,7 @@
 - **Contact Field:** rejected as the current implementation. Its exact generated-positive metrics are preserved, but the favorable null result is not credited because the harness forced null abstention and its class-count parity leaked labels. The current implementation remains rejected; the audit does not prove every redesign impossible.
 - **Elastic Word:** remains a **synthetic control/fallback**, not a product branch. Its exact perfect generated score is preserved but is not promotion, safety, generalization, or severe-nuisance evidence: the severe transform was a near-duplicate, calibration was unused, splits shared generators, and training used one exemplar per class.
 - **FCPT:** arithmetic-only and primitive-rejected. The run contains 27 modeled-cost parameter settings and no recognition metrics; modeled cost is not accuracy.
-- **No branch is promoted.** The immediate next action is Test 0, scientific-comparator repair; TSF is the single frozen next research branch only after Test 0 passes.
+- **No branch is promoted.** This historical run is followed by the repaired Test 0 comparator and the failed TSF synthetic falsifier; the current state requires a fresh post-failure branch decision.
 
 ## Frozen manifest and run envelope
 

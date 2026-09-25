@@ -1,0 +1,101 @@
+{
+  "schema": "TSF-SYNTHETIC-FALSIFIER",
+  "version": 1,
+  "frozen": true,
+  "synthetic_only": true,
+  "claim_scope": "synthetic fixture only; no device, network, Plover, hardware, human, WPM, correction, product, or external-repository claim",
+  "primitive": {
+    "name": "TemporalSetFlow",
+    "input": "timestamped unordered x/y point sets only",
+    "frame_bounds": {"minimum": 2, "maximum": 8},
+    "point_count_bounds": {"minimum": 2, "maximum": 12},
+    "frame_gap_ms_bounds": {"minimum": 0.1, "maximum": 100.0},
+    "adjacent_matching": "ephemeral deterministic minimum-cost one-to-one assignment",
+    "nuisance_removed": ["translation", "positive uniform scale", "declared proper rotation"],
+    "encoded_quantity": "ordered adjacent non-rigid residual deformation",
+    "persistent_tracking": false,
+    "stable_contact_identity_exposed": false,
+    "pressure_used_by_tsf": false,
+    "fail_closed": ["empty", "nonfinite", "over-limit", "malformed", "non-monotonic", "gap", "burst", "cardinality mismatch", "duplicate point", "degenerate spatial extent"]
+  },
+  "classes": ["alpha", "beta", "gamma"],
+  "fixture": {
+    "frames_per_sequence": 5,
+    "frame_interval_ms": 8.0,
+    "count_matched_classes": true,
+    "train": {
+      "family": "triangles_orthogonal_pulse_A",
+      "sessions": 2,
+      "positive_per_class": 4,
+      "null_sequences": 4,
+      "total_sequences": 16
+    },
+    "calibration": {
+      "family": "diamonds_alternating_shear_B",
+      "sessions": 2,
+      "positive_per_class": 2,
+      "null_sequences": 4,
+      "total_sequences": 10
+    },
+    "test": {
+      "family": "asymmetric_hexagons_local_pinch_C",
+      "sessions": 3,
+      "positive_per_class": 3,
+      "null_sequences": 3,
+      "total_sequences": 12,
+      "maximum_sequences": 12
+    }
+  },
+  "split_independence": {
+    "train_generator": "_generate_train_examples",
+    "calibration_generator": "_generate_calibration_examples",
+    "test_generator": "_generate_test_examples",
+    "shared_generator_function": false,
+    "explicit_implementations": true,
+    "prototype_copied_across_splits": false
+  },
+  "deformation_and_null_families": {
+    "temporal_operators": ["orthogonal stretch", "alternating shear", "local pinching", "rigid similarity"],
+    "randomized_rest_fields": ["train", "calibration"],
+    "nulls": [
+      "rigid",
+      "palm",
+      "rest",
+      "burst",
+      "dropout",
+      "gap",
+      "duplicate",
+      "reconnect"
+    ]
+  },
+  "protocol": {
+    "all_positive_train_exemplars_used_for_fitting": true,
+    "all_train_exemplars_presented_to_every_recognizer": true,
+    "calibration_selects": ["acceptance_threshold"],
+    "calibration_fits_parameters": false,
+    "test_used_for_parameter_or_threshold_selection": false,
+    "decisions_serialized_before_truth_join": true,
+    "bootstrap": {
+      "method": "session_clustered",
+      "paired_for_margin": true,
+      "replicates": 256,
+      "seed": 20260925,
+      "confidence": 0.95
+    }
+  },
+  "recognizers": [
+    "tsf",
+    "count_only",
+    "centroid_spread_only",
+    "instantaneous_shape",
+    "current_contact_field",
+    "rigid_motion"
+  ],
+  "kill_gates": {
+    "tsf_null_false_commit_rate_maximum": 0.0,
+    "tsf_positive_accuracy_minimum": 0.8,
+    "tsf_vs_best_control_margin_minimum": 0.1,
+    "margin_confidence_interval": "paired session-clustered lower 95 percent",
+    "on_any_failure": "claim must be none"
+  }
+}

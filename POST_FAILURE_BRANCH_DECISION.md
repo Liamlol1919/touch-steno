@@ -1,28 +1,36 @@
 # Post-Failure Branch Decision
 
-**Decision status:** `FROZEN — RESEARCH ONLY`
+**Decision status:** `FROZEN — TSF FALSIFIER FAILED; FRESH POST-FAILURE DECISION REQUIRED`
 **Decision date:** 2026-09-25
-**Single next branch:** Temporal Set-Flow (TSF)
-**Immediate prerequisite:** Test 0, repair of the synthetic scientific comparator
-**Implementation status:** none; this decision authorizes no code, tests, device access, or product claim
+**Single next branch:** None pending a fresh post-failure branch decision
+**Prerequisite status:** Test 0 is complete and frozen; the first TSF synthetic falsifier has executed
+**Implementation status:** The bounded TSF prototype was implemented for research only and is now held/rejected after its frozen falsifier; no hardware or product claim
 
 ## Decision
 
-Temporal Set-Flow (TSF) is the single frozen next research branch after the post-failure
-audit of `SYNTH-BRANCH-1`. TSF is an identity-free description of whole-field temporal
-deformation after ephemeral adjacent-set assignment and explicit rigid nuisance removal.
-It is not a renamed static Contact Field descriptor, a selected-finger path, an ordered
-Elastic Word template, or a hardware-ready decoder.
+Temporal Set-Flow (TSF) was selected as the frozen research branch after the post-failure
+audit of `SYNTH-BRANCH-1`. Its preserved design rationale is an identity-free description of
+whole-field temporal deformation after ephemeral adjacent-set assignment and explicit rigid
+nuisance removal. It is not a renamed static Contact Field descriptor, a selected-finger path,
+an ordered Elastic Word template, or a hardware-ready decoder. That rationale remains
+historical; it does not authorize implementation, tuning, or advancement after the falsifier.
 
 The current Contact Field and Elastic Word implementations remain rejected/control-only. The
 audit invalidates use of the old run's favorable null and Elastic results as promotion
 evidence, but it does not establish that every redesign is impossible.
 
-The next executable action is **Test 0: repair the scientific comparator before implementing
-TSF**. A passing Test 0 only makes a TSF synthetic falsifier scientifically meaningful; it
-does not implement, advance, or promote TSF. RCI and SOS are later comparators. Dwell,
-topology, and raw-field branches remain on hold pending an independent arming/observability
-or raw-interface prerequisite.
+The comparator repair, **Test 0, is complete and frozen**. Its exact results and hard limitations
+are recorded in `SCIENTIFIC_COMPARATOR_TEST0_RESULTS.md`. The runtime read-only
+`load_frozen_manifest()` API enforces canonical digest
+`922524b495753bd2f4394380b850f4d788c4b38b9af4ea057e57414fe601a25f` (raw file SHA-256
+`eccee106fab4b7aa19a48d0f160c4ea4a933e74b794b996da39a980747aa77c4`) and refuses manifest
+mutation with `ValueError`. All 9 comparator tests pass, as does the full 286-test repository
+suite with 1 skipped and 0 failed. The bounded TSF prototype was subsequently implemented as a
+research-only step and subjected to its first separately frozen synthetic falsifier. That
+falsifier has now failed, so this document's former implementation authorization is superseded.
+There is no hardware, human, performance, or product claim and no TSF promotion. RCI and SOS
+remain later comparators. Dwell, topology, and raw-field branches remain on hold pending an
+independent arming/observability or raw-interface prerequisite.
 
 ## Why `SYNTH-BRANCH-1` is structurally audited and non-promotional
 
@@ -127,7 +135,7 @@ A single hard-veto failure is non-compensable.
 
 ## Test 0 — immediate scientific-comparator repair
 
-Test 0 precedes all TSF implementation. Its acceptance evidence must show that:
+Test 0 preceded all TSF implementation. Its completed acceptance evidence shows that:
 
 1. Recognizer decisions are produced and serialized without labels, expected output, null
    flags, split metadata, or nuisance metadata; only then are labels joined for scoring.
@@ -147,8 +155,8 @@ Test 0 precedes all TSF implementation. Its acceptance evidence must show that:
 8. A shuffled-label recognizer is at chance, and randomized slot/order permutations do not
    change semantic decisions or event counts.
 
-Passing these checks validates the evidence boundary, not TSF. If any check fails, the run is
-void and the comparator remains under repair.
+These checks validate the evidence boundary, not TSF. Test 0 is now complete and frozen; any
+manifest mutation is refused at runtime.
 
 ## Frozen TSF primitive
 
@@ -296,13 +304,52 @@ correction throughput, WPM, text accuracy, or product readiness.
 
 | Position | Branch | Decision |
 |---|---|---|
-| Immediate prerequisite | **Comparator repair / Test 0** | Repair the scientific evidence boundary before TSF exists. |
-| Single next branch | **Temporal Set-Flow (TSF)** | Implement only after Test 0 passes; then run one frozen synthetic falsifier. |
-| Later comparators | **Rest-Censored Innovation (RCI)** | Consider only after TSF is decided; test slow excursions under locked session rest. |
-| Later comparators | **Spatiotemporal Occupancy Sketch (SOS)** | Consider only after TSF is decided; test local grid-space temporal texture. |
+| Completed prerequisite | **Comparator repair / Test 0** | Implemented, tested, and frozen as a synthetic evidence-boundary repair. Canonical manifest validation and mutation refusal are active; 9 comparator tests and the full 286-test suite pass (1 skipped, 0 failed). Exact results are frozen separately. |
+| Executed research branch | **Temporal Set-Flow (TSF)** | The bounded prototype was implemented and tested, then rejected/held by its frozen synthetic falsifier. Preserve its design rationale and exact failure; do not tune or advance it. |
+| Fresh decision required | **Post-failure branch selection** | Compare preserved, non-promotional branches under a new explicit decision. No branch is selected by this update. |
+| Later comparators | **Rest-Censored Innovation (RCI)** | Remains unimplemented and does not advance automatically. It requires a fresh selection decision and matched slow-motion, palm, and rest-drift falsification. |
+| Later comparators | **Spatiotemporal Occupancy Sketch (SOS)** | Remains unimplemented and does not advance automatically. It requires a fresh selection decision and evidence that temporal locality beats static occupancy and occupancy-difference controls. |
 | Hold / prerequisite | **Dwell** | No independent validated arming primitive; hold. |
 | Hold / prerequisite | **Topology** | First require stable graph structure under rest jitter; otherwise stop. |
 | Prerequisite hold | **Raw field** | First require a read-only capability audit proving timestamped dense target-device data; no inferred interface. |
 
 This ordering is frozen. It is not authority to implement the later comparators or hold
 branches, and it makes no hardware claim.
+
+## Executed TSF falsifier — historical decision update
+
+This entry records the first executed TSF synthetic falsifier. It supersedes any future TSF
+implementation authorization elsewhere in this document while preserving the original branch
+selection, primitive, state model, observation model, rationale, controls, and kill criteria as
+historical design context.
+
+The bounded identity-free prototype and its **11 TSF tests** are implemented and pass their
+structural checks. The frozen manifest is `tsf_falsifier_manifest.json`, with canonical digest
+`a95f0d18832362b314417c557d615be4802cc869010617113fb75100090ffe7e`. Structural-test success
+does not override the executed falsifier.
+
+`run_falsifier()` produced claim `none` and `kill_gate_passed=false`:
+
+- TSF positive accuracy was `0.0` over 12 test examples; its 3-cluster,
+  256-replicate session-cluster bootstrap interval was `[0.0, 0.0]`.
+- TSF null false-commit rate was `0.0`; its corresponding 3-cluster,
+  256-replicate interval was `[0.0, 0.0]`.
+- The calibration threshold was `0.0834054855946207`; test data was not used for
+  selection.
+- The best control was `rigid_motion` at positive accuracy `0.3333333333333333`.
+  TSF's observed margin was `-0.3333333333333333`; the paired 3-cluster,
+  256-replicate margin interval was `[-0.6666666666666666, 0.0]`.
+- Control positive accuracies were `count_only=0.3333333333333333`,
+  `centroid_spread_only=0.3333333333333333`, `instantaneous_shape=0.0`,
+  `current_contact_field=0.0`, and `rigid_motion=0.3333333333333333`.
+- Decisions were serialized before truth join (`true`).
+
+Against the frozen manifest, TSF passed only the zero-null false-commit gate. It failed the
+positive-accuracy minimum `0.8`, the required margin `0.1`, and the requirement that the
+paired margin's lower 95% bound be positive. The current TSF research prototype is therefore
+**held/rejected**. `TSF_FALSIFIER_RESULTS.md` contains the complete exact record and limitations.
+
+This is synthetic-only rejection evidence, not hardware, human, WPM, correction,
+text-accuracy, privacy-by-retention, or product evidence. The next executable action is a fresh
+post-failure branch decision, not TSF tuning. RCI and SOS remain later unimplemented
+comparators and receive no automatic promotion or implementation authorization.
