@@ -1,170 +1,169 @@
-# Fünf Stunden, zwei Agenten — was wirklich passiert ist
+# Five hours, two agents — what actually happened
 
-**Zeitraum:** 2026-09-25, ca. 06:00–10:00 MESZ
-**Beteiligt:** Agent 1 (Haupt-Baupfad), Agent 2 (Forschung/Modell/Auswertung), Nutzer als Messperson
-**Stand:** 86 Commits, 24 Issues, 125+ Tests grün
-
----
-
-## 1. Das Urteil zuerst
-
-**Es wurde kein Eingabesystem gebaut.** Kein Steno-Dekoder, der einen echten Strich in
-Text übersetzt, existiert. Das war die ursprüngliche Frage. Sie ist offen.
-
-Was entstanden ist, ist eine **belastbare Neuausrichtung des Problems plus ein
-Messgerät**. Das ist kein Produkt, und fünf Stunden sind dafür viel.
+**Window:** 2026-09-25, roughly 06:00–10:00 CEST
+**Involved:** Agent 1 (main build path), Agent 2 (research / modelling / evaluation), the
+user as the measurement subject
+**State:** 86 commits, 24 issues, 125+ tests green
 
 ---
 
-## 2. Die eine Sache, die zählt: echte Handdaten
+## 1. The verdict first
 
-Der Nutzer hat rund eine Stunde echte Messungen geliefert. Das war die wertvollste
-Rohstoffzufuhr der ganzen Zeit — und sie hat eine zentrale Annahme des Projekts gekippt.
+**No input system was built.** No steno decoder exists that turns a real stroke into text.
+That was the original question. It remains open.
 
-| Messung | Wert | Konsequenz |
+What exists is a **defensible re-framing of the problem plus a measurement instrument**. That
+is not a product, and five hours is a lot for it.
+
+---
+
+## 2. The one thing that matters: real hand data
+
+The user supplied roughly an hour of real measurements — the most valuable raw material of
+the entire period. It overturned a central assumption of the project.
+
+| Measurement | Value | Consequence |
 |---|---|---|
-| Sektor-Genauigkeit, 12 mm, rechter Daumen | **47,6 %** | Modell nahm 58–68 % an — Annahme unbestätigt |
-| Ruhe-Streuung ruhender Finger, 9007 Samples | **0,4 mm** (Median) | Sensor arbeitet sauber |
-| Signal bei 12 mm Auslenkung | **~30 : 1** | **Der Sensor ist als Fehlerquelle ausgeschlossen** |
-| 20-mm-Arm | 0 Events | 31 Blöcke unter dem 88-ms-Detektorfenster |
-| Natürliche Daumenhülle | 24,6 × 18,2 mm | größer als die 12-mm-Armannahme |
+| Sector accuracy, 12 mm, right thumb | **47.6 %** | the model assumed 58–68 % — assumption unconfirmed |
+| Resting-finger jitter, 9007 samples | **0.4 mm** median | the sensor works correctly |
+| Signal at 12 mm excursion | **~30 : 1** | **the sensor is excluded as an error source** |
+| 20 mm arm | 0 events | 31 blocks fell under the 88 ms detector window |
+| Natural thumb envelope | 24.6 × 18.2 mm | larger than the 12 mm working assumption |
 
-**Die Fehler liegen in der Hand, nicht im Gerät.** Vorher wusste das niemand; die
-Projektmodelle nahmen einen Richtungsfehler als gegeben an und optimierten darunter.
+**The remaining error belongs to the hand, not the device.** Nobody knew this before. The
+project models had assumed a direction-error rate and optimised underneath it.
 
-Die Fehlerstruktur ist dabei **kein Rauschen, sondern ein Muster**: jeder Fehler fällt auf
-das exakte 180°-Gegenüber (NE↔SW, NW↔SE, S↔N, W↔E). Das ist lösbar, aber noch nicht gelöst.
-
----
-
-## 3. Die Korrektur, die Agent 2 selbst durchgesetzt hat
-
-Agent 2 veröffentlichte die Kernbehauptung des Zyklus:
-
-> „Die Sprachschicht hebt 6,8 % auf 88,8 % Wortgenauigkeit."
-
-und zog sie **am selben Morgen** zurück. Grund: der Kandidatensatz wurde aus der Zeile des
-*beabsichtigten* Sektors gebaut — der Sprachmodell bekam die Antwort vorgegeben. Korrigiert
-auf P(wahr | beobachtet) fällt der Gewinn auf ~0. Mit **Oracle-Präfix** (wahre Kontextbuchstaben
-vorgegeben) bleibt er bei ~0: es liegt weder an Modellqualität noch an Fehlerfortpflanzung.
-
-Mitgezogen wurden: die Rückzugs-Politik, die Korrekturlast (1,87 → 0,92 Aktionen/Wort) und
-**sämtliche WPM-Zahlen**. Alles war stromabwärts vom selben Fehler.
-
-Das ist wertvoll, weil die Korrektur öffentlich und im Repo dokumentiert wurde
-(`LM_RECOVERY.md`, Issue #20) — statt die Zahl stillschweigend zu ersetzen.
-
-**Agent 1 hat den Fehler danach behoben**, nicht wiederholt: `lexicon_recovery.py`
-erzeugt Kandidaten aus der *beobachteten* Sektor-Spalte und gibt das Zielfort erst danach
-zur Bewertung frei (`conditioning: observed-sector-column`).
+The error structure is **not noise but a pattern**: every failure lands on the exact 180°
+opposite (NE↔SW, NW↔SE, S↔N, W↔E). That is solvable, and it is not yet solved.
 
 ---
 
-## 4. Die belastbare Modellaussage (synthetischer Kanal, korrekt konditioniert)
+## 3. A correction Agent 2 forced on itself
 
-`lexicon_recovery.py`, 2000 Versuche je Radius, 20k-Lexikon:
+Agent 2 published the cycle's headline claim:
 
-| Radius | Top-1 Wort | richtiges Symbol in Top-3 | Wort im Lexikon erreichbar | **Dekoder wählt korrekt** | unerreichbar | Korrekturen/Wort |
+> "The language layer lifts word accuracy from 6.8 % to 88.8 %."
+
+and withdrew it **the same morning**. The candidate set for each character had been built
+from the row of the *intended* sector, which hands the model the answer. Corrected to
+P(true | observed), the gain collapses to roughly zero, and with an **oracle prefix** — the
+true preceding letters supplied — it stays at roughly zero. So it is neither model quality
+nor error propagation: a greedy per-character model simply cannot exploit this channel.
+
+Withdrawn along with it: the retraction policy, the correction load (1.87 → 0.92
+actions/word), and **every WPM figure**. All of it was downstream of the same error.
+
+This was worth doing because the retraction was made publicly and recorded in the repository
+(`LM_RECOVERY.md`, issue #20) rather than the number being quietly replaced.
+
+**Agent 1 then fixed the conditioning** rather than repeating the mistake:
+`lexicon_recovery.py` builds candidates from the *observed* sector column and releases the
+target word only for scoring afterwards (`conditioning: observed-sector-column`).
+
+---
+
+## 4. The one load-bearing model result
+
+`lexicon_recovery.py`, 2000 trials per radius, 20k lexicon, correctly conditioned:
+
+| Radius | Top-1 word | true symbol in top-3 | word reachable in lexicon | **decoder selects correctly** | unreachable | corrections/word |
 |---|---|---|---|---|---|---|
-| 12 mm | 6,8 % | 96,3 % | 80,7 % | **73,6 %** | 14,5 % | 0,264 |
-| 15 mm | 15,5 % | 99,1 % | 94,9 % | **89,2 %** | 3,0 % | 0,108 |
-| 20 mm | 38,5 % | 99,9 % | 99,5 % | **96,3 %** | ~0 % | 0,038 |
+| 12 mm | 6.8 % | 96.3 % | 80.7 % | **73.6 %** | 14.5 % | 0.264 |
+| 15 mm | 15.5 % | 99.1 % | 94.9 % | **89.2 %** | 3.0 % | 0.108 |
+| 20 mm | 38.5 % | 99.9 % | 99.5 % | **96.3 %** | ~0 % | 0.038 |
 
-**Das ist die zentrale Erkenntnis des Projekts:** der Sensor liefert die richtige Information
-zu 96 % unter den Top-3. Der naive Dekoder nimmt Top-1 und wirft 80 % weg. Eine
-wortweise Lexikonsuche holt sie zurück.
+**The information is in the channel:** at 12 mm the true symbol is inside the top-3
+candidates 96.3 % of the time. The naive decoder takes top-1 and throws away 80 % of it. A
+word-level lexicon search recovers it.
 
-**Einschränkung, die in jeder Datei steht:** der Kanal ist synthetisch, kalibriert über
-`layout_assignment.py`. Das sind **keine** PTH-660-Messungen. Und die 47,6 % aus der echten
-Hand liegen **unter** der 12-mm-Modellannahme — die Kurve beschreibt also einen Kanal, dessen
-Fehlerrate real nicht validiert ist.
+**Stated in every file:** the channel is synthetic, calibrated through
+`layout_assignment.py`. These are **not** PTH-660 measurements. And the measured 47.6 % sits
+**below** the 12 mm model assumption, so the curve describes a channel whose error rate is
+not validated against reality.
 
 ---
 
-## 5. Was baulich entstanden ist
+## 5. What was actually built
 
-| Artefakt | Umfang | Zweck |
+| Artefact | Size | Purpose |
 |---|---|---|
-| `guided_calibration.py` | ~370 Zeilen | geführte Messung, Radius-Arm, selbstgetakteter Modus |
-| `session_runner.py` | 223 Zeilen | ganze Sitzung in einem Befehl |
-| `lexicon_decoder.py` | 188 Zeilen | wortweiser Lexikon-Dekoder |
-| `lexicon_recovery.py` | 152 Zeilen | korrekt konditionierte Benchmark |
-| `layout_assignment.py` | 237 Zeilen | Sektor-Layout gegen Confusion-Matrix |
-| `correction_timing.py` | — | Stoppuhr-Protokoll, tabletfrei |
-| `plot_models.py` + `models/*.png` | 3 Abbildungen | Layout, gemessene Confusion, Decoder-Decke |
-| Messgeräte | 6 Tasks | noise, palm, sectors, tempo, correction, chord, identity |
+| `guided_calibration.py` | ~370 lines | cued measurement, radius arm, self-paced mode |
+| `session_runner.py` | 223 lines | an entire session in one command |
+| `lexicon_decoder.py` | 188 lines | word-level lexicon decoder |
+| `lexicon_recovery.py` | 152 lines | correctly conditioned benchmark |
+| `layout_assignment.py` | 237 lines | sector layout against a confusion matrix |
+| `correction_timing.py` | — | stopwatch protocol, no tablet required |
+| `plot_models.py` + `models/*.png` | 3 figures | layout, measured confusion, decoder ceiling |
+| Measurement tasks | 6 | noise, palm, sectors, tempo, correction, chord, identity |
 
-Belege im Repo: 3 Abbildungen, 8 Markdown-Dokumente, 24 Issues (20 geschlossen),
-125+ grüne Tests.
-
----
-
-## 6. Was nicht existiert
-
-- **Kein Steno-Dekoder.** Kein Modul übersetzt reale Striche in Steno-Symbole oder Text.
-  `stroke_decoder.py` liefert Richtungsvektoren, kein Wort.
-- **Kein End-to-End-Textausgang.** Es gibt keine Demo, in der eine Bewegung zu Text wird.
-- **Keine brauchbare WPM-Zahl.** Sämtliche Extrapolationen wurden zurückgezogen und nicht
-  ersetzt. Sekunden-pro-Korrektur ist in der Literatur **nicht** vorhanden (Agent 2 hat
-  das verifiziert) und mit dem Nutzer nicht gemessen worden.
-- **Keine Freiheitsgrad-Vermessung.** Die behaupteten 68 % Mitbewegung stammen aus
-  Modellannahmen, nicht aus Messung.
-- **Kein 20-mm-Datenarm.** Der Lauf scheiterte an der 88-ms-Schwelle, nicht am Nutzer.
+Evidence in the repository: 3 rendered figures, 8 markdown documents, 24 issues (20 closed),
+125+ green tests.
 
 ---
 
-## 7. Wo die Zeit verloren ging
+## 6. What does not exist
 
-Der Nutzer verlor rund eine Stunde an **Fehlern, die Agent 2 selbst eingebaut hatte**:
-
-1. **Vier falsche Befehlszeilen** in einem fremd erstellten Session-Plan (Flags, die es
-   nicht gab). Hätte beim ersten Schritt abgebrochen.
-2. **`--task sectors` hatte keinen Radius-Parameter** — die 12-vs-20-mm-Frage, die als
-   entscheidend galt, war nicht messbar. Nachträglich ergänzt.
-3. **Kein `--force`**, vorhandene Dateien blockierten jeden zweiten Lauf.
-4. **Ein Ausgabepuffer im Runner**, der sämtliche Live-Anweisungen verschluckte.
-5. **Ein Countdown mit 1,5 s pro Sektor** — in dieser Zeit weder lesen noch ausführen.
-6. **`\r`-basierte Neuanzeige**, die auf dem Terminal des Nutzers zu Dutzenden
-   identischen Zeilen führte.
-
-Punkt 1–3 fielen auf, weil die Befehle **nie vorher ausgeführt** worden waren — nur
-gegen `--help` und statisch geprüft. Das ist der eigentliche Fehler: Prüfung, die die
-Fehlerart nicht abdeckt, auf die es ankam.
+- **No steno decoder.** Nothing turns real strokes into steno symbols or text.
+  `stroke_decoder.py` produces direction vectors, not words.
+- **No end-to-end text output.** There is no demo in which a movement becomes text.
+- **No usable WPM figure.** Every extrapolation was withdrawn and not replaced.
+  Seconds-per-correction does not exist in the literature and was never measured here.
+- **No degrees-of-freedom survey.** The quoted 68 % co-movement comes from model assumptions,
+  not measurement.
+- **No 20 mm data arm.** That run failed at the 88 ms threshold, not because of the user.
 
 ---
 
-## 8. Ehrliche Bilanz
+## 7. Where the time went
 
-| Frage | Antwort |
+The user lost roughly an hour to **mistakes Agent 2 introduced**:
+
+1. **Four command lines with flags that do not exist** in a session plan written elsewhere.
+   It would have aborted on the first step.
+2. **`--task sectors` had no radius parameter** — the 12-vs-20 mm question, which was treated
+   as decisive, was not measurable. Added afterwards.
+3. **No `--force`**, so existing files blocked every rerun.
+4. **An output buffer in the runner** that swallowed every live instruction.
+5. **A 1.5 s countdown per sector** — not enough time to read and execute a cue.
+6. **A carriage-return redraw** that produced dozens of duplicate lines on the user's
+   terminal.
+
+Items 1–3 surfaced because the commands were **never executed before being recommended** —
+only checked against `--help` and inspected statically. That is the actual error: a check
+that cannot cover the class of failure that mattered.
+
+---
+
+## 8. Honest scorecard
+
+| Question | Answer |
 |---|---|
-| Wird das Projekt durch die Messung besser? | **Ja.** Fehlerquelle eingegrenzt, Muster erkannt, Fehlannahme entkräftet |
-| Ist die zentrale Hypothese belegt? | **Teilweise.** Synthetisch kalibriert, gegen echte Hand nicht validiert |
-| Gibt es ein benutzbares System? | **Nein** |
-| War die ursprüngliche Frage beantwortet? | **Nein.** „Wo ist das optimierte Steno-Modell" — es existiert nicht |
-| Ist die investierte Zeit verschwendet? | **Der Forschungsanteil nicht. Die Build- und Dokumentationsmenge ja.** |
+| Did the measurement improve the project? | **Yes.** Error source localised, pattern identified, an assumption disproved |
+| Is the central hypothesis supported? | **Partly.** Synthetic-but-calibrated, not validated against a real hand |
+| Is there a usable system? | **No** |
+| Was the original question answered? | **No.** "Where is the optimised steno model" — it does not exist |
+| Was the time wasted? | **The research share, no. The build and documentation volume, yes.** |
 
-**Die Reihenfolge war verkehrt.** Zuerst 30 Issues, Messgeräte und Hypothesen, dann nie
-das Dekodieren. Die Frage „wo ist das Steno-Modell" hätte am ersten Tag stehen müssen,
-nicht am fünften.
-
----
-
-## 9. Was als Nächstes gebaut werden muss
-
-Ein Steno-Dekoder: Plover-Steno-Tabelle über die Sektorvektoren, lauffähig gegen die
-gemessenen 63 Striche. Kein weiterer Messaufwand, kein Tablet. Der Ausgang wird bei 47,6 %
-fehlerhaft sein — sichtbar wird aber, ob das Prinzip trägt, und das ist heute unbekannt.
-
-Erst wenn daraus Text wird, sind Genauigkeit, Undo und Tempo sinnvoll zu optimieren.
+**The ordering was wrong.** Thirty issues, instruments and hypotheses first, and the decoder
+never. The question "where is the steno model" belonged on day one, not day five.
 
 ---
 
-## Anhang: Zustand des Arbeitsverzeichnisses
+## 9. What to build next
 
-Das lokale Arbeitsverzeichnis ist **5 Commits hinter `origin/main`** und trägt
-uncommittete Änderungen an `scripts/guided_calibration.py` — dieselbe Datei, an der
-beide Agenten gearbeitet haben. Beide Agenten arbeiten im selben Verzeichnis; das ist
-die Ursache der fehlgeschlagenen Pulls und der doppelten Arbeit.
+A steno decoder: a Plover steno table over the sector vectors, runnable against the measured
+63 strokes. No further measurement, no tablet. The output will be wrong — 47.6 % does not
+make readable text — but it will show whether the principle holds, and today that is unknown.
 
-**Vor weiterer Arbeit:** Änderungen committen oder stashen, dann `git pull --rebase`,
-dann `scripts/guided_calibration.py` von Hand zusammenführen.
+Only once text exists does it make sense to optimise accuracy, undo and tempo.
+
+---
+
+## Appendix: state of the working directory
+
+The local working tree is **5 commits behind `origin/main`** and carries uncommitted changes
+to `scripts/guided_calibration.py` — the same file both agents worked on. Both agents operate
+in the same directory; that is the cause of the failed pulls and the duplicated work.
+
+**Before further work:** commit or stash, then `git pull --rebase`, then merge
+`scripts/guided_calibration.py` by hand.
