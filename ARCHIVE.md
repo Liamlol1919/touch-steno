@@ -111,6 +111,8 @@ steno profile mapping, local replay, and measurement instruments. `commindv2` is
 may be asserted. See [INTEGRATION_TARGETS.md](INTEGRATION_TARGETS.md) for the integration
 boundary and evidence limits.
 
+[INTEGRATION_CONTRACT_V1.md](INTEGRATION_CONTRACT_V1.md) is the authoritative event contract.
+
 ## Innovation branch registry
 
 The following four branches are research records, not silently implemented features:

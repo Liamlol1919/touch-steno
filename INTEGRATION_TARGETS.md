@@ -69,44 +69,24 @@ Ownership is one-way: touch-steno produces the contracted event and commindv2 co
 A consumer-side policy, UI action, or graph mutation never causes the source to reinterpret or
 re-export raw contacts.
 
-## Historical event contract sketch (superseded as design only)
+## Event contract
 
-The following loose sketch is retained as prior history. It was never a protocol
-implementation or a promise that either external repository exposes it.
-`INTEGRATION_CONTRACT_V1.md` now supersedes it **only as the closed `DESIGN` proposal**
-for a process-local `hello` and ordered `key`/`nack`/`reset` contract. The proposal is
-not current runtime behavior in this project or either external target.
+[`INTEGRATION_CONTRACT_V1.md`](INTEGRATION_CONTRACT_V1.md) is the single definition of the
+v1 event schema. The boundary carries only contract-permitted process-local negotiation
+and ordered key, NACK, and RESET events; it must never carry raw contact data, notation,
+masks, or text synthesized from a NACK.
 
-```text
-EnglishStenoKeyEvent {
-  contract_version: string
-  event_id: opaque process-local identifier
-  sequence: monotonic integer
-  side: "left" | "right" | "bilateral"
-  stroke: canonical English steno key-event representation
-  state: "key" | "nack"
-  source: "touch-steno"
-}
-```
+## Failure semantics
 
-Required interpretation:
-
-- The transport is **versioned** and **process-local**; it is not a network publication, raw
-  contact stream, or a second device connection.
-- The event is **side-specific** where side is available. A bilateral representation must
-  preserve the side relationship rather than flattening away which side produced a key.
-- `state: "nack"` is an explicit source event and must not be silently converted to a key.
-- Sequence and event identity are for ordering/deduplication in the consumer; they do not expose
-  device identity, tracking IDs, coordinates, pressure, or contact lifetimes.
-- The exact v1 representation and fail-closed rules are now specified in
-  `INTEGRATION_CONTRACT_V1.md`, but remain unimplemented design rather than runtime
-  compatibility.
+Failures use only the contract's closed NACK reasons: `distance_gt_1`, `nearest_tie`,
+`all_zero`, `invalid_observation`, and `ambiguous_attribution`. A consumer must never
+synthesize text from a NACK, and silence is a valid outcome.
 
 ## Privacy boundary
 
 Raw contact frames, coordinates, areas, tracking IDs, device paths, calibration data, and
 contact-lifetime details remain inside touch-steno. Only records permitted by the strict
-allowlist in `INTEGRATION_CONTRACT_V1.md` may cross the proposed process-local boundary.
+allowlist in `INTEGRATION_CONTRACT_V1.md` may cross the process-local boundary.
 No reference target is authorized to collect raw contacts, replay private captures, or infer
 anatomical identity. Any future event extension requires an explicit privacy review and a
 versioned compatibility decision.
@@ -118,7 +98,7 @@ layout authority. It must not be copied into a new runtime, silently treated as 
 layout, or used to resolve a mismatch between the source decoder and the application. In
 particular, a self-consistent archived file cannot prove that a second consumer is using the
 same keyboard, segmentation, or decoder semantics. `INTEGRATION_CONTRACT_V1.md` names
-the source-owned profile/layout fingerprint as the proposal's source of truth and rejects
+the source-owned profile/layout fingerprint as the contract's source of truth and rejects
 stale-layout ambiguity rather than adding a compatibility shim.
 
 ## No-implementation policy

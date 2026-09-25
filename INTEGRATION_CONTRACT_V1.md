@@ -1,16 +1,22 @@
-# English Steno Process-Local Contract V1 Proposal
+# Frozen English Steno Process-Local Contract V1
 
-**Artifact status:** `DESIGN` proposal only  
-**Proposed contract identifier:** `touchsteno.english-steno-key-event.v1`  
+**Status:** `FROZEN`  
+**Contract identifier:** `touchsteno.english-steno-key-event.v1`  
 **Scope:** one producer process to one local consumer process; live delivery only  
-**Current implementation status:** not implemented by `nextgen/` or any integration target
+**Current implementation status:** `nextgen/boundary.py` is being conformed in the current cycle
 
-This document closes the proposed wire shape and rejection behavior for a future
-process-local boundary between a touch-steno source and an application consumer. It
-supersedes the earlier loose event sketch in `INTEGRATION_TARGETS.md` as a **design
-proposal only**. It does not describe current runtime behavior, does not modify an
-external repository, and does not claim that the current `nextgen/` prototype already
-speaks this contract.
+## Status and implementation
+
+This document, not the earlier seven-field sketch in `INTEGRATION_TARGETS.md` and not
+prose in any other document, is the single definition of the v1 event schema.
+`nextgen/boundary.py` is being conformed to this document in the current cycle. Until
+that conformance lands, the code and this document may disagree; this document is
+authoritative.
+
+This document closes the wire shape and rejection behavior for the process-local
+boundary between a touch-steno source and an application consumer. It does not describe
+current runtime behavior, does not modify an external repository, and does not claim that
+the current `nextgen/` prototype already speaks this contract.
 
 ## Evidence boundary
 
@@ -284,6 +290,9 @@ unknown fields are rejected even if their names appear harmless.
 
 Compatibility is semantic and prospective, not implementation equivalence:
 
+The earlier seven-field `en-steno-key/1` implementation is superseded by this contract and
+must not be resurrected.
+
 - The prototype's 32 canonical key tuples can be copied exactly into future v1 `key`
   payloads; the consumer must preserve the side-specific labels.
 - Prototype distance 0 and unique distance 1 map to `distance` 0/1 and the corresponding
@@ -317,5 +326,5 @@ without device access:
 8. proof that the current prototype is adapted rather than silently accepted as the
    v1 envelope.
 
-Until a separately authorized implementation supplies such evidence, this matrix remains
-`DESIGN` and all external integration targets remain `REFERENCE_ONLY`.
+This matrix does not itself establish implementation conformance; until conformance evidence
+lands, all external integration targets remain `REFERENCE_ONLY`.
