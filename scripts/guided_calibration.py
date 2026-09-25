@@ -92,13 +92,21 @@ def build_tasks(args) -> list[dict]:
                           "events": [round(i / rate, 6) for i in range(n)],
                           "event_provenance": "expected_cue_schedule"})
     elif args.task == "sectors":
+        r = getattr(args, "radius_mm", 0.0)
         for rep in range(args.reps):
             order = SECTORS_8 if rep % 2 == 0 else tuple(reversed(SECTORS_8))
             for name in order:
-                tasks.append({"label": f"sector_{name}", "cue": f"THUMB -> {name}",
+                # The cue must state HOW FAR to move, not just where. Issue #17 is a
+                # 12 mm vs 20 mm decision, and the task previously offered no way to
+                # constrain the excursion, so the two conditions were not runnable.
+                cue = f"THUMB -> {name}"
+                if r:
+                    cue += f"  ({r:.0f} mm out, back to centre)"
+                tasks.append({"label": f"sector_{name}", "cue": cue,
                               "seconds": args.sector_seconds, "sector": name,
                               "sector_angle_deg": SECTOR_ANGLE[name],
-                              "axis": name in ("N", "E", "S", "W")})
+                              "axis": name in ("N", "E", "S", "W"),
+                              "radius_mm": r or None})
     elif args.task == "chord":
         for rep in range(args.reps):
             tasks.append({"label": "chord_both_thumbs", "cue": "BOTH THUMBS",
@@ -235,6 +243,10 @@ def main() -> int:
     ap.add_argument("--rates", type=float, nargs="+",
                     default=[1.0, 2.0, 3.0, 4.0, 5.0])
     ap.add_argument("--sector-seconds", type=float, default=1.5)
+    ap.add_argument("--radius-mm", type=float, default=0.0,
+                    help="target excursion for --task sectors, stated in the cue. "
+                         "Issue #17 is a 12 vs 20 mm decision; without this the two "
+                         "conditions were not distinguishable.")
     ap.add_argument("--palm-seconds", type=float, default=60.0)
     ap.add_argument("--chord-seconds", type=float, default=1.5)
     ap.add_argument("--reps", type=int, default=4)
