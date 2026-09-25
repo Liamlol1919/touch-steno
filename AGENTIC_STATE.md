@@ -1,13 +1,14 @@
 # Agentic State Ledger
 
 **Loop:** 10× autonomous product-engineering meta-plan  
-**Current phase:** 3 — Frozen `SYNTH-BRANCH-1` comparison complete; redesign/hold
+**Current phase:** 3 — `SYNTH-BRANCH-1` post-failure audit complete; comparator repair precedes TSF
 **Evidence class of current product slice:** `IMPLEMENTED`
 **Active candidate:** Clean English steno transport plus offline contract validator
-**Promoted offline research branch:** None; no branch is promoted to product
-**Rejected/hold branches:** Contact Field representation rejected as current primary, pending redesign/hold; FCPT current selectable-thumb primitive rejected, arithmetic only
-**Open falsification test:** Contact Field redesign must declare a fresh representation and evidence boundary before any new comparator
-**Next executable action:** Hold and redesign the Contact Field representation if justified; do not inflate claims, retune to erase failed gates, or promote Elastic Word from synthetic control/fallback status
+**Promoted offline research branch:** None; no branch is promoted to product or hardware
+**Single next research branch:** Temporal Set-Flow (TSF), `DESIGN`, research-only, not implemented
+**Rejected/control/hold branches:** Current Contact Field implementation rejected; Elastic Word control/fallback; FCPT selectable-thumb primitive rejected; RCI/SOS later comparators; dwell/topology/raw-field hold/prerequisite
+**Open falsification test:** Test 0 must repair the scientific comparator before TSF implementation
+**Next executable action:** Repair Test 0: isolate decisions from labels/null flags, prove always-positive null failure, use independent count-matched generators, use train/calibration/test properly, and report clustered confidence intervals
 
 ## Decisions
 
@@ -38,11 +39,16 @@ unimplemented.
 - **Simplex-10:** retain as the **IMPLEMENTED PROTOTYPE** product baseline. Its next gate is
   real anatomy/identity/false-commit and held-out chord evidence, plus a frozen profile
   identifier and layout fingerprint before any adapter.
-The completed frozen `SYNTH-BRANCH-1` run supersedes the earlier static comparison. Its exact results and gate evaluation are recorded in `SYNTH_BRANCH_1_RESULTS.md`.
 
-- **Contact-field:** **REJECTED AS CURRENT PRIMARY REPRESENTATION; REDESIGN/HOLD.** The frozen run reports macro recall `0.585`, coverage `0.8`, wrong-commit rate `0.28`, conditional accepted-event error `0.35`, null false-commit upper95 `0.013347160654775625`, and nuisance recall `0.9625` clean, `0.7625` mild, `0.3375` moderate, and `0.0` severe. It clears basic discriminability but fails the wrong-commit/accepted-error and nuisance requirements; no hold label overrides those failed gates.
-- **Word-as-event / Elastic Word:** **SYNTHETIC CONTROL/FALLBACK / HOLD.** The frozen comparator reports macro recall `1.0`, coverage `0.8888888888888888`, wrong-commit rate `0.0`, conditional accepted-event error `0.0`, and nuisance recall `1.0` in every stratum. The reported null upper95 is `0.013347160654775625`; regardless of that bound, the result does not establish anonymous-contact segmentation, end-to-end event construction, correction, or product readiness.
-- **FCPT:** **CURRENT SELECTABLE-THUMB PRIMITIVE REJECTED; ARITHMETIC HELD.** The frozen run has 27 modeled-cost settings and `recognition_metrics=null`. Modeled cost is not recognition accuracy, hardware evidence, or human evidence.
+`POST_FAILURE_BRANCH_DECISION.md` is the frozen post-failure authority. It records that `SYNTH-BRANCH-1` is structurally audited and non-promotional while preserving its exact metrics.
+
+- **Contact-field:** **CURRENT IMPLEMENTATION REJECTED.** The frozen run reports macro recall `0.585`, coverage `0.8`, wrong-commit `0.28`, conditional accepted error `0.35`, null upper95 `0.013347160654775625`, and nuisance recall `0.9625/0.7625/0.3375/0.0`. Wrong-commit/error and nuisance failures are valid rejection evidence. Null safety is not credited because `expected_output is None` forced abstention, and class-count parity leaked labels. The audit does not prove every redesign impossible.
+- **Word-as-event / Elastic Word:** **SYNTHETIC CONTROL/FALLBACK / HOLD; NON-PROMOTIONAL.** The exact run reports macro recall `1.0`, lower95 `0.9983118898757506`, coverage `0.8888888888888888`, error rates `0.0`, null upper95 `0.013347160654775625`, and all-stratum recall `1.0`. It is not safety/generalization/severe-nuisance evidence: nulls were forced, splits shared generators, calibration was unused, one exemplar trained each class, and severe insertion was a `0.0001`-unit near-duplicate. Anonymous path construction remains absent.
+- **Temporal Set-Flow (TSF):** **SINGLE NEXT RESEARCH BRANCH; `DESIGN`, RESEARCH-ONLY, NOT IMPLEMENTED.** It encodes ordered non-rigid whole-field deformation after ephemeral adjacent-set assignment and rigid nuisance removal. It is not static Contact Field, a selected-finger trajectory, or Elastic Word. Test 0 comparator repair precedes implementation; no hardware or product claim follows.
+- **RCI and SOS:** later comparators only, not the next branch. **Dwell, topology, and raw-field:** hold/prerequisite for independent arming, graph stability, and target-interface observability respectively.
+- **FCPT:** **CURRENT SELECTABLE-THUMB PRIMITIVE REJECTED; ARITHMETIC HELD.** The frozen run has 27 modeled-cost settings and `recognition_metrics=null`; modeled cost is not recognition or hardware evidence.
+
+The repaired harness must not pass labels, expected output, null flags, split/nuisance metadata, slot/TID, or class information into recognizer decisions. It must prove an always-positive recognizer fails the null gate, use independently implemented count-matched train/calibration/test generator families, fit only on train, select only on calibration, leave test untouched, and use session-clustered confidence intervals. Existing strict lifecycle, timestamp-gap, fresh-epoch, duplicate/replay, NACK/reset, restart, and privacy allowlist requirements remain mandatory; raw geometry and branch state cannot cross the event boundary.
 
 No branch is promoted to product. Synthetic comparator results are not hardware, human, WPM, correction, or text-accuracy evidence.
 
