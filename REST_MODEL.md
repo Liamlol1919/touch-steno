@@ -117,3 +117,7 @@ The artifact can also accept a caller-supplied `gesture_coverage` mapping keyed 
 `(velocity_mm_s, persistence_frames)`. If supplied, selection requires both rest-clean and
 the requested minimum gesture coverage; without it, `selection_basis` is explicitly
 `rest_clean_only` and the result must not be read as a full 150–350 ms envelope validation.
+The artifact also records `min_gesture_coverage`; replay reuses that threshold instead of
+silently falling back to the default. Older artifacts without the field retain the legacy
+`1.0` replay default. This preserves the selection policy across replay without turning
+the synthetic envelope into a hardware measurement.

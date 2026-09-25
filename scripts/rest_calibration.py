@@ -128,6 +128,8 @@ def calibrate_user(rest_sources, mover_sources=(), *, user_label="local",
         "source_sha256": {str(path): file_sha256(path) for path in sources},
         "windows": list(windows), "min_frames": min_frames,
         "gesture_coverage_source": "caller" if gesture_coverage is not None else None,
+        "min_gesture_coverage": (min_gesture_coverage
+                                 if gesture_coverage is not None else None),
         "selection_basis": "rest_clean_and_gesture_coverage" if gesture_coverage is not None
                        else "rest_clean_only",
         "rest_covariance": _rest_covariance(rest_sources, min_frames),
@@ -145,6 +147,7 @@ def replay_sweep(artifact: dict, rest_sources, mover_sources=()) -> dict:
                 for candidate in artifact["candidates"] for row in candidate["rows"]
                 if row.get("gesture_coverage") is not None}
     current = calibrate_user(rest_sources, mover_sources,
+                            min_gesture_coverage=artifact.get("min_gesture_coverage", 1.0),
                             windows=artifact["windows"],
                             min_frames=artifact["min_frames"],
                             gesture_coverage=coverage or None)

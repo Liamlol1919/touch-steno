@@ -48,6 +48,28 @@ class TestRestCalibration(unittest.TestCase):
         self.assertTrue(any(row["gesture_coverage"] == 0.7
                             for candidate in artifact["candidates"]
                             for row in candidate["rows"]))
+    def test_replay_preserves_gesture_coverage_threshold(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            with kinematics.Recorder(root / "rest.jsonl") as recorder:
+                for i in range(300):
+                    recorder.frame(i * 0.011,
+                                   {1: (10.0 + (0.1 if i % 2 else 0.0), 10.0, 2.0)})
+            with kinematics.Recorder(root / "mover.jsonl") as recorder:
+                for i in range(300):
+                    recorder.frame(i * 0.011,
+                                   {1: (10.0 + 0.02 * i * i, 10.0, 2.0)})
+            artifact = rest_calibration.calibrate_user(
+                [root / "rest.jsonl"], [root / "mover.jsonl"], min_frames=50,
+                gesture_coverage={(40.0, 8): 0.7, (60.0, 5): 0.9},
+                min_gesture_coverage=0.8)
+            replay = rest_calibration.replay_sweep(
+                artifact, [root / "rest.jsonl"], [root / "mover.jsonl"])
+        self.assertEqual(artifact["min_gesture_coverage"], 0.8)
+        self.assertEqual(artifact["selected"]["velocity_mm_s"], 60.0)
+        self.assertEqual(artifact["selected"]["persistence_frames"], 5)
+        self.assertEqual(replay["selected"], artifact["selected"])
+
 
     def test_missing_coverage_is_not_silently_promoted(self):
         with tempfile.TemporaryDirectory() as td:

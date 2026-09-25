@@ -196,3 +196,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Added strict JSONL validation, median/P95/rate reporting and protocol documentation.
 - [x] No human correction-throughput result or WPM extrapolation was fabricated.
 - [ ] A real multi-user correction-throughput capture remains outstanding.
+
+## Iteration 21 — 2026-09-25
+
+- [x] Persisted `min_gesture_coverage` in rest-calibration artifacts.
+- [x] Made `replay_sweep()` reuse the recorded threshold; legacy artifacts default to `1.0`.
+- [x] Added a behavioral test proving a below-threshold gesture candidate is excluded and replay preserves the selected candidate.
+- [ ] Real user-specific gesture-coverage measurements remain outstanding; no hardware result was added.
