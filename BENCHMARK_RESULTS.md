@@ -130,3 +130,64 @@ Run the same evaluation on a **cued real session** (`guided_calibration.py --tas
 then `evaluate_session.py`). That converts every number above from "validated on calibrated
 synthetic data" to "measured on the device", and it is the first thing worth doing when the
 tablet is connected again.
+
+
+## Addendum (06:20) — the direction-accuracy discrepancy is explained, and so were three metric bugs
+
+The open question from §2 — "sector accuracy 0.19–1.0 by cell, unexplained" — is now
+resolved, and the resolution is a design requirement rather than a mystery.
+
+### Root cause: gestures need a return phase, and it must be sub-gate
+
+The two generators differed in one respect that turned out to decide everything: whether each
+gesture starts from a common reference point. On a 20 mm compass the neighbouring sector
+targets are only **15.3 mm apart**, so without a return the first frames of a stroke are
+dominated by *repositioning*, not by the intended direction. Computed over the 8-sector
+sequence:
+
+| gesture start | direction error |
+|---|---:|
+| from the previous target | **a constant 67.5°** (7 of 8 sectors wrong, 1/8 correct) |
+| from the common centre | **0.0°** (8/8 correct) |
+
+A 67.5° error is 1.5 sectors — which is exactly the failure the sweep was showing. So the
+return phase is not a nicety: **without it the direction estimate is systematically rotated and
+the sector classifier collapses.** This is independent of, and stronger than, the segmentation
+argument in §1.
+
+The return must also stay **below the detection gate**, otherwise it triggers its own event.
+Modelled at 30 mm/s against the 40 mm/s gate, a 20 mm return takes 0.67 s — affordable at low
+rates, and the reason long gestures become unreliable (below).
+
+### Corrected operating envelope
+
+`scripts/envelope_sweep.py`, ≥8 cued gestures per cell, decoded sector compared to truth:
+
+| gesture length | detection rate | direction accuracy | idle false events |
+|---|---|---|---|
+| **100 ms** | **0 % at 1–6 Hz** | – | 0 |
+| **150–350 ms** | **100 % at 1–6 Hz** | **100 %** | 0 |
+| **500 ms** | 75–89 % | 100 % of detected | 0 |
+
+Final statement of the envelope, superseding §0 and §1:
+
+- minimum detectable gesture: **above 100 ms**, not the nominal 88 ms
+- working range: **150–350 ms**, valid to **6 Hz**
+- **there is no measured 3 Hz ceiling** and no measured 5.5 events/s ceiling
+- long gestures (500 ms) lose events, not accuracy
+- a **sub-gate return to a common centre is mandatory** for direction to be classifiable
+
+### Three metric bugs, all in the evaluation harness
+
+Every one of them produced a confident, wrong number, and none was caught by code review or by
+the pipeline audit:
+
+1. **event counting per block** instead of per gesture — invented the "3 Hz collapse" (§0).
+2. **closed label intervals** — shifted ground truth by one block, faking a uniform 45° rotation.
+3. **comparing the event's block label to the gesture's label** — trivially true, so the
+   reported "direction accuracy" never looked at the decoded direction at all. The real error
+   was 2–20°, i.e. every sector inside its 22.5° half-width.
+
+The pattern is the finding: the *harness* is the weakest link in this project, and it has now
+produced three wrong headlines in a row. It needs its own tests, and the rule for the rest of
+this work is: **a number is not a finding until the metric that produced it has a test.**

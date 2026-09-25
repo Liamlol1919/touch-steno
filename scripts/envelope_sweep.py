@@ -44,7 +44,7 @@ VEC = {name: (math.cos(math.radians(i * 45)), -math.sin(math.radians(i * 45)))
 DETECTOR_WINDOW_S = intent_filter.MIN_RUN_FRAMES * DT
 
 
-def build(length_s, rate_hz, seed, rest_s=1.5):
+def build(length_s, rate_hz, seed, rest_s=1.5, return_mm_s=30.0):
     """Rest block, then evenly spaced cued sector strokes, contacts continuous."""
     rng = random.Random(seed)
     frames, manifest = [], []
@@ -75,6 +75,11 @@ def build(length_s, rate_hz, seed, rest_s=1.5):
     for k in range(n_gest):
         t0 = t
         target = VEC[SECTORS[k % 8]]
+        # RETURN PHASE, as real sub-gate motion rather than a teleport. Consecutive sector
+        # targets are only 15.3mm apart on a 20mm arc, so without a return the repositioning
+        # vector is rotated a constant 67.5deg from the intended direction and the sector
+        # estimate collapses to 1/8 correct (measured). The return speed is below the 40mm/s
+        # gate so it does not itself trigger - which is what makes the return affordable.
         sx, sy = x, y
         for j in range(n_len):
             f = (j + 1) / n_len
@@ -85,7 +90,14 @@ def build(length_s, rate_hz, seed, rest_s=1.5):
         manifest.append({"t_start": t0, "t_end": t,
                          "label": f"sector_{SECTORS[k % 8]}",
                          "sector": SECTORS[k % 8]})
-        gap = period - length_s
+        # sub-gate return to the centre, then drift noise for the remaining gap
+        ret_n = int(math.hypot(x - sx, y - sy) / (return_mm_s * DT)) + 1
+        for j in range(ret_n):
+            f = (j + 1) / ret_n
+            x = x + (0.0 - x) * (1 / ret_n) + rng.gauss(0, 0.03)
+            y = y + (0.0 - y) * (1 / ret_n) + rng.gauss(0, 0.03)
+            push()
+        gap = period - length_s - ret_n * DT
         for _ in range(max(0, int(gap / DT))):
             x += rng.gauss(0, 0.05)
             y += rng.gauss(0, 0.05)
@@ -126,8 +138,12 @@ def measure(frames, manifest, tmp: Path) -> dict:
         if hit is None:
             continue
         matched.append(g)
-        lab = label_at(manifest, hit["t_start"]) or {}
-        if lab.get("sector") == g["sector"]:
+        # Compare the DECODED sector against the truth. The previous version compared the
+        # event's block label to the gesture's label, which is trivially true and produced a
+        # meaningless "accuracy" - the third metric bug in this project, all in the harness.
+        sec = stroke_decoder.sector_of(hit["mover_dx_mm"] or 0.0,
+                                       hit["mover_dy_mm"] or 0.0)
+        if sec == g["sector"]:
             correct += 1
     detected = len(matched)
     sector_ev = [e for e in evs
