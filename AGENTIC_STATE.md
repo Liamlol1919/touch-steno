@@ -1,14 +1,13 @@
 # Agentic State Ledger
 
 **Loop:** 10× autonomous product-engineering meta-plan  
-**Current phase:** 3 — Innovation branch prototypes
+**Current phase:** 3 — Offline branch comparison complete; synthetic kill-gate preparation
 **Evidence class of current product slice:** `IMPLEMENTED`
 **Active candidate:** Clean English steno transport plus offline contract validator
-**Last promoted candidate:** English steno transport plus offline contract validator in `nextgen/`
-**Last rejected candidate:** Legacy sector-fitting as the product core
-**Open falsification test:** Real PTH-660 anatomy, identity, and false-commit study
-**Next executable action:** Red-team the three offline branch prototypes against a shared
-held-out synthetic contract; do not connect, vendor, or modify any external repository
+**Promoted offline research branch:** Contact-field representation — research priority only, not human-validated
+**Rejected/hold branch:** FCPT current selectable-thumb primitive rejected; retain layout arithmetic only on hold
+**Open falsification test:** Frozen `SYNTH-BRANCH-1` held-out synthetic comparison
+**Next executable action:** Create the frozen `SYNTH-BRANCH-1` manifest and offline synthetic harness, then run the declared Contact Field, Elastic Word control, and FCPT arithmetic gates without device or external-repository access
 
 ## Decisions
 
@@ -36,17 +35,29 @@ unimplemented.
 
 ## Innovation branch decisions
 
-- **Simplex-10:** retain as the **IMPLEMENTED PROTOTYPE** baseline. Its next gate is
+- **Simplex-10:** retain as the **IMPLEMENTED PROTOTYPE** product baseline. Its next gate is
   real anatomy/identity/false-commit and held-out chord evidence, plus a frozen profile
   identifier and layout fingerprint before any adapter.
-- **FCPT:** **OFFLINE PROTOTYPE / HOLD.** The bounded target-cost model is executable, but
-  coefficients, language compiler, anatomy, and human timing remain unvalidated.
-- **Word-as-event:** **OFFLINE PROTOTYPE / HOLD.** Normalization and abstention are
-  executable on synthetic trajectories; segmentation, held-out words, and correction cost
-  remain unvalidated.
-- **Contact-field:** **OFFLINE PROTOTYPE / HOLD; current legacy scripts rejected as
-  evidence.** The corrected descriptor handles variable cardinality and nuisance transforms;
-  separability, false commits, and cross-session robustness remain unvalidated.
+- **Contact-field:** **PRIMARY OFFLINE RESEARCH CANDIDATE / HOLD.** Its red-team priority
+  is 61/100 because the representation is aligned with anonymous contact input. It is
+  still only an offline geometry utility: cardinality, segmentation, timing, palm/rest,
+  confidence, correction, and cross-session behavior are unvalidated. Advance only through
+  the frozen `SYNTH-BRANCH-1` discriminability and false-commit gates.
+- **Word-as-event:** **CONTROL/FALLBACK OFFLINE RESEARCH BRANCH / HOLD.** Its red-team
+  priority is 59/100. Synthetic path normalization, bounded scoring, and per-template
+  abstention are executable, but segmentation, dictionary/OOD decoding, held-out words,
+  and correction are absent. It cannot become an end-to-end fallback until an
+  anonymous-contact-to-single-writer-path constructor exists.
+- **FCPT:** **CURRENT SELECTABLE-THUMB PRIMITIVE REJECTED; ARITHMETIC HELD.** Stable
+  single-contact attribution is a non-compensable veto under the recorded
+  0-key-event/24-ambiguous-NACK capture condition. Retain corpus/layout arithmetic only
+  behind exact exhaustive, greedy-counterexample, held-out 5%, 24/27 parameter-grid, and
+  bootstrap-stability gates. Passing arithmetic gates does not revive the primitive.
+
+The exact weighted scorecard, hard vetoes, implemented/missing layers, privacy/anatomy/
+timing risks, and kill tests are frozen in `BRANCH_REDTEAM.md`. All branch conclusions
+remain offline evidence and make no hardware-validity, human-performance, WPM,
+throughput, correction, or text-accuracy claim.
 
 ## Reference integration targets
 
