@@ -87,11 +87,12 @@ WHAT_TO_DO = {
 
 
 def cue(text: str, seconds: float = 1.0) -> None:
-    """Show the cue, then tick the remaining time down as plain lines.
+    """Show the cue and tick the remaining time down as plain lines.
 
-    No carriage returns. Redrawing in place depends on the terminal honouring \r, and
-    when it does not the session drowns in duplicate cue text - which is exactly what
-    happened on the operator's screen. Plain lines are identical everywhere.
+    Kein \r, unter keinen Umstaenden. Ein Redraw im Place erzeugt auf Terminals,
+    die Carriage Return nicht als Ueberschreiben behandeln, zehn bis vierzig
+    identische Zeilen pro Sekunde. Genau das ist auf dem Terminal des Nutzers
+    passiert. Eine Zeile pro Sekunde ist auf jedem Terminal identisch.
     """
     print(f"\n  >>> {text}")
     end_t = time.monotonic() + seconds
