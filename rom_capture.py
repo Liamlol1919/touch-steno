@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import pathlib
 import statistics
 import sys
 import time
@@ -510,65 +511,77 @@ def run_device(args) -> list[StepResult]:
     return results
 
 
-def run_manual(args) -> list[StepResult]:
-    """No device: ask the same questions and synthesise the samples.
+def _ask_numbers(prompt: str, defaults: list[float], n: int) -> list[float]:
+    """One prompt, n numbers separated by spaces or commas, defaults on Enter."""
+    while True:
+        raw = _press(f"{prompt} [{' '.join(f'{d:g}' for d in defaults)}] ")
+        if not raw:
+            return list(defaults)
+        parts = [p for p in raw.replace(",", " ").split() if p]
+        if len(parts) == n:
+            try:
+                return [float(x) for x in parts]
+            except ValueError:
+                pass
+        print(f"  bitte {n} Zahlen, z.B. {' '.join(f'{d:g}' for d in defaults)}")
 
-    The numbers the operator supplies are the measurement; the derived profile is
-    identical in shape to the device run so both feed the optimiser the same way.
-    """
-    print("Manual mode. Answer with the numbers you measured (see the sheet).")
-    rest = (float(_press("Thumb rest position, x mm from the left edge: ") or 128),
-            float(_press("Thumb rest position, y mm from the bottom edge: ") or 9))
-    comfort = float(_press("Comfortable thumb reach from that point, mm: ") or 50)
-    maxr = float(_press("Absolute maximum thumb reach, mm: ") or 55)
-    fan0 = float(_press("Fan start angle, deg (0 = towards the right edge, 90 = up): ") or 0)
-    fan1 = float(_press("Fan end angle, deg: ") or 112)
-    pen = _press("Sideways sweep vs radial extension: same (1) / harder (2) / "
-                 "much harder (3): ") or "2"
-    idx_reach = float(_press("Comfortable index reach up the pad, mm: ") or 85)
-    idx_max = float(_press("Absolute maximum index reach up the pad, mm: ") or 95)
-    idx_spread = float(_press("Index sideways spread, mm: ") or 52)
-    rating = _ask_rating()
+
+def run_manual(args) -> tuple[list[StepResult], dict, dict]:
+    """No device: five questions, then the same profile the device run produces."""
+    print(__doc__.strip().splitlines()[0])
+    print("Leg die rechte Hand flach aufs Pad, Ferse frei, Daumen entspannt.\n")
+    rest = _ask_numbers("1) Daumen-Ruhelage  x y   (mm vom linken / unteren Rand):",
+                        [128.0, 9.0], 2)
+    comfort, maxr = _ask_numbers(
+        "2) Daumenreichweite  komfortabel maximal   (mm ab der Ruhelage):",
+        [58.0, 64.0], 2)
+    if maxr < comfort:
+        maxr = comfort
+    fan0, fan1 = _ask_numbers(
+        "3) Fächer  von bis   (Grad, 0 = zum rechten Rand, 90 = nach oben):",
+        [0.0, 100.0], 2)
+    idx = _ask_numbers(
+        "4) Zeigefinger  komfortabel maximal spreizung   (mm):",
+        [88.0, 100.0, 52.0], 3)
+    pen = _press("5) Seitlicher Sweep: 1 = so schnell wie radial, 2 = schwerer, "
+                 "3 = viel schwerer  [2] ") or "2"
+    print()
+    rest_pt = (rest[0], rest[1])
     results = []
     mk = StepResult("rest", "rest")
-    mk.points = [(rest[0], rest[1], 0.0)]
-    mk.rating = rating
+    mk.points = [(rest_pt[0], rest_pt[1], 0.0)]
+    mk.rating = _ask_rating()
     results.append(mk)
-    for name, kind, val in (("comfort_radial", "sweep", comfort), ("max_radial", "sweep", maxr)):
-        r = StepResult(name, kind)
-        r.contacts = [Contact(rest[0] + val * math.cos(math.radians(45)),
-                               rest[1] + val * math.sin(math.radians(45)),
+    for name, val in (("comfort_radial", comfort), ("max_radial", maxr)):
+        r = StepResult(name, "sweep")
+        r.contacts = [Contact(rest_pt[0] + val * math.cos(math.radians(45)),
+                               rest_pt[1] + val * math.sin(math.radians(45)),
                                0.6, 2 * val, 4.0, True)]
         r.points = [(c.x, c.y, 0.0) for c in r.contacts]
         results.append(r)
-    # the fan sweep is synthesised from the operator's own fan angles, so the ring
-    # solver sees the fan that will actually be built
-    for name, kind, val, dur in (("comfort_fan", "sweep", comfort, 1.0),
-                                 ("max_fan", "sweep", maxr, 1.0)):
-        r = StepResult(name, kind)
+    # the fan sweep is synthesised at the four sector centres the builder will use
+    for name, val in (("comfort_fan", comfort), ("max_fan", maxr)):
+        r = StepResult(name, "sweep")
         for k in range(4):
             deg = fan0 + (k + 0.5) * (fan1 - fan0) / 4.0
             rad = math.radians(deg)
-            r.contacts.append(Contact(rest[0] + val * math.cos(rad),
-                                      rest[1] + val * math.sin(rad),
-                                      dur, 2.0 * val * (fan1 - fan0) / 180.0, 4.0, True))
+            r.contacts.append(Contact(rest_pt[0] + val * math.cos(rad),
+                                      rest_pt[1] + val * math.sin(rad),
+                                      1.0, 2.0 * val * (fan1 - fan0) / 180.0, 4.0, True))
         r.points = [(c.x, c.y, 0.0) for c in r.contacts]
         results.append(r)
-    fr = StepResult("index_reach", "sweep")
-    fr.points = [(rest[0] + INDEX_OFFSET_X_MM, 6.0 + idx_reach, 0.0)]
-    fr.contacts = [Contact(fr.points[0][0], fr.points[0][1], 0.6, 2 * idx_reach, 4.0, True)]
-    results.append(fr)
-    fm = StepResult("index_max", "sweep")
-    fm.contacts = [Contact(rest[0] + INDEX_OFFSET_X_MM, 6.0 + idx_max, 0.6, 2 * idx_max, 4.0, True)]
-    results.append(fm)
-    fs = StepResult("index_spread", "sweep")
-    fs.contacts = [Contact(rest[0] + INDEX_OFFSET_X_MM, 40.0, 0.6, idx_spread, 4.0, True)]
-    results.append(fs)
-    results.append(StepResult("spokes", "spokes"))
-    results.append(StepResult("cross_centre", "sweep"))
-    results.append(StepResult("hold", "hold"))
+    for name, val, y0 in (("index_reach", idx[0], 6.0), ("index_max", idx[1], 6.0),
+                          ("index_spread", idx[2], 40.0)):
+        r = StepResult(name, "sweep")
+        p = (rest_pt[0] + INDEX_OFFSET_X_MM, y0 + (0.0 if name != "index_spread" else 34.0))
+        if name == "index_reach":
+            p = (p[0], 6.0 + idx[0])
+        r.points = [(p[0], p[1], 0.0)]
+        r.contacts = [Contact(p[0], p[1], 0.6, 2 * val, 4.0, True)]
+        results.append(r)
+    for name in ("spokes", "cross_centre", "hold"):
+        results.append(StepResult(name, name))
     prof, diag = analyse(results)
-    # the operator's own word for the sideways sweep becomes the tangential premium
     prof["thumb"]["tangential_penalty"] = {"1": 1.0, "2": 1.35, "3": 1.8}.get(pen, 1.35)
     diag["tangential_penalty"] = prof["thumb"]["tangential_penalty"]
     diag["source"] = "manual entry (no device)"
@@ -762,44 +775,111 @@ def self_test() -> int:
 # main
 # --------------------------------------------------------------------------- #
 
+REPO = "Liamlol1919/touch-steno"
+BRANCH = "main"
+PUBLISH_FILES = ["README.md", ".gitignore", "layout_optimizer.py", "rom_capture.py",
+                 "hand_profile.json", "layout.json"]
+
+
+def publish(paths: list[str], message: str) -> str:
+    """Commit files to the repository through the GitHub API, without git.
+
+    One tree, one commit, one ref update, built on whatever the remote head is at that
+    moment, so a concurrent push cannot be clobbered. Additive: files not listed are
+    left exactly as they are."""
+    import base64
+    import subprocess
+
+    def gh(*args, payload=None):
+        proc = subprocess.run(["gh", *args], capture_output=True, text=True, input=payload)
+        if proc.returncode != 0:
+            raise SystemExit(f"gh {args[:3]} failed: {proc.stderr.strip()}")
+        return proc.stdout
+
+    head = json.loads(gh("api", f"repos/{REPO}/commits/{BRANCH}"))
+    entries = []
+    for rel in paths:
+        data = pathlib.Path(rel).read_bytes()
+        blob = json.loads(gh("api", f"repos/{REPO}/git/blobs", "-X", "POST", "--input", "-",
+                             payload=json.dumps({"content": base64.b64encode(data).decode(),
+                                                 "encoding": "base64"})))
+        entries.append({"path": rel, "mode": "100644", "type": "blob", "sha": blob["sha"]})
+        print(f"  + {rel:<24} {len(data):>7} B  {blob['sha'][:10]}")
+    tree = json.loads(gh("api", f"repos/{REPO}/git/trees", "-X", "POST", "--input", "-",
+                         payload=json.dumps({"base_tree": head["commit"]["tree"]["sha"],
+                                             "tree": entries})))
+    if "sha" not in tree:
+        raise SystemExit(f"tree rejected: {tree}")
+    commit = json.loads(gh("api", f"repos/{REPO}/git/commits", "-X", "POST", "--input", "-",
+                           payload=json.dumps({"message": message, "tree": tree["sha"],
+                                               "parents": [head["sha"]]})))
+    gh("api", f"repos/{REPO}/git/refs/heads/{BRANCH}", "-X", "PATCH", "--input", "-",
+       payload=json.dumps({"sha": commit["sha"]}))
+    print(f"  -> {REPO}@{BRANCH} {commit['sha'][:10]}")
+    print(f"  -> https://github.com/{REPO}/tree/{BRANCH}")
+    return commit["sha"]
+
+
+def optimise(profile_path: Path, out_json: Path) -> int:
+    import layout_optimizer
+    return layout_optimizer.main([
+        "--hand-profile", str(profile_path), "--out", str(out_json),
+        "--iters", "120000", "--restarts", "4"])
+
+
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description="Measure your hand, write the profile, optimise the layout, publish.",
+        epilog="Just run it:  python3 rom_capture.py --publish", formatter_class=
+        argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--device", help="/dev/input/eventN of the pad (live capture)")
-    ap.add_argument("--manual", action="store_true", help="ask the questions instead")
-    ap.add_argument("--seconds", type=float, default=8.0, help="seconds per step")
+    ap.add_argument("--manual", action="store_true",
+                    help="ask the five questions instead of using a device (the default)")
+    ap.add_argument("--publish", action="store_true",
+                    help="after measuring: optimise the layout and push everything to GitHub")
+    ap.add_argument("--seconds", type=float, default=8.0, help="seconds per device step")
     ap.add_argument("--out-dir", type=Path, default=Path("messung/rom"))
+    ap.add_argument("--profile", type=Path, default=Path("hand_profile.json"),
+                    help="where the measured profile goes (published from here)")
+    ap.add_argument("--layout-out", type=Path, default=Path("layout.json"))
     ap.add_argument("--sheet", type=Path, help="also write a printable pad overlay here")
-    ap.add_argument("--raw", action="store_true", help="device already reports millimetres")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args(argv)
 
     if args.self_test:
         print("self-test:")
         return self_test()
-    if args.sheet:
+    if args.sheet and not (args.device or args.manual or args.publish):
         write_sheet(args.sheet)
-        if not (args.device or args.manual):
-            return 0
-    if not (args.device or args.manual):
-        ap.error("pick --device (live) or --manual (no hardware)")
-
-    args.out_dir.mkdir(parents=True, exist_ok=True)
-    if args.manual:
-        results, profile, diag = run_manual(args)
-    else:
+        return 0
+    if args.device:
         results = run_device(args)
         profile, diag = analyse(results)
-    prof_path = args.out_dir / "hand_profile.json"
-    prof_path.write_text(json.dumps(profile, indent=2), encoding="utf-8")
-    raw_path = args.out_dir / "rom_steps.json"
-    raw_path.write_text(json.dumps([r.to_json() for r in results], indent=2), encoding="utf-8")
-    print(f"wrote {prof_path}")
-    print(f"wrote {raw_path}")
-    if diag:
-        print_diag(diag)
-    print(f"\nuse it:  python3 layout_optimizer.py --hand-profile {prof_path}")
-    return 0
+    else:
+        results, profile, diag = run_manual(args)
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    args.profile.write_text(json.dumps(profile, indent=2), encoding="utf-8")
+    (args.out_dir / "rom_steps.json").write_text(
+        json.dumps([r.to_json() for r in results], indent=2), encoding="utf-8")
+    print(f"\nwrote {args.profile}")
+    print_diag(diag)
+    if not args.publish:
+        print(f"\nnaechster Schritt:  python3 layout_optimizer.py "
+              f"--hand-profile {args.profile}")
+        return 0
+
+    print("\n" + "=" * 66)
+    print("LAYOUT")
+    print("=" * 66)
+    rc = optimise(args.profile, args.layout_out)
+    present = [f for f in PUBLISH_FILES if pathlib.Path(f).is_file()]
+    print("\n" + "=" * 66)
+    print("PUBLISH")
+    print("=" * 66)
+    publish(present, f"Measured hand profile and the layout it produces "
+                     f"(comfort {diag['comfort_reach_mm']:g} mm, "
+                     f"fan {diag['fan_deg'][0]:.0f}-{diag['fan_deg'][1]:.0f} deg)")
+    return rc
 
 
 if __name__ == "__main__":

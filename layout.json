@@ -1,0 +1,1475 @@
+{
+  "topology": {
+    "pad_mm": [
+      224.0,
+      148.0
+    ],
+    "zones": [
+      {
+        "zid": "rt_r0_s0",
+        "digit": "rt",
+        "x": 150.65,
+        "y": 14.02,
+        "width": 10.04,
+        "ring": 0,
+        "sector": 0,
+        "reach": 23.2
+      },
+      {
+        "zid": "rt_r0_s1",
+        "digit": "rt",
+        "x": 146.41,
+        "y": 23.12,
+        "width": 10.04,
+        "ring": 0,
+        "sector": 1,
+        "reach": 23.2
+      },
+      {
+        "zid": "rt_r0_s2",
+        "digit": "rt",
+        "x": 138.71,
+        "y": 29.58,
+        "width": 10.04,
+        "ring": 0,
+        "sector": 2,
+        "reach": 23.2
+      },
+      {
+        "zid": "rt_r0_s3",
+        "digit": "rt",
+        "x": 129.01,
+        "y": 32.18,
+        "width": 10.04,
+        "ring": 0,
+        "sector": 3,
+        "reach": 23.2
+      },
+      {
+        "zid": "rt_r1_s0",
+        "digit": "rt",
+        "x": 161.98,
+        "y": 16.53,
+        "width": 11.6,
+        "ring": 1,
+        "sector": 0,
+        "reach": 34.8
+      },
+      {
+        "zid": "rt_r1_s1",
+        "digit": "rt",
+        "x": 155.61,
+        "y": 30.18,
+        "width": 11.6,
+        "ring": 1,
+        "sector": 1,
+        "reach": 34.8
+      },
+      {
+        "zid": "rt_r1_s2",
+        "digit": "rt",
+        "x": 144.07,
+        "y": 39.87,
+        "width": 11.6,
+        "ring": 1,
+        "sector": 2,
+        "reach": 34.8
+      },
+      {
+        "zid": "rt_r1_s3",
+        "digit": "rt",
+        "x": 129.52,
+        "y": 43.77,
+        "width": 11.6,
+        "ring": 1,
+        "sector": 3,
+        "reach": 34.8
+      },
+      {
+        "zid": "rt_r2_s0",
+        "digit": "rt",
+        "x": 173.3,
+        "y": 19.04,
+        "width": 11.6,
+        "ring": 2,
+        "sector": 0,
+        "reach": 46.4
+      },
+      {
+        "zid": "rt_r2_s1",
+        "digit": "rt",
+        "x": 164.81,
+        "y": 37.25,
+        "width": 11.6,
+        "ring": 2,
+        "sector": 1,
+        "reach": 46.4
+      },
+      {
+        "zid": "rt_r2_s2",
+        "digit": "rt",
+        "x": 149.43,
+        "y": 50.16,
+        "width": 11.6,
+        "ring": 2,
+        "sector": 2,
+        "reach": 46.4
+      },
+      {
+        "zid": "rt_r2_s3",
+        "digit": "rt",
+        "x": 130.02,
+        "y": 55.36,
+        "width": 11.6,
+        "ring": 2,
+        "sector": 3,
+        "reach": 46.4
+      },
+      {
+        "zid": "rt_r3_s0",
+        "digit": "rt",
+        "x": 184.63,
+        "y": 21.55,
+        "width": 11.6,
+        "ring": 3,
+        "sector": 0,
+        "reach": 58.0
+      },
+      {
+        "zid": "rt_r3_s1",
+        "digit": "rt",
+        "x": 174.01,
+        "y": 44.31,
+        "width": 11.6,
+        "ring": 3,
+        "sector": 1,
+        "reach": 58.0
+      },
+      {
+        "zid": "rt_r3_s2",
+        "digit": "rt",
+        "x": 154.78,
+        "y": 60.45,
+        "width": 11.6,
+        "ring": 3,
+        "sector": 2,
+        "reach": 58.0
+      },
+      {
+        "zid": "rt_r3_s3",
+        "digit": "rt",
+        "x": 130.53,
+        "y": 66.94,
+        "width": 11.6,
+        "ring": 3,
+        "sector": 3,
+        "reach": 58.0
+      },
+      {
+        "zid": "lt_r0_s3",
+        "digit": "lt",
+        "x": 73.35,
+        "y": 14.02,
+        "width": 10.04,
+        "ring": 0,
+        "sector": 3,
+        "reach": 23.2
+      },
+      {
+        "zid": "lt_r0_s2",
+        "digit": "lt",
+        "x": 77.59,
+        "y": 23.12,
+        "width": 10.04,
+        "ring": 0,
+        "sector": 2,
+        "reach": 23.2
+      },
+      {
+        "zid": "lt_r0_s1",
+        "digit": "lt",
+        "x": 85.29,
+        "y": 29.58,
+        "width": 10.04,
+        "ring": 0,
+        "sector": 1,
+        "reach": 23.2
+      },
+      {
+        "zid": "lt_r0_s0",
+        "digit": "lt",
+        "x": 94.99,
+        "y": 32.18,
+        "width": 10.04,
+        "ring": 0,
+        "sector": 0,
+        "reach": 23.2
+      },
+      {
+        "zid": "lt_r1_s3",
+        "digit": "lt",
+        "x": 62.02,
+        "y": 16.53,
+        "width": 11.6,
+        "ring": 1,
+        "sector": 3,
+        "reach": 34.8
+      },
+      {
+        "zid": "lt_r1_s2",
+        "digit": "lt",
+        "x": 68.39,
+        "y": 30.18,
+        "width": 11.6,
+        "ring": 1,
+        "sector": 2,
+        "reach": 34.8
+      },
+      {
+        "zid": "lt_r1_s1",
+        "digit": "lt",
+        "x": 79.93,
+        "y": 39.87,
+        "width": 11.6,
+        "ring": 1,
+        "sector": 1,
+        "reach": 34.8
+      },
+      {
+        "zid": "lt_r1_s0",
+        "digit": "lt",
+        "x": 94.48,
+        "y": 43.77,
+        "width": 11.6,
+        "ring": 1,
+        "sector": 0,
+        "reach": 34.8
+      },
+      {
+        "zid": "lt_r2_s3",
+        "digit": "lt",
+        "x": 50.7,
+        "y": 19.04,
+        "width": 11.6,
+        "ring": 2,
+        "sector": 3,
+        "reach": 46.4
+      },
+      {
+        "zid": "lt_r2_s2",
+        "digit": "lt",
+        "x": 59.19,
+        "y": 37.25,
+        "width": 11.6,
+        "ring": 2,
+        "sector": 2,
+        "reach": 46.4
+      },
+      {
+        "zid": "lt_r2_s1",
+        "digit": "lt",
+        "x": 74.57,
+        "y": 50.16,
+        "width": 11.6,
+        "ring": 2,
+        "sector": 1,
+        "reach": 46.4
+      },
+      {
+        "zid": "lt_r2_s0",
+        "digit": "lt",
+        "x": 93.98,
+        "y": 55.36,
+        "width": 11.6,
+        "ring": 2,
+        "sector": 0,
+        "reach": 46.4
+      },
+      {
+        "zid": "lt_r3_s3",
+        "digit": "lt",
+        "x": 39.37,
+        "y": 21.55,
+        "width": 11.6,
+        "ring": 3,
+        "sector": 3,
+        "reach": 58.0
+      },
+      {
+        "zid": "lt_r3_s2",
+        "digit": "lt",
+        "x": 49.99,
+        "y": 44.31,
+        "width": 11.6,
+        "ring": 3,
+        "sector": 2,
+        "reach": 58.0
+      },
+      {
+        "zid": "lt_r3_s1",
+        "digit": "lt",
+        "x": 69.22,
+        "y": 60.45,
+        "width": 11.6,
+        "ring": 3,
+        "sector": 1,
+        "reach": 58.0
+      },
+      {
+        "zid": "lt_r3_s0",
+        "digit": "lt",
+        "x": 93.47,
+        "y": 66.94,
+        "width": 11.6,
+        "ring": 3,
+        "sector": 0,
+        "reach": 58.0
+      },
+      {
+        "zid": "ri_00",
+        "digit": "ri",
+        "x": 177.0,
+        "y": 94.0,
+        "width": 34.0,
+        "ring": -1,
+        "sector": -1,
+        "reach": 89.6
+      },
+      {
+        "zid": "ri_01",
+        "digit": "ri",
+        "x": 211.0,
+        "y": 94.0,
+        "width": 34.0,
+        "ring": -1,
+        "sector": -1,
+        "reach": 89.6
+      },
+      {
+        "zid": "ri_10",
+        "digit": "ri",
+        "x": 177.0,
+        "y": 60.0,
+        "width": 34.0,
+        "ring": -1,
+        "sector": -1,
+        "reach": 56.6
+      },
+      {
+        "zid": "ri_11",
+        "digit": "ri",
+        "x": 211.0,
+        "y": 60.0,
+        "width": 34.0,
+        "ring": -1,
+        "sector": -1,
+        "reach": 56.6
+      },
+      {
+        "zid": "li_00",
+        "digit": "li",
+        "x": 13.0,
+        "y": 94.0,
+        "width": 34.0,
+        "ring": -1,
+        "sector": -1,
+        "reach": 89.6
+      },
+      {
+        "zid": "li_01",
+        "digit": "li",
+        "x": 47.0,
+        "y": 94.0,
+        "width": 34.0,
+        "ring": -1,
+        "sector": -1,
+        "reach": 89.6
+      },
+      {
+        "zid": "li_10",
+        "digit": "li",
+        "x": 13.0,
+        "y": 60.0,
+        "width": 34.0,
+        "ring": -1,
+        "sector": -1,
+        "reach": 56.6
+      },
+      {
+        "zid": "li_11",
+        "digit": "li",
+        "x": 47.0,
+        "y": 60.0,
+        "width": 34.0,
+        "ring": -1,
+        "sector": -1,
+        "reach": 56.6
+      }
+    ]
+  },
+  "assignment": {
+    "AA": "li_10",
+    "AE": "li_01",
+    "AH": "rt_r0_s1",
+    "AO": "lt_r1_s1",
+    "AW": "lt_r0_s2",
+    "AY": "li_00",
+    "B": "ri_10",
+    "CH": "lt_r3_s0",
+    "D": "rt_r2_s1",
+    "DH": "rt_r3_s1",
+    "EH": "rt_r2_s3",
+    "ER": "lt_r0_s3",
+    "EY": "lt_r2_s0",
+    "F": "lt_r0_s0",
+    "G": "ri_00",
+    "HH": "lt_r1_s2",
+    "IH": "rt_r2_s0",
+    "IY": "ri_01",
+    "JH": "rt_r3_s3",
+    "K": "lt_r2_s1",
+    "L": "lt_r1_s3",
+    "M": "li_11",
+    "N": "rt_r1_s1",
+    "NG": "rt_r2_s2",
+    "OW": "lt_r3_s3",
+    "OY": "lt_r2_s2",
+    "P": "lt_r2_s3",
+    "R": "rt_r0_s2",
+    "S": "rt_r3_s0",
+    "SH": "lt_r0_s1",
+    "T": "rt_r1_s0",
+    "TH": "lt_r3_s2",
+    "UH": "lt_r3_s1",
+    "UW": "rt_r3_s2",
+    "V": "rt_r0_s3",
+    "W": "lt_r1_s0",
+    "Y": "rt_r1_s3",
+    "Z": "ri_11",
+    "ZH": "rt_r1_s2",
+    "SPACE": "rt_r0_s0"
+  },
+  "layout": [
+    {
+      "zone": "rt_r0_s0",
+      "digit": "rt",
+      "x_mm": 150.65,
+      "y_mm": 14.02,
+      "width_mm": 10.04,
+      "ring": 0,
+      "sector": 0,
+      "symbol": "SPACE",
+      "class": "BOUNDARY",
+      "reach_mm": 23.2
+    },
+    {
+      "zone": "rt_r0_s1",
+      "digit": "rt",
+      "x_mm": 146.41,
+      "y_mm": 23.12,
+      "width_mm": 10.04,
+      "ring": 0,
+      "sector": 1,
+      "symbol": "AH",
+      "class": "VOWEL_OPEN",
+      "reach_mm": 23.2
+    },
+    {
+      "zone": "rt_r0_s2",
+      "digit": "rt",
+      "x_mm": 138.71,
+      "y_mm": 29.58,
+      "width_mm": 10.04,
+      "ring": 0,
+      "sector": 2,
+      "symbol": "R",
+      "class": "POSTALVEOLAR",
+      "reach_mm": 23.2
+    },
+    {
+      "zone": "rt_r0_s3",
+      "digit": "rt",
+      "x_mm": 129.01,
+      "y_mm": 32.18,
+      "width_mm": 10.04,
+      "ring": 0,
+      "sector": 3,
+      "symbol": "V",
+      "class": "LABIODENTAL",
+      "reach_mm": 23.2
+    },
+    {
+      "zone": "rt_r1_s0",
+      "digit": "rt",
+      "x_mm": 161.98,
+      "y_mm": 16.53,
+      "width_mm": 11.6,
+      "ring": 1,
+      "sector": 0,
+      "symbol": "T",
+      "class": "ALVEOLAR",
+      "reach_mm": 34.8
+    },
+    {
+      "zone": "rt_r1_s1",
+      "digit": "rt",
+      "x_mm": 155.61,
+      "y_mm": 30.18,
+      "width_mm": 11.6,
+      "ring": 1,
+      "sector": 1,
+      "symbol": "N",
+      "class": "ALVEOLAR",
+      "reach_mm": 34.8
+    },
+    {
+      "zone": "rt_r1_s2",
+      "digit": "rt",
+      "x_mm": 144.07,
+      "y_mm": 39.87,
+      "width_mm": 11.6,
+      "ring": 1,
+      "sector": 2,
+      "symbol": "ZH",
+      "class": "POSTALVEOLAR",
+      "reach_mm": 34.8
+    },
+    {
+      "zone": "rt_r1_s3",
+      "digit": "rt",
+      "x_mm": 129.52,
+      "y_mm": 43.77,
+      "width_mm": 11.6,
+      "ring": 1,
+      "sector": 3,
+      "symbol": "Y",
+      "class": "PALATAL",
+      "reach_mm": 34.8
+    },
+    {
+      "zone": "rt_r2_s0",
+      "digit": "rt",
+      "x_mm": 173.3,
+      "y_mm": 19.04,
+      "width_mm": 11.6,
+      "ring": 2,
+      "sector": 0,
+      "symbol": "IH",
+      "class": "VOWEL_CLOSE",
+      "reach_mm": 46.4
+    },
+    {
+      "zone": "rt_r2_s1",
+      "digit": "rt",
+      "x_mm": 164.81,
+      "y_mm": 37.25,
+      "width_mm": 11.6,
+      "ring": 2,
+      "sector": 1,
+      "symbol": "D",
+      "class": "ALVEOLAR",
+      "reach_mm": 46.4
+    },
+    {
+      "zone": "rt_r2_s2",
+      "digit": "rt",
+      "x_mm": 149.43,
+      "y_mm": 50.16,
+      "width_mm": 11.6,
+      "ring": 2,
+      "sector": 2,
+      "symbol": "NG",
+      "class": "VELAR",
+      "reach_mm": 46.4
+    },
+    {
+      "zone": "rt_r2_s3",
+      "digit": "rt",
+      "x_mm": 130.02,
+      "y_mm": 55.36,
+      "width_mm": 11.6,
+      "ring": 2,
+      "sector": 3,
+      "symbol": "EH",
+      "class": "VOWEL_MID",
+      "reach_mm": 46.4
+    },
+    {
+      "zone": "rt_r3_s0",
+      "digit": "rt",
+      "x_mm": 184.63,
+      "y_mm": 21.55,
+      "width_mm": 11.6,
+      "ring": 3,
+      "sector": 0,
+      "symbol": "S",
+      "class": "ALVEOLAR",
+      "reach_mm": 58.0
+    },
+    {
+      "zone": "rt_r3_s1",
+      "digit": "rt",
+      "x_mm": 174.01,
+      "y_mm": 44.31,
+      "width_mm": 11.6,
+      "ring": 3,
+      "sector": 1,
+      "symbol": "DH",
+      "class": "INTERDENTAL",
+      "reach_mm": 58.0
+    },
+    {
+      "zone": "rt_r3_s2",
+      "digit": "rt",
+      "x_mm": 154.78,
+      "y_mm": 60.45,
+      "width_mm": 11.6,
+      "ring": 3,
+      "sector": 2,
+      "symbol": "UW",
+      "class": "VOWEL_CLOSE",
+      "reach_mm": 58.0
+    },
+    {
+      "zone": "rt_r3_s3",
+      "digit": "rt",
+      "x_mm": 130.53,
+      "y_mm": 66.94,
+      "width_mm": 11.6,
+      "ring": 3,
+      "sector": 3,
+      "symbol": "JH",
+      "class": "POSTALVEOLAR",
+      "reach_mm": 58.0
+    },
+    {
+      "zone": "lt_r0_s3",
+      "digit": "lt",
+      "x_mm": 73.35,
+      "y_mm": 14.02,
+      "width_mm": 10.04,
+      "ring": 0,
+      "sector": 3,
+      "symbol": "ER",
+      "class": "VOWEL_MID",
+      "reach_mm": 23.2
+    },
+    {
+      "zone": "lt_r0_s2",
+      "digit": "lt",
+      "x_mm": 77.59,
+      "y_mm": 23.12,
+      "width_mm": 10.04,
+      "ring": 0,
+      "sector": 2,
+      "symbol": "AW",
+      "class": "VOWEL_OPEN",
+      "reach_mm": 23.2
+    },
+    {
+      "zone": "lt_r0_s1",
+      "digit": "lt",
+      "x_mm": 85.29,
+      "y_mm": 29.58,
+      "width_mm": 10.04,
+      "ring": 0,
+      "sector": 1,
+      "symbol": "SH",
+      "class": "POSTALVEOLAR",
+      "reach_mm": 23.2
+    },
+    {
+      "zone": "lt_r0_s0",
+      "digit": "lt",
+      "x_mm": 94.99,
+      "y_mm": 32.18,
+      "width_mm": 10.04,
+      "ring": 0,
+      "sector": 0,
+      "symbol": "F",
+      "class": "LABIODENTAL",
+      "reach_mm": 23.2
+    },
+    {
+      "zone": "lt_r1_s3",
+      "digit": "lt",
+      "x_mm": 62.02,
+      "y_mm": 16.53,
+      "width_mm": 11.6,
+      "ring": 1,
+      "sector": 3,
+      "symbol": "L",
+      "class": "ALVEOLAR",
+      "reach_mm": 34.8
+    },
+    {
+      "zone": "lt_r1_s2",
+      "digit": "lt",
+      "x_mm": 68.39,
+      "y_mm": 30.18,
+      "width_mm": 11.6,
+      "ring": 1,
+      "sector": 2,
+      "symbol": "HH",
+      "class": "GLOTTAL",
+      "reach_mm": 34.8
+    },
+    {
+      "zone": "lt_r1_s1",
+      "digit": "lt",
+      "x_mm": 79.93,
+      "y_mm": 39.87,
+      "width_mm": 11.6,
+      "ring": 1,
+      "sector": 1,
+      "symbol": "AO",
+      "class": "VOWEL_MID",
+      "reach_mm": 34.8
+    },
+    {
+      "zone": "lt_r1_s0",
+      "digit": "lt",
+      "x_mm": 94.48,
+      "y_mm": 43.77,
+      "width_mm": 11.6,
+      "ring": 1,
+      "sector": 0,
+      "symbol": "W",
+      "class": "LABIAL",
+      "reach_mm": 34.8
+    },
+    {
+      "zone": "lt_r2_s3",
+      "digit": "lt",
+      "x_mm": 50.7,
+      "y_mm": 19.04,
+      "width_mm": 11.6,
+      "ring": 2,
+      "sector": 3,
+      "symbol": "P",
+      "class": "LABIAL",
+      "reach_mm": 46.4
+    },
+    {
+      "zone": "lt_r2_s2",
+      "digit": "lt",
+      "x_mm": 59.19,
+      "y_mm": 37.25,
+      "width_mm": 11.6,
+      "ring": 2,
+      "sector": 2,
+      "symbol": "OY",
+      "class": "VOWEL_MID",
+      "reach_mm": 46.4
+    },
+    {
+      "zone": "lt_r2_s1",
+      "digit": "lt",
+      "x_mm": 74.57,
+      "y_mm": 50.16,
+      "width_mm": 11.6,
+      "ring": 2,
+      "sector": 1,
+      "symbol": "K",
+      "class": "VELAR",
+      "reach_mm": 46.4
+    },
+    {
+      "zone": "lt_r2_s0",
+      "digit": "lt",
+      "x_mm": 93.98,
+      "y_mm": 55.36,
+      "width_mm": 11.6,
+      "ring": 2,
+      "sector": 0,
+      "symbol": "EY",
+      "class": "VOWEL_MID",
+      "reach_mm": 46.4
+    },
+    {
+      "zone": "lt_r3_s3",
+      "digit": "lt",
+      "x_mm": 39.37,
+      "y_mm": 21.55,
+      "width_mm": 11.6,
+      "ring": 3,
+      "sector": 3,
+      "symbol": "OW",
+      "class": "VOWEL_MID",
+      "reach_mm": 58.0
+    },
+    {
+      "zone": "lt_r3_s2",
+      "digit": "lt",
+      "x_mm": 49.99,
+      "y_mm": 44.31,
+      "width_mm": 11.6,
+      "ring": 3,
+      "sector": 2,
+      "symbol": "TH",
+      "class": "INTERDENTAL",
+      "reach_mm": 58.0
+    },
+    {
+      "zone": "lt_r3_s1",
+      "digit": "lt",
+      "x_mm": 69.22,
+      "y_mm": 60.45,
+      "width_mm": 11.6,
+      "ring": 3,
+      "sector": 1,
+      "symbol": "UH",
+      "class": "VOWEL_CLOSE",
+      "reach_mm": 58.0
+    },
+    {
+      "zone": "lt_r3_s0",
+      "digit": "lt",
+      "x_mm": 93.47,
+      "y_mm": 66.94,
+      "width_mm": 11.6,
+      "ring": 3,
+      "sector": 0,
+      "symbol": "CH",
+      "class": "POSTALVEOLAR",
+      "reach_mm": 58.0
+    },
+    {
+      "zone": "ri_00",
+      "digit": "ri",
+      "x_mm": 177.0,
+      "y_mm": 94.0,
+      "width_mm": 34.0,
+      "ring": -1,
+      "sector": -1,
+      "symbol": "G",
+      "class": "VELAR",
+      "reach_mm": 89.6
+    },
+    {
+      "zone": "ri_01",
+      "digit": "ri",
+      "x_mm": 211.0,
+      "y_mm": 94.0,
+      "width_mm": 34.0,
+      "ring": -1,
+      "sector": -1,
+      "symbol": "IY",
+      "class": "VOWEL_CLOSE",
+      "reach_mm": 89.6
+    },
+    {
+      "zone": "ri_10",
+      "digit": "ri",
+      "x_mm": 177.0,
+      "y_mm": 60.0,
+      "width_mm": 34.0,
+      "ring": -1,
+      "sector": -1,
+      "symbol": "B",
+      "class": "LABIAL",
+      "reach_mm": 56.6
+    },
+    {
+      "zone": "ri_11",
+      "digit": "ri",
+      "x_mm": 211.0,
+      "y_mm": 60.0,
+      "width_mm": 34.0,
+      "ring": -1,
+      "sector": -1,
+      "symbol": "Z",
+      "class": "ALVEOLAR",
+      "reach_mm": 56.6
+    },
+    {
+      "zone": "li_00",
+      "digit": "li",
+      "x_mm": 13.0,
+      "y_mm": 94.0,
+      "width_mm": 34.0,
+      "ring": -1,
+      "sector": -1,
+      "symbol": "AY",
+      "class": "VOWEL_OPEN",
+      "reach_mm": 89.6
+    },
+    {
+      "zone": "li_01",
+      "digit": "li",
+      "x_mm": 47.0,
+      "y_mm": 94.0,
+      "width_mm": 34.0,
+      "ring": -1,
+      "sector": -1,
+      "symbol": "AE",
+      "class": "VOWEL_OPEN",
+      "reach_mm": 89.6
+    },
+    {
+      "zone": "li_10",
+      "digit": "li",
+      "x_mm": 13.0,
+      "y_mm": 60.0,
+      "width_mm": 34.0,
+      "ring": -1,
+      "sector": -1,
+      "symbol": "AA",
+      "class": "VOWEL_OPEN",
+      "reach_mm": 56.6
+    },
+    {
+      "zone": "li_11",
+      "digit": "li",
+      "x_mm": 47.0,
+      "y_mm": 60.0,
+      "width_mm": 34.0,
+      "ring": -1,
+      "sector": -1,
+      "symbol": "M",
+      "class": "LABIAL",
+      "reach_mm": 56.6
+    }
+  ],
+  "objective": {
+    "components_raw": {
+      "time": 1463324050121980.0,
+      "error": 7.577181881219428,
+      "learn": 49.53179545081422,
+      "sym": 0.0
+    },
+    "components_normalised": {
+      "time": 0.8729877328056572,
+      "error": 0.6609497611105954,
+      "learn": 0.915680785322194,
+      "sym": 0.0
+    },
+    "weights": {
+      "time": 0.4,
+      "error": 0.2,
+      "learn": 0.25,
+      "sym": 0.15
+    },
+    "value": 0.7103052416749305,
+    "start_value": 0.9796654074221974,
+    "history": [
+      0.713393,
+      0.710305,
+      0.710305,
+      0.710305
+    ]
+  },
+  "throughput_model": {
+    "total_hours": 457705722.5,
+    "ms_per_word": 3065.8,
+    "ms_per_word_movement": 2722.7,
+    "ms_per_word_stroke_overhead": 343.1,
+    "ms_per_stroke": 491.4,
+    "strokes_per_word": 6.239,
+    "phones_per_word": 4.239,
+    "model_wpm": 19.6,
+    "stroke_count_ceiling_wpm": 174.9,
+    "note": "model, not measured: no person, device or session is involved"
+  },
+  "symmetry": 1.0,
+  "family_tightness": 0.24006990782068902,
+  "vowel_grid": {
+    "n": 11,
+    "r_f1_ring": -0.722,
+    "r_f2_sector": -0.374
+  },
+  "confusable_pairs": [
+    {
+      "a": "EH",
+      "b": "IH",
+      "confusability": 0.6561,
+      "zone_distance_mm": 56.5,
+      "same_digit": true
+    },
+    {
+      "a": "AY",
+      "b": "OW",
+      "confusability": 0.6107,
+      "zone_distance_mm": 77.1,
+      "same_digit": false
+    },
+    {
+      "a": "AH",
+      "b": "IH",
+      "confusability": 0.582,
+      "zone_distance_mm": 27.2,
+      "same_digit": true
+    },
+    {
+      "a": "AE",
+      "b": "OW",
+      "confusability": 0.5767,
+      "zone_distance_mm": 72.9,
+      "same_digit": false
+    },
+    {
+      "a": "M",
+      "b": "V",
+      "confusability": 0.5726,
+      "zone_distance_mm": 86.6,
+      "same_digit": false
+    },
+    {
+      "a": "EH",
+      "b": "OW",
+      "confusability": 0.5683,
+      "zone_distance_mm": 96.7,
+      "same_digit": false
+    },
+    {
+      "a": "L",
+      "b": "M",
+      "confusability": 0.5662,
+      "zone_distance_mm": 46.0,
+      "same_digit": false
+    },
+    {
+      "a": "B",
+      "b": "V",
+      "confusability": 0.5573,
+      "zone_distance_mm": 55.5,
+      "same_digit": false
+    },
+    {
+      "a": "AA",
+      "b": "EH",
+      "confusability": 0.552,
+      "zone_distance_mm": 117.1,
+      "same_digit": false
+    },
+    {
+      "a": "AE",
+      "b": "EH",
+      "confusability": 0.5414,
+      "zone_distance_mm": 91.6,
+      "same_digit": false
+    },
+    {
+      "a": "D",
+      "b": "Z",
+      "confusability": 0.5334,
+      "zone_distance_mm": 51.5,
+      "same_digit": false
+    },
+    {
+      "a": "ER",
+      "b": "IY",
+      "confusability": 0.53,
+      "zone_distance_mm": 159.2,
+      "same_digit": false
+    },
+    {
+      "a": "ER",
+      "b": "IH",
+      "confusability": 0.5241,
+      "zone_distance_mm": 100.1,
+      "same_digit": false
+    },
+    {
+      "a": "JH",
+      "b": "M",
+      "confusability": 0.5225,
+      "zone_distance_mm": 83.8,
+      "same_digit": false
+    },
+    {
+      "a": "AY",
+      "b": "EY",
+      "confusability": 0.5171,
+      "zone_distance_mm": 89.7,
+      "same_digit": false
+    },
+    {
+      "a": "AH",
+      "b": "EH",
+      "confusability": 0.5118,
+      "zone_distance_mm": 36.2,
+      "same_digit": true
+    },
+    {
+      "a": "IH",
+      "b": "IY",
+      "confusability": 0.5108,
+      "zone_distance_mm": 83.9,
+      "same_digit": false
+    },
+    {
+      "a": "AE",
+      "b": "IH",
+      "confusability": 0.5056,
+      "zone_distance_mm": 146.9,
+      "same_digit": false
+    },
+    {
+      "a": "IH",
+      "b": "OW",
+      "confusability": 0.5008,
+      "zone_distance_mm": 134.0,
+      "same_digit": false
+    },
+    {
+      "a": "AE",
+      "b": "EY",
+      "confusability": 0.4969,
+      "zone_distance_mm": 60.8,
+      "same_digit": false
+    },
+    {
+      "a": "AE",
+      "b": "AY",
+      "confusability": 0.4854,
+      "zone_distance_mm": 34.0,
+      "same_digit": true
+    },
+    {
+      "a": "D",
+      "b": "T",
+      "confusability": 0.4823,
+      "zone_distance_mm": 20.9,
+      "same_digit": true
+    },
+    {
+      "a": "AY",
+      "b": "IH",
+      "confusability": 0.4781,
+      "zone_distance_mm": 177.0,
+      "same_digit": false
+    },
+    {
+      "a": "EY",
+      "b": "OW",
+      "confusability": 0.4777,
+      "zone_distance_mm": 64.2,
+      "same_digit": true
+    },
+    {
+      "a": "AY",
+      "b": "EH",
+      "confusability": 0.475,
+      "zone_distance_mm": 123.2,
+      "same_digit": false
+    }
+  ],
+  "baselines": {
+    "inventory-order": {
+      "raw": {
+        "time": 1605105517753168.8,
+        "error": 13.643848550040566,
+        "learn": 51.86245658539796,
+        "sym": 1.0
+      },
+      "objective": 1.036126682335822,
+      "time": {
+        "total_hours": 497089463.5,
+        "ms_per_word": 3329.6,
+        "ms_per_word_movement": 2986.5,
+        "ms_per_word_stroke_overhead": 343.1,
+        "ms_per_stroke": 533.7,
+        "strokes_per_word": 6.239,
+        "phones_per_word": 4.239,
+        "model_wpm": 18.0,
+        "stroke_count_ceiling_wpm": 174.9,
+        "note": "model, not measured: no person, device or session is involved"
+      }
+    },
+    "reversed": {
+      "raw": {
+        "time": 1611220275308698.5,
+        "error": 11.913617576790495,
+        "learn": 51.670090481631036,
+        "sym": 0.7567567567567568
+      },
+      "objective": 0.9638519035032765,
+      "time": {
+        "total_hours": 498788007.3,
+        "ms_per_word": 3341.0,
+        "ms_per_word_movement": 2997.9,
+        "ms_per_word_stroke_overhead": 343.1,
+        "ms_per_stroke": 535.5,
+        "strokes_per_word": 6.239,
+        "phones_per_word": 4.239,
+        "model_wpm": 18.0,
+        "stroke_count_ceiling_wpm": 174.9,
+        "note": "model, not measured: no person, device or session is involved"
+      }
+    },
+    "frequency-greedy": {
+      "raw": {
+        "time": 1526876237214907.5,
+        "error": 11.817529366579846,
+        "learn": 49.44825306811917,
+        "sym": 0.7972972972972973
+      },
+      "objective": 0.9388897462631483,
+      "time": {
+        "total_hours": 475359107.8,
+        "ms_per_word": 3184.1,
+        "ms_per_word_movement": 2841.0,
+        "ms_per_word_stroke_overhead": 343.1,
+        "ms_per_stroke": 510.4,
+        "strokes_per_word": 6.239,
+        "phones_per_word": 4.239,
+        "model_wpm": 18.8,
+        "stroke_count_ceiling_wpm": 174.9,
+        "note": "model, not measured: no person, device or session is involved"
+      }
+    },
+    "random": {
+      "raw": {
+        "time": 1729589061286507.2,
+        "error": 12.539992450521497,
+        "learn": 51.84835006528517,
+        "sym": 0.7567567567567568
+      },
+      "objective": 1.003849880671393,
+      "time": {
+        "total_hours": 531668225.6,
+        "ms_per_word": 3561.3,
+        "ms_per_word_movement": 3218.1,
+        "ms_per_word_stroke_overhead": 343.1,
+        "ms_per_stroke": 570.8,
+        "strokes_per_word": 6.239,
+        "phones_per_word": 4.239,
+        "model_wpm": 16.8,
+        "stroke_count_ceiling_wpm": 174.9,
+        "note": "model, not measured: no person, device or session is involved"
+      }
+    }
+  },
+  "corpus": {
+    "frequency_source": "https://norvig.com/ngrams/count_1w.txt",
+    "pronunciation_source": "https://raw.githubusercontent.com/cmusphinx/cmudict/master/cmudict.dict",
+    "frequency_sha256": "51df159fd3de12b20e403c108f526e96dbd723d9cabdd5f17955cdc16059e690",
+    "pronunciation_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+    "words_requested": 20000,
+    "words_used": 18015,
+    "words_dropped": 1985,
+    "token_coverage": 0.978,
+    "syllables_per_token": 1.6518711831170014,
+    "syllables_per_word": 2.297307799056342,
+    "phones": [
+      "AA",
+      "AE",
+      "AH",
+      "AO",
+      "AW",
+      "AY",
+      "B",
+      "CH",
+      "D",
+      "DH",
+      "EH",
+      "ER",
+      "EY",
+      "F",
+      "G",
+      "HH",
+      "IH",
+      "IY",
+      "JH",
+      "K",
+      "L",
+      "M",
+      "N",
+      "NG",
+      "OW",
+      "OY",
+      "P",
+      "R",
+      "S",
+      "SH",
+      "T",
+      "TH",
+      "UH",
+      "UW",
+      "V",
+      "W",
+      "Y",
+      "Z",
+      "ZH"
+    ]
+  },
+  "parameters": {
+    "fitts_b_ms": 150.0,
+    "fitts_a_ms": 60.0,
+    "stroke_ms": 55.0,
+    "switch_digit_ms": 45.0,
+    "switch_hand_ms": 95.0,
+    "err_range_mm": 25.0,
+    "conf_sharpen": 3.0,
+    "w_phys": 0.4,
+    "w_err": 0.2,
+    "w_learn": 0.25,
+    "w_sym": 0.15,
+    "rest_per_word": 1.0
+  },
+  "geometry": {
+    "source": "measured hand profile",
+    "hand_profile": {
+      "_measured_by": "rom_capture.py",
+      "pad_mm": [
+        224.0,
+        148.0
+      ],
+      "thumb": {
+        "rest": [
+          128.0,
+          9.0
+        ],
+        "joint": [
+          128.0,
+          9.0
+        ],
+        "rings": [
+          23.2,
+          34.8,
+          46.4,
+          58.0
+        ],
+        "fan_deg": [
+          0.0,
+          100.0
+        ],
+        "reach_mm": 58.0,
+        "max_reach_mm": 64.0,
+        "tangential_penalty": 1.35
+      },
+      "index": {
+        "rest": [
+          194.0,
+          6.0
+        ],
+        "joint": [
+          196.0,
+          2.0
+        ],
+        "centre": [
+          194.0,
+          77.0
+        ],
+        "pitch": 34.0,
+        "reach_mm": 88.0,
+        "max_reach_mm": 100.0,
+        "tangential_penalty": 1.0
+      }
+    },
+    "pad_mm": [
+      224.0,
+      148.0
+    ],
+    "anchors": {
+      "rt": [
+        128.0,
+        9.0
+      ],
+      "lt": [
+        96.0,
+        9.0
+      ],
+      "ri": [
+        194.0,
+        6.0
+      ],
+      "li": [
+        30.0,
+        6.0
+      ]
+    },
+    "joints": {
+      "rt": [
+        128.0,
+        9.0
+      ],
+      "lt": [
+        96.0,
+        9.0
+      ],
+      "ri": [
+        196.0,
+        2.0
+      ],
+      "li": [
+        28.0,
+        2.0
+      ]
+    },
+    "thumb_rings": [
+      23.2,
+      34.8,
+      46.4,
+      58.0
+    ],
+    "thumb_fan_deg": [
+      0.0,
+      100.0
+    ],
+    "index_centre": [
+      194.0,
+      77.0
+    ],
+    "index_pitch": 34.0,
+    "envelope_mm": {
+      "rt": 64.0,
+      "lt": 64.0,
+      "ri": 100.0,
+      "li": 100.0
+    },
+    "tangential_penalty": {
+      "rt": 1.35,
+      "lt": 1.35,
+      "ri": 1.0,
+      "li": 1.0
+    },
+    "comfort_reach_mm": 58.0,
+    "rest_width_mm": 15.0
+  },
+  "provenance": [
+    [
+      "fitts_a_ms / fitts_b_ms",
+      "Fitts (1954) Shannon formulation, published coefficients",
+      "literature"
+    ],
+    [
+      "stroke_ms",
+      "lift + contact + segmentation overhead per stroke",
+      "model assumption"
+    ],
+    [
+      "switch_digit_ms / switch_hand_ms",
+      "digit and hand transition penalties",
+      "model assumption"
+    ],
+    [
+      "err_range_mm",
+      "spatial decay of zone-adjacency confusion",
+      "model assumption"
+    ],
+    [
+      "conf_sharpen",
+      "exponent applied to corpus context cosine",
+      "model assumption"
+    ],
+    [
+      "pad / anchor / ring geometry",
+      "224x148 mm pad, model topology",
+      "design input"
+    ],
+    [
+      "w_phys / w_err / w_learn / w_sym",
+      "component weights of the objective",
+      "design input"
+    ]
+  ],
+  "search": {
+    "seed": 20260925,
+    "iters": 120000,
+    "restarts": 4,
+    "seconds": 23.15
+  },
+  "disclaimer": "Every number here is a model output of the declared parameters. No measurement from any person or device is used or claimed."
+}

@@ -1,0 +1,48 @@
+{
+  "_measured_by": "rom_capture.py",
+  "pad_mm": [
+    224.0,
+    148.0
+  ],
+  "thumb": {
+    "rest": [
+      128.0,
+      9.0
+    ],
+    "joint": [
+      128.0,
+      9.0
+    ],
+    "rings": [
+      23.2,
+      34.8,
+      46.4,
+      58.0
+    ],
+    "fan_deg": [
+      0.0,
+      100.0
+    ],
+    "reach_mm": 58.0,
+    "max_reach_mm": 64.0,
+    "tangential_penalty": 1.35
+  },
+  "index": {
+    "rest": [
+      194.0,
+      6.0
+    ],
+    "joint": [
+      196.0,
+      2.0
+    ],
+    "centre": [
+      194.0,
+      77.0
+    ],
+    "pitch": 34.0,
+    "reach_mm": 88.0,
+    "max_reach_mm": 100.0,
+    "tangential_penalty": 1.0
+  }
+}
