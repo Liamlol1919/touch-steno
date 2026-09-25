@@ -204,3 +204,63 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+def detect_reversal_events(rows, min_speed: float, min_run: int,
+                           turn_deg: float = 90.0) -> list[dict]:
+    """Out-and-back events: close on a direction reversal instead of waiting for silence.
+
+    The measured problem (BENCHMARK_RESULTS.md addendum): on a surface that cannot signal a
+    release, consecutive gestures can run back to back, and the persistence window then merges
+    them. A reversal is a segmentation landmark that needs no lift signal, and it lets the
+    return leg be fast - which matters, because a sub-gate return costs 0.67s for a 20mm arc.
+
+    An event starts after `min_run` supra-threshold frames and closes at the first frame where
+    the instantaneous direction turns by more than `turn_deg` from the event's accumulated
+    direction. The event's vector is the OUT leg only, so the return cancels nothing.
+    """
+    events: list[dict] = []
+    run: list[set[str]] = []
+    for i, row in enumerate(rows):
+        fast = {k for k, (_dx, _dy, v) in row.items() if v >= min_speed}
+        if not fast:
+            run = []
+            continue
+        run.append(fast)
+        if len(run) < min_run:
+            continue
+        start = i - min_run + 1
+        acc: dict[str, list[float]] = {}
+        for r in rows[start:i + 1]:
+            for tid, (dx, dy, _v) in r.items():
+                p = acc.setdefault(tid, [0.0, 0.0])
+                p[0] += dx
+                p[1] += dy
+        if not acc:
+            continue
+        mover = max(acc, key=lambda k: math.hypot(*acc[k]))
+        mx, my = acc[mover]
+        mmag = math.hypot(mx, my)
+        # look for a reversal in the frames after the window
+        for j in range(i + 1, min(i + 1 + 4 * min_run, len(rows))):
+            r = rows[j]
+            if mover not in r:
+                break
+            rx, ry = r[mover][0], r[mover][1]
+            if mmag <= 0 or math.hypot(rx, ry) <= 0:
+                continue
+            cosang = (mx * rx + my * ry) / (mmag * math.hypot(rx, ry))
+            if math.degrees(math.acos(max(-1.0, min(1.0, cosang)))) > turn_deg:
+                events.append({"start": start, "end": j, "mover": mover,
+                               "dx_mm": round(mx, 3), "dy_mm": round(my, 3),
+                               "displacement_mm": round(mmag, 2),
+                               "turn_deg": round(math.degrees(
+                                   math.acos(max(-1.0, min(1.0, cosang)))), 1)})
+                run = []
+                break
+        else:
+            if i - start + 1 >= min_run and i + 1 not in [e["end"] for e in events]:
+                events.append({"start": start, "end": i, "mover": mover,
+                               "dx_mm": round(mx, 3), "dy_mm": round(my, 3),
+                               "displacement_mm": round(mmag, 2), "turn_deg": None})
+    return events

@@ -422,6 +422,25 @@ class TestEnvelopeAndMetricContract(unittest.TestCase):
         self.assertTrue(cg.analyse(40, cg.DEFAULT_WINDOW_MS,
                                    cg.DEFAULT_SPEED_MM_S)["within_half_width"])
 
+    def test_reversal_detector_closes_on_a_turn(self):
+        """Out-and-back: the event must close at the reversal, not run into the return."""
+        out = [{"1": (1.0, 0.0, 120.0)} for _ in range(14)]
+        back = [{"1": (-1.0, 0.0, 120.0)} for _ in range(14)]
+        rows = out + back
+        evs = intent_filter.detect_reversal_events(
+            rows, intent_filter.MIN_SPEED_MM_S, intent_filter.MIN_RUN_FRAMES)
+        self.assertTrue(evs, "a reversal must produce an event")
+        self.assertLess(evs[0]["end"], 14, "event must close before the return ends")
+        self.assertGreater(evs[0]["turn_deg"], 90.0)
+
+    def test_reversal_detector_ignores_a_straight_run(self):
+        rows = [{"1": (1.0, 0.0, 120.0)} for _ in range(30)]
+        evs = intent_filter.detect_reversal_events(
+            rows, intent_filter.MIN_SPEED_MM_S, intent_filter.MIN_RUN_FRAMES)
+        for e in evs:
+            self.assertIsNone(e["turn_deg"],
+                              "a straight run has no reversal to report")
+
 class TestQuantileHelpers(unittest.TestCase):
     def test_quantile_bounds(self):
         vals = [float(i) for i in range(100)]
