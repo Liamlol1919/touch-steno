@@ -582,6 +582,69 @@ class TestLayoutAssignment(unittest.TestCase):
                            "aim error dominates sensor noise; a better sensor would "
                            "not fix direction accuracy")
 
+
+class TestIdentityDatasetCheck(unittest.TestCase):
+    """A finger-identity capture must be validated before it trains anything."""
+
+    def _capture(self, tmp, lift_frames=18, lift_two=False):
+        import json
+        import kinematics
+        DT = 0.011
+        contacts = {"1": (10.0, 10.0), "2": (30.0, 12.0), "3": (50.0, 14.0)}
+        frames, manifest, t = [], [], 0.0
+        for _rep in range(2):
+            for i, (tid, (x, y)) in enumerate(contacts.items()):
+                t0 = t
+                for _ in range(120):
+                    frames.append({"t": round(t, 6),
+                                   "c": {k: [v[0], v[1], 2.0] for k, v in contacts.items()}})
+                    t += DT
+                victims = list(contacts)[:2] if (lift_two and i == 1) else [tid]
+                for _ in range(lift_frames):
+                    frames.append({"t": round(t, 6),
+                                   "c": {k: [v[0], v[1], 2.0]
+                                         for k, v in contacts.items() if k not in victims}})
+                    t += DT
+                for _ in range(60):
+                    frames.append({"t": round(t, 6),
+                                   "c": {k: [v[0], v[1], 2.0] for k, v in contacts.items()}})
+                    t += DT
+                manifest.append({"t_start": t0, "t_end": t,
+                                 "label": f"identity_f{i}", "finger": f"f{i}"})
+        path = Path(tmp) / "cap.jsonl"
+        with kinematics.Recorder(path, force=True) as rec:
+            for fr in frames:
+                rec.frame(fr["t"], {int(k): tuple(v) for k, v in fr["c"].items()})
+        path.with_suffix(".manifest.jsonl").write_text(
+            "\n".join(json.dumps(r) for r in manifest), encoding="utf-8")
+        return path
+
+    def test_clean_capture_is_all_valid(self):
+        import tempfile
+        import identity_dataset_check as idc
+        with tempfile.TemporaryDirectory() as td:
+            rep = idc.check(self._capture(td))
+        self.assertTrue(rep["all_valid"])
+        self.assertEqual(rep["counts"].get("VALID"), rep["cues"])
+
+    def test_shallow_lift_is_rejected(self):
+        """3 frames of jitter is not a lift; the capture must not pass as labelled data."""
+        import tempfile
+        import identity_dataset_check as idc
+        with tempfile.TemporaryDirectory() as td:
+            rep = idc.check(self._capture(td, lift_frames=3))
+        self.assertFalse(rep["all_valid"])
+        self.assertIn("MISSING", rep["counts"])
+
+    def test_two_fingers_lifted_at_once_is_ambiguous(self):
+        """The label cannot be attributed when more than one contact vanished."""
+        import tempfile
+        import identity_dataset_check as idc
+        with tempfile.TemporaryDirectory() as td:
+            rep = idc.check(self._capture(td, lift_two=True))
+        self.assertFalse(rep["all_valid"])
+        self.assertIn("AMBIGUOUS", rep["counts"])
+
 class TestQuantileHelpers(unittest.TestCase):
     def test_quantile_bounds(self):
         vals = [float(i) for i in range(100)]
