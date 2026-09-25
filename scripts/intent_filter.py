@@ -32,6 +32,21 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import kinematics  # noqa: E402
 
 # Measured operating point (MEASURED_BIOMECHANICS.md section 3).
+#
+# 40 mm/s, not 60. Raising the gate to 60 was tried because it costs no latency (latency comes
+# from the persistence window k) and buys rest margin: 3 frames instead of 1. Measured, it
+# does cost detection of LONG gestures:
+#
+#   gesture   detect@40   detect@60
+#    150 ms       1.00        1.00
+#    250 ms       1.00        1.00
+#    350 ms       1.00        0.67-0.75
+#    500 ms       0.75-0.83   0.00
+#
+# Published touch data puts real gesture execution at ~355ms mean (Beats, CHI 2017), which is
+# exactly inside the band 60 mm/s loses. So 40 mm/s is the correct choice and the 1-frame
+# rest margin is the price. The margin is a known risk with a cheap mitigation: measure the
+# per-user rest floor (guided_calibration --task noise) and raise the gate for that user.
 MIN_SPEED_MM_S = 40.0
 MIN_RUN_FRAMES = 8
 # A follower is called "explained" when the per-pair fit explains at least this share of
@@ -215,9 +230,9 @@ def detect_reversal_events(rows, min_speed: float, min_run: int,
     them. A reversal is a segmentation landmark that needs no lift signal, and it lets the
     return leg be fast - which matters, because a sub-gate return costs 0.67s for a 20mm arc.
 
-An event starts after `min_run` supra-threshold frames and watches for the first later frame
-whose direction turns by more than `turn_deg` from the accumulated direction. The returned
-event ends on the preceding out-leg frame, so the return vector never enters the stroke.
+    An event starts after `min_run` supra-threshold frames and closes at the first frame where
+    the instantaneous direction turns by more than `turn_deg` from the event's accumulated
+    direction. The event's vector is the OUT leg only, so the return cancels nothing.
     """
     events: list[dict] = []
     run: list[set[str]] = []
@@ -251,7 +266,7 @@ event ends on the preceding out-leg frame, so the return vector never enters the
                 continue
             cosang = (mx * rx + my * ry) / (mmag * math.hypot(rx, ry))
             if math.degrees(math.acos(max(-1.0, min(1.0, cosang)))) > turn_deg:
-                events.append({"start": start, "end": j - 1, "mover": mover,
+                events.append({"start": start, "end": j, "mover": mover,
                                "dx_mm": round(mx, 3), "dy_mm": round(my, 3),
                                "displacement_mm": round(mmag, 2),
                                "turn_deg": round(math.degrees(

@@ -54,6 +54,26 @@ real sessions (17 contacts; the worst session is `test-zeige`, where three conta
 | 80 mm/s | 4 frames | no | 4 frames |
 | 100 mm/s | 3 frames | no | 5 frames |
 
+### Would a higher gate be free? No — measured, and reverted
+
+Raising $v_\text{gate}$ from 40 to 60 mm/s costs **no latency** (latency comes from $k$, not
+from the gate) and buys three frames of rest margin instead of one. That looked like a free
+safety increase, so it was tried. It is not free:
+
+| out-stroke | detect @ 40 mm/s | detect @ 60 mm/s |
+|---:|---:|---:|
+| 150 ms | 1.00 | 1.00 |
+| 250 ms | 1.00 | 1.00 |
+| **350 ms** | **1.00** | **0.67–0.75** |
+| **500 ms** | 0.75–0.83 | **0.00** |
+
+Published touch data puts real gesture execution at **355 ms mean** (Beats, CHI 2017) —
+precisely the band that 60 mm/s starts losing. The gate stays at 40 mm/s, and the one-frame
+margin is the accepted price, with the per-user rest floor as the mitigation.
+
+Recorded because the hypothesis sounded right and the measurement said otherwise; that is
+exactly the case a reader needs to find in the source.
+
 ### The uncomfortable part, stated plainly
 
 **The chosen operating point has a one-frame margin.** $(40\ \text{mm/s}, k=8)$ is the
