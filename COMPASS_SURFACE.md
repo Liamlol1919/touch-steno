@@ -66,3 +66,44 @@ the return strategy together. They cannot be chosen independently.
 - If thumb reach on a 224 × 148 mm pad with both hands down cannot reach 30 mm from the wrist
   pivot in a comfortable posture, the row is unreachable regardless of the arithmetic. That
   is a measurement, and it is in the cued protocol as a feasibility check, not an assumption.
+
+## Addendum: the measured natural gesture envelope is ~12 mm, and that is where accuracy collapses
+
+**This overturns the design premise rather than tuning it.** The surface above says r = 30 mm
+gives 0.957 accuracy and r ≤ 12 mm is not viable (0.576). Now measure what radius this hand
+actually used, from the recordings themselves:
+
+| contact | session | path | bounding box | max radius from its own centre |
+|---|---|---:|---|---:|
+| 81 (thumb) | test-daumen | 243.5 mm | **24.6 × 18.2 mm** | **15.1 mm** |
+| 82 (thumb) | test-daumen | 276.9 mm | **20.6 × 15.9 mm** | **13.0 mm** |
+| 141 (index) | test-zeige | 110.0 mm | 17.6 × 15.1 mm | 11.9 mm |
+| 142 (index) | test-zeige | 89.7 mm | 13.6 × 16.1 mm | 10.7 mm |
+
+The natural envelope is a **~12 mm radius** — precisely the regime the accuracy curve says
+cannot work. The accuracy-optimal radius (30 mm) is **2.5× larger than the movement this
+hand makes without being asked to make it.**
+
+### What that means, stated carefully
+
+- These sessions were **exploratory, not cued**: the operator was asked to move a finger,
+  not to hit sectors. So this is a **lower bound on the comfortable envelope**, not a maximum
+  reach. It does not prove 30 mm is unreachable.
+- But it does mean the compass concept currently asks for a movement the hand does not
+  make by default, and the cycle budget punishes learning it (a 30 mm out-and-back cycle is
+  ~200 ms vs ~110 ms at 12 mm).
+- There are exactly three honest resolutions, and this is a product decision, not a tuning one:
+  1. **Train the larger excursion.** Costs cycle time; accuracy 0.822 → 0.957.
+  2. **Accept r ≈ 12–15 mm and let the language layer absorb ~40 % label error.** W9's
+     position is that the dictionary and correction path are the multiplier; this makes that
+     load-bearing rather than optional.
+  3. **Change the primitive** so accuracy does not depend on excursion radius at all —
+     e.g. dwell-plus-direction, or direction read from the path *shape* rather than the net
+     displacement. Untested, and the only option that does not cost speed.
+
+### The measurement that resolves it
+
+`guided_calibration.py --task sectors` already cues 8 directions. Run it at a cued radius and
+read the achieved envelope from the recording: if the operator can hold a 30 mm arc cleanly
+after a short practice, option 1 is live. If they cannot, option 2 or 3 is forced, and that
+is a design decision the project should make explicitly rather than discover late.

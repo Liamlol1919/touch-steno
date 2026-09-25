@@ -106,11 +106,49 @@ def main() -> int:
                                "message": args.message,
                                "tree": tree["sha"],
                                "parents": [head_sha]})))
-    gh("api", f"repos/{args.repo}/git/refs/heads/{args.branch}", "-X", "PATCH",
-       "--input", "-", input_json=json.dumps({"sha": commit["sha"]}))
-    print(f"committed {commit['sha'][:10]} -> {args.repo}@{args.branch}")
-    print(args.message)
-    return 0
+    # The other agent can push between our head read and this ref update. A non-fast-forward
+    # here means the commit was built on a stale parent, so we must NOT force it: re-read the
+    # head and rebuild the whole commit on top of it. Losing that race twice is a signal to
+    # stop, not to retry forever.
+    for attempt in range(1, 4):
+        proc = subprocess.run(
+            ["gh", "api", f"repos/{args.repo}/git/refs/heads/{args.branch}",
+             "-X", "PATCH", "--input", "-"],
+            capture_output=True, text=True, input=json.dumps({"sha": commit["sha"]}))
+        if proc.returncode == 0:
+            print(f"committed {commit['sha'][:10]} -> {args.repo}@{args.branch}")
+            print(args.message)
+            return 0
+        if "not a fast forward" not in proc.stderr:
+            sys.stderr.write(proc.stderr)
+            raise SystemExit("ref update failed")
+        if attempt == 3:
+            sys.stderr.write(proc.stderr)
+            raise SystemExit(
+                "lost the push race 3 times - the collaborator is committing faster than "
+                "we can publish; stop and coordinate rather than retry")
+        print(f"  push race lost (attempt {attempt}); rebuilding on the new remote head...")
+        new = json.loads(gh("api", f"repos/{args.repo}/commits/{args.branch}"))
+        head_sha, base_tree = new["sha"], new["commit"]["tree"]["sha"]
+        entries = []
+        for rel, data in files:
+            blob = json.loads(gh("api", f"repos/{args.repo}/git/blobs", "-X", "POST",
+                                 "--input", "-",
+                                 input_json=json.dumps({
+                                     "content": base64.b64encode(data).decode(),
+                                     "encoding": "base64"})))
+            entries.append({"path": rel, "mode": "100644", "type": "blob",
+                            "sha": blob["sha"]})
+        tree = json.loads(gh("api", f"repos/{args.repo}/git/trees", "-X", "POST",
+                             "--input", "-",
+                             input_json=json.dumps({"base_tree": base_tree,
+                                                    "tree": entries})))
+        commit = json.loads(gh("api", f"repos/{args.repo}/git/commits", "-X", "POST",
+                               "--input", "-",
+                               input_json=json.dumps({"message": args.message,
+                                                      "tree": tree["sha"],
+                                                      "parents": [head_sha]})))
+    return 1
 
 
 if __name__ == "__main__":
