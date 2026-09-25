@@ -517,7 +517,12 @@ class TestSeparationModel(unittest.TestCase):
         import real_session_evidence as rse
         import kinematics
         from pathlib import Path
-        sessions = [Path.home() / "Projekte/commindv2/messung" / n
+        # Raw sessions are biometric and never committed; point at them explicitly.
+        import os
+        root = os.environ.get("TOUCH_STENO_SESSIONS")
+        if not root:
+            self.skipTest("set TOUCH_STENO_SESSIONS to a directory of raw captures")
+        sessions = [Path(root) / n
                     for n in ("test.jsonl", "test-daumen.jsonl", "test-zeige.jsonl")]
         if not all(p.exists() for p in sessions):
             self.skipTest("measured sessions not available")

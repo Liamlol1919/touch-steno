@@ -29,7 +29,7 @@ data either supports or does not.
 Usage:
     python3 scripts/separation_model.py
     python3 scripts/separation_model.py --json
-    python3 scripts/separation_model.py --verify ~/Projekte/commindv2/messung/test.jsonl
+    python3 scripts/separation_model.py --verify <dir-with-captures>/test.jsonl
 """
 from __future__ import annotations
 
