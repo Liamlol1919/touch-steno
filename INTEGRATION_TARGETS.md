@@ -118,6 +118,15 @@ same keyboard, segmentation, or decoder semantics. The future integration contra
 its own source of truth and reject stale-layout ambiguity rather than add a compatibility
 shim.
 
+## Failure semantics
+
+- **On NACK:** acknowledge the rejection, expose its status through consumer state or diagnostics, and do not apply or retain steno text for that event.
+- **On an unknown schema version:** do not interpret the payload; reject it as incompatible and retain only status diagnostics according to the consumer's policy.
+- **On a dropped event:** advance or terminate the current consumer action according to its explicit timeout or cancellation policy; do not invent a replacement stroke.
+- **On confidence below threshold:** do not act on or emit the stroke. It may be recorded only as an aggregate, opt-in metric without raw biometric data.
+
+**Silence is a valid outcome.** A consumer must never synthesise text from a NACK, an incompatible version, a dropped event, or a low-confidence stroke.
+
 ## No-implementation policy
 
 This target register is documentation only. Do not implement, vendor, fork, connect to, open a

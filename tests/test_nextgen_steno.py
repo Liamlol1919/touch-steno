@@ -36,6 +36,39 @@ class TestEnglishStenoTransport(unittest.TestCase):
             self.assertTrue(set(stroke.keys) <= STENO_KEYS)
             self.assertEqual(len(stroke.keys), len(set(stroke.keys)))
 
+    def test_stroke_notation_derives_from_canonical_keys(self):
+        profile_keys = set()
+        for stroke in STROKE_LIBRARY:
+            profile_keys.update(stroke.keys)
+            compact = "".join(key.strip("-") for key in stroke.keys)
+            key_form = "".join(stroke.keys)
+            self.assertEqual(stroke.notation.replace("-", ""), compact)
+            self.assertEqual(
+                self.codec.encode_stroke(stroke.notation),
+                self.codec.encode_stroke(compact),
+            )
+            self.assertEqual(
+                self.codec.encode_stroke(stroke.notation),
+                self.codec.encode_stroke(key_form),
+            )
+        self.assertEqual(profile_keys, set(STENO_KEYS))
+
+    def test_real_library_outlines_round_trip(self):
+        outline = "A/EU/ST-PLT/*/#"
+        results = self.codec.decode_outline(self.codec.encode_outline(outline))
+        self.assertTrue(all(result.ok for result in results))
+        self.assertEqual(
+            "/".join(result.stroke.notation for result in results),
+            outline,
+        )
+
+    def test_encode_stroke_error_names_accepted_forms(self):
+        with self.assertRaisesRegex(
+            ValueError,
+            "library notation.*compact notation.*key form",
+        ):
+            self.codec.encode_stroke("cat")
+
     def test_all_one_bit_errors_correct_and_two_bit_errors_nack(self):
         for expected in MESSAGE_MASKS:
             self.assertEqual(self.codec.decode_mask(expected).distance, 0)

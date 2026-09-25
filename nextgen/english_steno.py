@@ -9,7 +9,8 @@ not claim two-error correction.
 Each of the 32 codewords is assigned a canonical English steno stroke. The
 stroke key labels use the English stenotype system inspected in the pinned
 Plover source. An outline is an ordered sequence of strokes. Plover consumes
-the emitted key events; this module does not bundle or modify a dictionary.
+the emitted key events; this module transports outlines only. Text-to-outline
+translation requires a lexicon, is out of scope here, and is owned by Plover.
 """
 from __future__ import annotations
 
@@ -86,10 +87,26 @@ STROKE_LIBRARY: tuple[Stroke, ...] = (
     Stroke("#", ("#",)),
 )
 
+
+def _compact_notation(stroke: Stroke) -> str:
+    """Derive unhyphenated stroke notation from canonical key names."""
+    return "".join(key.strip("-") for key in stroke.keys)
+
+
+def _key_form(stroke: Stroke) -> str:
+    """Return the side-specific key form from the canonical key names."""
+    return "".join(stroke.keys)
+
+
 if len(STROKE_LIBRARY) != 32:
     raise RuntimeError("English steno profile must contain exactly 32 strokes")
-if len({s.notation for s in STROKE_LIBRARY}) != 32:
-    raise RuntimeError("English steno profile contains duplicate notation")
+if len({_compact_notation(stroke) for stroke in STROKE_LIBRARY}) != 32:
+    raise RuntimeError("English steno profile contains duplicate key-derived notation")
+if any(
+    stroke.notation.replace("-", "") != _compact_notation(stroke)
+    for stroke in STROKE_LIBRARY
+):
+    raise RuntimeError("English steno notation does not match its canonical keys")
 
 # The ten columns are a rank-5 binary generator with d_min=4. The affine
 # offset removes the zero physical word from the profile. The column-to-finger
@@ -163,7 +180,15 @@ class StenoCodec:
             raise RuntimeError("the English transport code must have d_min=4")
         if len(set(MESSAGE_MASKS)) != 32 or 0 in MESSAGE_MASKS:
             raise RuntimeError("the English transport profile is not 32 nonzero words")
-        self._by_notation = {stroke.notation: index for index, stroke in enumerate(STROKE_LIBRARY)}
+        self._by_notation = {
+            form: index
+            for index, stroke in enumerate(STROKE_LIBRARY)
+            for form in (
+                stroke.notation,
+                _compact_notation(stroke),
+                _key_form(stroke),
+            )
+        }
         self._by_message = {mask: index for index, mask in enumerate(MESSAGE_MASKS)}
 
     def minimum_distance(self) -> int:
@@ -174,11 +199,20 @@ class StenoCodec:
         return tuple(zip(MESSAGE_MASKS, STROKE_LIBRARY))
 
     def encode_stroke(self, notation: str) -> int:
-        """Return the ten-bit physical mask for one exact profile notation."""
+        """Encode library notation, compact notation, or canonical key form."""
+        accepted_forms = (
+            "library notation (ST-PLT), compact notation (STPLT), "
+            "or key form (S-T--P--L--T)"
+        )
+        if not isinstance(notation, str) or not notation:
+            raise ValueError(f"stroke must use {accepted_forms}")
         try:
-            message = self._by_notation[notation]
+            message = self._by_notation[notation.upper()]
         except KeyError as exc:
-            raise ValueError(f"stroke not in English steno profile: {notation}") from exc
+            raise ValueError(
+                f"stroke {notation!r} is not in the English steno profile; "
+                f"accepted forms are {accepted_forms}"
+            ) from exc
         return MESSAGE_MASKS[message]
 
     def decode_mask(self, observed_mask: int) -> DecodeResult:

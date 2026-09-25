@@ -102,6 +102,32 @@ Tier 4 files.
 authority. Before it, a bare `WacomTouchReader()` silently received a different keyboard
 than the app, and no test could detect it because both layouts were self-consistent.
 
+## Cross-repository roles
+
+touch-steno owns the input system: PTH-660 capture, segmentation, decoding, English
+steno profile mapping, local replay, and measurement instruments. `commindv2` is a
+`REFERENCE_ONLY` eventual consumer and is locally inspectable. `commind` is a
+`REFERENCE_ONLY` concept canon and was NOT inspectable, so nothing about its implementation
+may be asserted. See [INTEGRATION_TARGETS.md](INTEGRATION_TARGETS.md) for the integration
+boundary and evidence limits.
+
+## Innovation branch registry
+
+The following four branches are research records, not silently implemented features:
+
+1. **FCPT / Fitts-cost phoneme target layout** — the optimiser is the strongest idea in
+   the project (recommendation), but its Fitts coefficients `a` and `b` have never been
+   fitted to this hand (unmeasured).
+2. **Continuous elastic word-as-event** — specified and self-scored 25/50; the acceptance
+   test ran and returned void because the pad was empty.
+3. **Contact-field / permutation-invariant gesture representation** — the only surviving
+   signal, measured at 0.4583 class-mean against 0.1250 chance; its labels were
+   thumb-compass cues, so a control experiment is still required.
+4. **English syllable-pair arithmetic** — 1.3965 syllables per 5-letter word means a fixed
+   syllable code needs 4.189 events per word, a 39 percent overshoot of the 1–2 event
+   premise (derived from the measured corpus arithmetic).
+ 
+
 ## Archive tag
 
 The state at the start of the design sprint is tagged `pre-sprint-2026-09-25`. The

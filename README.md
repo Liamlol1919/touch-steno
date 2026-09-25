@@ -8,6 +8,7 @@ Research and implementation notes for high-speed text input on a continuous touc
 - [SYSTEM_COMPARISON_MATRIX.md](SYSTEM_COMPARISON_MATRIX.md) — stenography, chord, gesture and tap-sequence systems.
 - [RECOMMENDED_ARCHITECTURES.md](RECOMMENDED_ARCHITECTURES.md) — five implementable architectures and PTH-660 deployment plan.
 - [CODE_REFERENCES.md](CODE_REFERENCES.md) — reusable open-source repositories and integration ideas.
+- [INTEGRATION_TARGETS.md](INTEGRATION_TARGETS.md) — touch-steno owns the input system (PTH-660 capture, segmentation, decoding, English steno profile mapping, local replay, and measurement instruments); it deliberately does not own the `commindv2` or `commind` repositories' implementations. `commindv2` is a `REFERENCE_ONLY` eventual consumer, while `commind` is a `REFERENCE_ONLY` concept canon that was not inspectable, so no claim about its implementation belongs here.
 - [EXPERIMENT_PROTOCOL.md](EXPERIMENT_PROTOCOL.md) — reproducible PTH-660 sensor, intent and ergonomics protocol.
 - [RESEARCH_LOG.md](RESEARCH_LOG.md) and [AGENT2_RESEARCH_LOG.md](AGENT2_RESEARCH_LOG.md) — living project and measurement logs.
 - [DECODER_DESIGN.md](DECODER_DESIGN.md) — state machine, feature contract, enslavement model and Plover bridge.
