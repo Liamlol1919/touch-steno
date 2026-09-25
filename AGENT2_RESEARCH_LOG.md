@@ -71,3 +71,21 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
 - `scripts/stroke_sink.py` closes the loop: Plover JSON, text transcript, optional uinput,
   with a retract path (the 360 WPM source makes undo/untranslate the cheapest speed win).
 - 36 tests green, pipeline end-to-end on all three real sessions and the benchmark.
+
+## 06:10–06:14 — latency, envelope, and a retraction
+- `scripts/latency_budget.py`: CPU cost 90-289 us/frame against a 91Hz budget of
+  10989 us/frame = 1-3% utilisation. The dominant cost is the 88ms detection window, not
+  compute. Sensor latency is explicitly NOT measurable from the logged stream and is stated
+  as such rather than assumed zero. Regression test pins the pipeline under 25% of a frame.
+- `scripts/stroke_sink.py`: the output hop (Plover JSON / transcript / optional uinput) with
+  a '*' retract path, because the 360 WPM source makes undo the cheapest speed win.
+- `scripts/envelope_sweep.py`: measured the (gesture length x cue rate) surface per gesture.
+- RETRACTION: the "3 Hz ceiling" from the previous entry was a metric artifact (events per
+  block instead of per-gesture matching). Re-measured: 100ms gestures 0% detected at every
+  rate; 150-350ms 100% detected at 1-6 Hz; 500ms 62%->36%. No 3Hz ceiling exists. The
+  useful envelope is 150-350ms. Correction posted to issue #11 and BENCHMARK_RESULTS.md §0.
+  I am recording the retraction rather than quietly fixing the number, because a confidently
+  wrong headline is worse than a gap.
+- Also unresolved and NOT claimed: direction accuracy differs between the two synthetic
+  generators (0.19-1.0 vs 1.00). No direction-accuracy capability is quoted from either until
+  the cued real session settles it.
