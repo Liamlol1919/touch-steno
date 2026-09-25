@@ -191,3 +191,62 @@ the pipeline audit:
 The pattern is the finding: the *harness* is the weakest link in this project, and it has now
 produced three wrong headlines in a row. It needs its own tests, and the rule for the rest of
 this work is: **a number is not a finding until the metric that produced it has a test.**
+
+## Addendum 2 (06:26) — the speed ceiling, derived from measurements rather than argued
+
+Two intermediate claims were wrong and are corrected first.
+
+1. **The reversal threshold is not the problem.** Sweeping `turn_deg` over 30–120° gives
+   *identical* results (acc 1.00 / 1.00 / 0.83 / 0.79 at 1/2/3/4 Hz). Only 150° breaks down
+   (0.06 at 3 Hz). So "B is under-tuned" was wrong.
+2. **The cycle budget is the problem.** Accuracy stays at 1.00 while the cue rate is below
+   `1 / (t_out + t_return)` and collapses above it:
+
+| return speed | return time | cycle limit | acc 1 Hz | 2 Hz | 3 Hz | 4 Hz |
+|---:|---:|---:|---|---|---|---|
+| 100 mm/s | 200 ms | 2.2 Hz | 1.00 | 1.00 | 0.83 | 0.62 |
+| 200 mm/s | 100 ms | 2.9 Hz | 1.00 | 1.00 | 0.83 | 0.79 |
+| 400 mm/s | 50 ms | 3.3 Hz | 1.00 | 1.00 | 1.00 | 0.04 |
+| 600 mm/s | 33 ms | 3.5 Hz | 1.00 | 1.00 | 1.00 | 0.04 |
+
+Above the limit the next out-stroke begins while the return is still running, so the first
+8 frames of the new gesture are contaminated — hence the collapse.
+
+### The ceiling
+
+With the measured minimum out-stroke of 150 ms and a 20 mm return:
+
+| out-stroke | return 600 mm/s | cycle | events/s | **WPM** (1.5 syll/word) |
+|---:|---:|---:|---:|---:|
+| 150 ms | 33 ms | 183 ms | 5.45 | **218** |
+| 200 ms | 33 ms | 233 ms | 4.29 | 171 |
+| 250 ms | 33 ms | 283 ms | 3.53 | 141 |
+| 350 ms | 33 ms | 383 ms | 2.61 | 104 |
+
+For comparison: 150 WPM needs a 267 ms cycle, 250 WPM a 160 ms cycle.
+
+**Consequence: 250 WPM is not reachable with an out-and-back gesture on this device.** A
+160 ms cycle cannot contain a 150 ms out-stroke plus any return at all. The measured ceiling
+is **~218 WPM in the most favourable corner** (150 ms out-stroke, 600 mm/s return) and
+**100–160 WPM for realistic gesture lengths**, which sits:
+
+- far **above** every published touch/chording system (16.8–55 WPM, CROSS_VALIDATION 1.8.1)
+- at or **below** the professional stenography band (180–225 WPM certification), and
+- consistent with it, because professional steno has a *key release* to segment on.
+
+So the honest claim is: **this architecture is a plausible path into the 100–200 WPM band,
+not a path to 250 WPM.** The 360 WPM record is reachable only with a device that can signal a
+release, which is the physical difference the whole project has been circling.
+
+### What would lift the ceiling
+
+Ranked by measured effect, all derived from the table above:
+
+1. **Shorter out-strokes** — the whole budget is linear in `t_out`, and 150 ms is already the
+   detection floor. Nothing below it works.
+2. **A smaller compass radius** — the return length is the other term. Halving r to 10 mm
+   halves the return, but `compass_geometry.py` shows the repositioning error then exceeds the
+   sector half-width by itself, so the return must stay.
+3. **Not paying for a return at all** — which is only possible if the surface can signal a
+   release, i.e. a different device class. This is the finding: the 0G surface spends its speed
+   budget on the return stroke.
