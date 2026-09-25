@@ -216,6 +216,8 @@ def main() -> int:
         "sector_samples": sectors_total,
         "sector_accuracy": round((axis_hits + diag_hits) / sectors_total, 3)
         if sectors_total else None,
+        "axis_accuracy": round(axis_hits / axis_total, 3) if axis_total else None,
+        "diagonal_accuracy": round(diag_hits / diag_total, 3) if diag_total else None,
         "chord": chord,
         "idle_false_events": rest_events,
         "idle_seconds": round(rest_seconds, 1),

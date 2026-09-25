@@ -34,7 +34,8 @@
 - [ ] Cued chord run: calibrate peak-ratio and lag thresholds; keep chords unimplemented until then.
 - [x] Stabilize a versioned raw-event JSONL schema and legacy replay path.
 - [ ] Add per-user rest/palm covariance calibration and replayable threshold sweeps.
-- [ ] Define opt-in privacy-safe telemetry and correction/undo metrics.
+- [x] Define correction/undo metrics with explicit motion-versus-text provenance.
+- [ ] Define opt-in privacy-safe telemetry for raw sessions.
 - [x] Normalize `guided_calibration.py` paired manifest records and make `evaluate_session.py`
   use one-to-one synthetic tempo/chord matching; legacy guided tempo remains aggregate mode.
 - [x] Add expected per-event cue timestamps to guided tempo capture; evaluator labels them
@@ -134,3 +135,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [ ] A real cued correction capture and text-sink repair log remain outstanding.
 - [x] Hardened correction metrics: motion is named as detected-event latency, rates use total
   correction exposure, and text repair requires typed monotonic undo records.
+
+## Iteration 13 — 2026-09-25 07:21–07:30 CEST
+
+- [x] Added typed correction repair-log validation and corrected exposure-based rates.
+- [x] Fixed evaluator text mode to expose axis/diagonal keys present in its result contract.
+- [x] Added CLI regression coverage for human-readable evaluation output.
+- [ ] Real correction capture with a Plover/text repair log remains outstanding.
