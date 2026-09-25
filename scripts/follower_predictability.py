@@ -118,3 +118,50 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+def lag_profile(rows, a: str, b: str, max_lag: int = 5) -> dict:
+    """Cross-correlation of a and b's step vectors at integer frame lags.
+
+    Distinguishes the two coupling classes by their TEMPORAL SHAPE, not their magnitude:
+    a mechanical finger coupling is sharp (correlation collapses within 1-2 frames), while
+    the cross-hand relation measured at ~100 mm is broad and simultaneous (still above half
+    its peak at 4-5 frames). Measured on the ten-finger session:
+
+        64->61  within-hand   r(lag 0) = +0.958, half-width 2 frames
+        73->55  cross-hand    r(lag 0) = -0.859, half-width 5 frames
+
+    Both peak at lag 0, so there is no latency a decoder could wait out. The cross-hand
+    relation is a standing constraint, not a delayed reaction.
+    """
+    seq = []
+    for row in rows[1:]:
+        if a not in row or b not in row:
+            continue
+        if max(row, key=lambda k: math.hypot(*row[k])) != a:
+            continue
+        seq.append((row[a][0], row[a][1], row[b][0], row[b][1]))
+    out = {}
+    for lag in range(-max_lag, max_lag + 1):
+        num = da = db = 0.0
+        for i in range(len(seq) - abs(lag)):
+            j = i + (lag if lag > 0 else 0)
+            k = i + (-lag if lag < 0 else 0)
+            ax, ay = seq[j][0], seq[j][1]
+            bx, by = seq[k][2], seq[k][3]
+            num += ax * bx + ay * by
+            da += ax * ax + ay * ay
+            db += bx * bx + by * by
+        out[lag] = num / math.sqrt(da * db) if da > 0 and db > 0 else float("nan")
+    return out
+
+
+def half_width_frames(profile: dict) -> int | None:
+    """Smallest lag at which |r| drops below half the zero-lag peak."""
+    peak = abs(profile.get(0, 0.0))
+    if peak == 0:
+        return None
+    for lag in sorted(k for k in profile if k >= 0):
+        if abs(profile[lag]) < 0.5 * peak:
+            return lag
+    return None

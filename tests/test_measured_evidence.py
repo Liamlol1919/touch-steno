@@ -730,6 +730,41 @@ class TestCompassSurface(unittest.TestCase):
         self.assertLess(abs(m) / math.sqrt(var), 0.1,
                         "the direction error must be variance, not a correctable bias")
 
+
+class TestCouplingTimingSignature(unittest.TestCase):
+    """The two coupling classes differ in temporal SHAPE, not only in magnitude."""
+
+    def test_sharp_pair_peaks_at_lag_zero_and_collapses_fast(self):
+        import follower_predictability as fp
+        rows = []
+        for i in range(80):
+            rows.append({"1": (1.0, 0.0), "2": (0.65, 0.0)})
+            rows.append({"1": (0.0, 0.0), "2": (0.0, 0.0)})
+        prof = fp.lag_profile(rows, "1", "2", max_lag=4)
+        self.assertAlmostEqual(prof[0], 1.0, places=6)
+        self.assertLess(fp.half_width_frames(prof), 3,
+                        "a mechanical parallel coupling is sharp")
+
+    def test_broad_pair_stays_correlated_over_several_frames(self):
+        import follower_predictability as fp
+        import math
+        rows = []
+        for i in range(120):
+            # leader moves in bursts of 5 frames; follower trails the burst envelope,
+            # so the relation spans several frames but still peaks at zero lag
+            lead = 1.0 if (i // 5) % 2 == 0 else 0.0
+            follow = 1.0 if ((i + 1) // 5) % 2 == 0 else 0.0
+            rows.append({"1": (lead, 0.0), "2": (-0.5 * follow, 0.0)})
+        prof = fp.lag_profile(rows, "1", "2", max_lag=6)
+        self.assertLess(abs(prof[0]), 1.0)
+        del math
+
+    def test_half_width_is_none_when_nothing_decays(self):
+        import follower_predictability as fp
+        prof = {0: 0.5, 1: 0.4, 2: 0.3}
+        self.assertIsNone(fp.half_width_frames(prof),
+                          "a profile that never halves has no half-width")
+
 class TestQuantileHelpers(unittest.TestCase):
     def test_quantile_bounds(self):
         vals = [float(i) for i in range(100)]
