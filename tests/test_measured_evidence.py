@@ -907,5 +907,30 @@ class TestCandidateRanking(unittest.TestCase):
         self.assertAlmostEqual(b, 2 * a, places=6)
 
 
+    def test_word_retraction_costs_one_action_not_one_per_character(self):
+        import candidate_ranking as cr
+        m = cr.SymbolModel.from_counts(
+            {"a": 100, "e": 100, "l": 50, "o": 80},
+            {("a", "l"): 20, ("l", "o"): 18, ("o", "v"): 15, ("v", "e"): 20})
+        words = [[[("a", 0.6), ("e", 0.3)], [("l", 0.4), ("o", 0.35)],
+                  [("o", 0.55), ("i", 0.2)], [("e", 0.5), ("a", 0.3)],
+                  [("v", 0.45), ("b", 0.2)]]]
+        text, log = cr.decode_words(words, m)
+        self.assertEqual(len(log), 1)
+        self.assertEqual(log[0]["action"], "retract_word")
+        self.assertEqual(log[0]["cost_actions"], 1)
+        self.assertGreater(len(log[0]["weak_positions"]), 1,
+                           "the point is that several weak characters cost one action")
+
+    def test_clean_words_still_commit(self):
+        import candidate_ranking as cr
+        m = cr.SymbolModel.from_counts(
+            {"a": 100, "l": 50, "o": 80, "v": 50},
+            {("a", "l"): 20, ("l", "o"): 18, ("o", "v"): 15})
+        words = [[[("a", 0.98)], [("l", 0.97)], [("o", 0.96)], [("v", 0.95)]]]
+        text, log = cr.decode_words(words, m)
+        self.assertEqual(log[0]["action"], "commit")
+        self.assertIn("a", text)
+
 if __name__ == "__main__":
     unittest.main()

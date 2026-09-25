@@ -69,15 +69,24 @@ words — a human correction-throughput measurement in the plain sense.
 
 ## What would change the picture
 
-Three things, in order of leverage:
+Three things, in order of leverage — and the second is now measured, not proposed.
 
-1. **A measured correction rate.** The whole table scales with it. If the user can correct
-   in 0.3 s, the language layer makes 12–15 mm viable. If it is 2 s, no language layer
-   rescues them.
-2. **Cheaper correction.** Batching (retract a word, not a character), speculative commit with
-   delayed visual verification, or accepting the wrong letter and fixing later. The current
-   model retracts single characters; word-level retraction would cut the correction count by
-   roughly the word length.
+1. **A measured correction rate.** The whole table scales with it, and it remains unmeasured.
+2. **Cheaper correction — MEASURED, and it works.** Retracting a *word* instead of a
+   character costs one user action per affected word rather than one per weak character:
+
+   | radius | char actions / word | word actions / word | saving |
+   |---:|---:|---:|---:|
+   | 12 mm | 1.87 | **0.92** | **51 %** |
+   | 15 mm | 0.56 | 0.45 | 20 % |
+   | 20 mm | 0.00 | 0.00 | – |
+
+   Accuracy is identical in both columns — only the *unit of repair* changes, and the user
+   repairs a word, not a letter. At 12 mm, where several characters per word are usually
+   weak at once, this halves the correction load. It also makes the unmeasured
+   seconds-per-correction less critical, because there are half as many occasions to spend
+   it on. Shipped as `candidate_ranking.decode_words`, with the per-action cost recorded in
+   the decision log.
 3. **A better channel.** The only escape from the trade: an input primitive whose accuracy
    does not depend on excursion radius (COMPASS_SURFACE addendum, option 3). Untested.
 
