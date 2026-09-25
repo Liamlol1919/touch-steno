@@ -203,3 +203,11 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Made `replay_sweep()` reuse the recorded threshold; legacy artifacts default to `1.0`.
 - [x] Added a behavioral test proving a below-threshold gesture candidate is excluded and replay preserves the selected candidate.
 - [ ] Real user-specific gesture-coverage measurements remain outstanding; no hardware result was added.
+
+## Iteration 22 — 2026-09-25
+
+- [x] Added `lexicon_decoder.py` for bounded top-3, word-level lexicon-constrained search.
+- [x] Added explicit `resolved`, `ambiguous`, and `unreachable` outcomes without text commitment.
+- [x] Kept the language prior tie-only and preserved candidate provenance in the result.
+- [x] Removed stale withdrawn correction/WPM claims from `LM_RECOVERY.md`.
+- [ ] Correctly conditioned cued candidate capture and downstream re-measurement remain outstanding.

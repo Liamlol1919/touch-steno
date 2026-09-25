@@ -35,6 +35,8 @@ Research and implementation notes for high-speed text input on a continuous touc
   Plover JSON outline/translation validation with collision lint.
 - [CANDIDATE_RANKING.md](CANDIDATE_RANKING.md) and `scripts/candidate_ranker.py` —
   confidence/language ranked candidates without committing text.
+- [LEXICON_DECODING.md](LEXICON_DECODING.md) and `scripts/lexicon_decoder.py` —
+  top-3 candidate search over a lexicon without committing text.
 - `tests/` — standard-library unit tests for decoder invariants, measured constants and benchmark artefacts.
 
 ## Important evidence note

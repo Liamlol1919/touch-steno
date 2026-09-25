@@ -161,40 +161,34 @@ conditioning and must be re-measured once the decoder is correct.
 lines), the 91 Hz timing, the 88 ms evidence floor, the coupling structure and its temporal
 signatures, and the decision that seconds-per-correction is unmeasured in the literature.
 
+## Implementation status
+
+`scripts/lexicon_decoder.py` now implements the corrected search boundary: it consumes
+bounded top-3 sensor candidates, searches a supplied lexicon word-by-word, preserves
+candidate provenance, and uses a word prior only for exact sensor-score ties. It returns a
+reversible proposal, not committed text. This is an implementation result, not a new
+accuracy or WPM measurement; the existing greedy recovery table remains withdrawn.
+
 ## What would change the picture
 
-Three things, in order of leverage — and the second is now measured, not proposed.
+Three things, in order of leverage:
 
-1. **A measured correction rate.** The whole table scales with it, and it remains unmeasured.
-2. **Cheaper correction — MEASURED, and it works.** Retracting a *word* instead of a
-   character costs one user action per affected word rather than one per weak character:
-
-   | radius | char actions / word | word actions / word | saving |
-   |---:|---:|---:|---:|
-   | 12 mm | 1.87 | **0.92** | **51 %** |
-   | 15 mm | 0.56 | 0.45 | 20 % |
-   | 20 mm | 0.00 | 0.00 | – |
-
-   Accuracy is identical in both columns — only the *unit of repair* changes, and the user
-   repairs a word, not a letter. At 12 mm, where several characters per word are usually
-   weak at once, this halves the correction load. It also makes the unmeasured
-   seconds-per-correction less critical, because there are half as many occasions to spend
-   it on. Shipped as `candidate_ranking.decode_words`, with the per-action cost recorded in
-   the decision log.
-3. **A better channel.** The only escape from the trade: an input primitive whose accuracy
-   does not depend on excursion radius (COMPASS_SURFACE addendum, option 3). Untested.
+1. **A measured correction rate.** The usable-WPM calculation still needs real
+   seconds-per-correction observations.
+2. **A conditioned end-to-end re-measurement.** Feed the decoder candidate sets generated
+   from observed sectors, then measure reachable-word selection, ambiguity, correction load,
+   and usable rate. Do not reuse the withdrawn greedy-character table.
+3. **A better channel.** An input primitive whose accuracy does not depend on excursion
+   radius remains untested (COMPASS_SURFACE addendum, option 3).
 
 ## Honest limits
 
-- The LM is a character bigram — the weakest useful model. A stronger LM would recover more,
-  and would also retract less, so both columns move in our favour.
-- The model is trained on the same lexicon the targets come from, which is optimistic. A real
-  deployment faces a broader and partly unseen vocabulary.
-- Words are decoded independently except for the bigram context; no beam search, no
-  lookahead, no error model over the channel.
-- The confusion matrix is synthetic-but-calibrated. The cued session replaces it.
+- The top-3 availability and reachable-word figures are ceilings from a calibrated,
+  synthetic-but-measured confusion experiment, not PTH-660 results.
+- The lexicon search has not yet been connected to a real cued candidate stream.
+- The decoder does not measure correction cost, user acceptance, or Plover output.
+- The confusion matrix and candidate priors need replacement by cued hardware data.
 
-Even with all four caveats pointing the same way, the qualitative result is robust: **at an
-ergonomic radius the language layer converts a 6–16 %-accurate channel into something usable
-only if corrections are cheap, and the cost of corrections is the unmeasured quantity that
-decides the product.**
+The corrected conclusion is limited but useful: at an ergonomic radius, the channel often
+retains the target symbol in a small candidate set; whether a word-level decoder can select
+the right reachable word, and whether corrections are affordable, remains to be measured.
