@@ -16,6 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import kinematics  # noqa: E402
+import intent_filter  # noqa: E402
 import session_manifest  # noqa: E402
 
 
@@ -99,6 +100,7 @@ def load_repair_events(path: Path | None) -> list[dict] | None:
             raise SystemExit("repair log requires a non-empty cue_id")
         if record.get("clock") != "monotonic":
             raise SystemExit("repair log requires clock=monotonic")
+    return records
 
 
 

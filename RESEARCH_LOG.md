@@ -313,3 +313,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Closed issue #14 after the unsupported speed-ceiling headline was explicitly corrected in benchmark documentation.
 - [x] Kept the 100–218 WPM range labelled arithmetic/unmeasured and the realized-rate requirement explicit.
 - [x] No new rate, WPM, or hardware result was added.
+
+## Iteration 37 — 2026-09-25
+
+- [x] Fixed `correction_metrics.load_repair_events()` to return validated records.
+- [x] Imported `intent_filter` for the public `evaluate()` path.
+- [x] Added loader-return and manifest/motion integration tests.
+- [x] Preserved the explicit distinction between detected motion and typed text repair.

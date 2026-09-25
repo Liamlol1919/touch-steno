@@ -8,6 +8,7 @@ SCRIPTS = Path(__file__).resolve().parent.parent / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 import correction_metrics  # noqa: E402
+import kinematics  # noqa: E402
 
 
 class TestCorrectionMetrics(unittest.TestCase):
@@ -51,6 +52,31 @@ class TestCorrectionMetrics(unittest.TestCase):
                             encoding="utf-8")
             with self.assertRaises(SystemExit):
                 correction_metrics.load_repair_events(path)
+    def test_repair_loader_returns_validated_records(self):
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "repair.jsonl"
+            record = {"t": 1.5, "type": "text_repair", "action": "undo",
+                      "cue_id": "correction-0000", "clock": "monotonic"}
+            path.write_text(json.dumps(record) + "\n", encoding="utf-8")
+            self.assertEqual(correction_metrics.load_repair_events(path), [record])
+
+    def test_evaluate_uses_motion_detector_and_manifest(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            capture = root / "capture.jsonl"
+            with kinematics.Recorder(capture) as recorder:
+                for i in range(20):
+                    recorder.frame(1.0 + i * 0.011,
+                                   {1: (float(i * 2), 0.0, 1.0)})
+            manifest = root / "capture.manifest.jsonl"
+            manifest.write_text(json.dumps({
+                "label": "corr_undo", "cue_id": "correction-0000",
+                "t_start": 1.0, "t_end": 2.0, "correction_block": True,
+            }) + "\n", encoding="utf-8")
+            report = correction_metrics.evaluate(capture)
+        self.assertEqual(report["undo_cues"], 1)
+        self.assertEqual(report["motion_observed"], 1)
+        self.assertEqual(report["detail"][0]["motion_status"], "DETECTED")
 
 
 if __name__ == "__main__":
