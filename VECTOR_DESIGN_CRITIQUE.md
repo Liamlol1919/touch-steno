@@ -251,18 +251,27 @@ anchor is for — but two design rules follow:
 | parameter | design intent | MVP value | why |
 |---|---|---|---|
 | thumb zones | 16 + neutral | **8 + neutral** | 9.3σ vs 1.8σ worst-frame margin (§2) |
-| second thumb ring (inner/outer) | simultaneous | **time-divided** or dropped | mirrored coupling, not correctable (§4) |
+| **compass radius** | 20–30 mm assumed | **12–15 mm** | measured envelope 24.6 × 18.2 mm sits on the published 70 %-comfort box; r=30 sweeps 60 mm and fits neither comfort envelope (COMPASS_SURFACE) |
+| direction accuracy at that radius | — | **0.58–0.68** | so the **language layer is the correctness lever**, not the speed lever |
+| second thumb ring (inner/outer) | simultaneous | **time-divided** or dropped | mirrored coupling, r² 0.10–0.25 (§4) |
 | event window | ~40 ms | **8 frames ≈ 88 ms** | above every measured resting run (§3) |
-| velocity gate | >80 mm/s | **≥ 40 mm/s, 8 frames** | 80 mm/s alone is inside the rest spike range |
-| displacement | >2 mm | **≥ 7.9 mm over 88 ms** (one 8-way zone at r=20) | rest drift is 11.5 mm/20 s; windowed only |
-| follower suppression | fixed 65 % | **measured per-pair matrix, parallel pairs only** | β 0.55–0.69, cos θ > 0.87 for fingers; mirrored for thumbs (§4) |
-| chord policy | simultaneous two-thumb | **one active thumb per stroke** until mirrored coupling is characterised | removes the unfixable case |
-
+| velocity gate | >80 mm/s | **≥ 40 mm/s, 8 frames** | 80 mm/s alone is inside the rest spike range; raising it to 60 costs 350–500 ms gesture coverage |
+| displacement | >2 mm | **windowed, ~5 mm over 88 ms** | rest drift is 11.5 mm/20 s, so displacement is valid only inside the window; the old 7.9 mm figure assumed r=20 |
+| follower suppression | fixed 65 % | **measured per-pair matrix, judged by r²** | r² is the criterion, not the sign; plus half-width ≤ 3 frames to exclude the broad cross-hand class (SEPARATION_MODEL 4b) |
+| chord policy | simultaneous two-thumb | **one active thumb per stroke** until mirrored coupling is characterised | removes the one unfixable pair class |
 Every row is a *measurement-backed* narrowing. None of them changes the architecture's
 shape: still 2 thumbs + 2 index fingers as the active set, still a vector/compass concept,
 still vector-shaped steno input. They make it fire correctly on day one and keep every
 path to the 16-zone version open, with a stated acceptance criterion for when it becomes
 justified.
+
+**What the radius row changes beyond the table.** At 12–15 mm the compass produces 32–42 %
+label error by construction. That is not a defect to tune away — it is outside the hand's
+comfort envelope to do better — so the language model, the dictionary and the correction
+path are what make the input usable. They stop being the speed lever (the 360 WPM source's
+argument) and become the **correctness lever**. If only one thing gets built after the
+detector, it should be ranked-candidate decoding with an LM in the loop, not a better
+threshold.
 
 ## 8. Falsification tests (what would change this review)
 
