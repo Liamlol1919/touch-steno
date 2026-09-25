@@ -801,3 +801,27 @@ syllable entropy), `2^8.852 = 461.98` (German syllable entropy).
 `1.396494 × e` events per 5-letter word — **4.189** at 3 events per syllable, 5.586 at 4,
 6.982 at 5. All exceed the 1–2 premise. English's lower syllable count makes the overshoot
 smaller than German's, not absent.
+
+---
+
+## 11. Sprint execution record — what was actually run
+
+The plan called for 50 raw ideas narrowed to 10, then 5 critics per candidate, then 3
+finalists with 5 more critics each. What was actually executed, stated plainly because the
+difference matters:
+
+| Stage | Planned | Executed |
+|---|---|---|
+| Ideation agents | broad | **22** across three waves, 12 input families then 10 new organising principles |
+| Shortlist | 10 | **10**, from the first wave |
+| Critics, round 1 | 5 axes × 10 | **5 independent critics on each of 10 candidates** (the agents each covered all five axes adversarially) |
+| Finalists | 3 | **3**: F1 lattice, F2 word-as-event, F3 field census |
+| Critics, round 2 | 5 axes × 3 | **5 on F2**, then **5 on the winner Thread-Rosette** |
+| Field separability | 1 experiment | **run on real data**, result above |
+| Instruments | — | reader ellipse capture, geometry probe, field separability script |
+
+**All ten round-1 candidates were killed at 10–21 / 50.** The sprint winner scored 36/50 on
+sponsor scores and **11/50 across five adversarial critics**. No concept survived. The
+surviving result is not a concept: it is that the ten-contact field carries class
+information at 45,8 % against 12,5 % chance, which reopens a design space the gate
+numbers had appeared to close.
