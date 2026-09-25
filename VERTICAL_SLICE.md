@@ -147,3 +147,35 @@ result from compass labels that may not transfer. Timing figures are arithmetic 
 the sensor event rate; whole-hand shapes are far slower and the real rate is unmeasured.
 
 **This concept has never been run. It is a specification, not a result.**
+
+---
+
+## 10. Status: UNVALIDATED — the acceptance test has not produced a result
+
+`scripts/field_gesture_probe.py` was executed on 2026-09-25 with `--seconds 3 --reps 2`:
+20 cues, **0 frames captured**.
+
+The cause was established rather than assumed. A direct five-second read of
+`/dev/input/event19` returned **0 events** with the device openable and no process holding
+it. The digitiser was readable and unobstructed; **nothing was resting on the pad**. The
+capture is therefore **void, not failed** — and the tool reported exactly that, which is the
+behaviour fixed in `b96f7cc`.
+
+**No result exists.** The 45,8 % figure in §1 comes from thumb-compass labels in a different
+session and says nothing about this concept's viability on field gestures. The deciding
+number in §6 remains unmeasured, and the acceptance criterion in §7 remains unapplied.
+
+### What this means for the project's status
+
+| | |
+|---|---|
+| Vertical slice | specified, self-scored 25/50, **untested** |
+| Design space | **open** — neither closed nor confirmed |
+| Compass / single-thumb families | closed on measurement, independently of this |
+| Ten-contact field | the only surviving direction, **evidence incomplete** |
+
+**This document must not be cited as evidence that field-based input works.** It is a
+specification with a pre-registered kill criterion that has not yet been applied. The
+honest summary of the sprint is: *the instrument was measured and found wanting, one
+signal survived scrutiny, and the test that would confirm or kill it requires a hand on the
+pad.*
