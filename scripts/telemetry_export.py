@@ -30,12 +30,30 @@ def _median(values):
     return _finite(statistics.median(clean)) if clean else None
 
 
+def _first_envelopes(paths: list[Path]) -> dict[str, int]:
+    counts = {"v1": 0, "legacy_unversioned": 0}
+    for path in paths:
+        with path.open(encoding="utf-8") as fh:
+            first = next((line for line in fh if line.strip()), None)
+        if first is None:
+            raise ValueError(f"empty raw session: {path.name}")
+        record = json.loads(first)
+        if record.get("schema") == raw_schema.SCHEMA and record.get("version") == raw_schema.VERSION:
+            counts["v1"] += 1
+        elif "schema" not in record and "version" not in record:
+            counts["legacy_unversioned"] += 1
+        else:
+            raise ValueError("unsupported raw frame envelope")
+    return counts
+
+
 def export_telemetry(paths: list[Path], min_frames: int = 50) -> dict:
     """Return aggregate timing and contact-group statistics only.
 
     No path, session name, contact ID, coordinate, timestamp, user ID, or text field is
     copied into the result. Raw JSONL remains a separate, explicitly controlled artifact.
     """
+    input_envelopes = _first_envelopes(paths)
     reports = [real_session_evidence.analyse(path, 100.0, 20.0) for path in paths]
     groups = real_session_evidence.group_summary(reports, min_frames)
     timing = {
@@ -60,6 +78,7 @@ def export_telemetry(paths: list[Path], min_frames: int = 50) -> dict:
         "provenance": {
             "raw_frame_schema": raw_schema.SCHEMA,
             "raw_frame_version": raw_schema.VERSION,
+            "input_envelopes": input_envelopes,
             "source_sessions": len(reports),
         },
         "timing": timing,
@@ -72,7 +91,11 @@ def main() -> int:
     ap.add_argument("sessions", nargs="+", type=Path)
     ap.add_argument("--min-frames", type=int, default=50)
     ap.add_argument("--out", type=Path)
+    ap.add_argument("--consent", action="store_true",
+                    help="confirm consent to export aggregate telemetry")
     args = ap.parse_args()
+    if not args.consent:
+        ap.error("--consent is required; telemetry export is opt-in")
     report = export_telemetry(args.sessions, args.min_frames)
     text = json.dumps(report, indent=2, sort_keys=True, allow_nan=False)
     if args.out:

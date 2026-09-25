@@ -151,3 +151,4 @@ mapping is collected and the resulting identity model is evaluated across sessio
   session names enter telemetry.
 - [x] Raw JSONL remains a separate restricted artifact; no raw export switch was added.
 - [ ] Local privacy review and real consented capture remain outstanding.
+- [x] CLI now requires explicit `--consent`; raw/aggregate boundary is enforced by code.

@@ -20,10 +20,10 @@ raw-data switch; raw JSONL remains a separately controlled artifact.
 
 ```bash
 python3 scripts/telemetry_export.py session.jsonl [more.jsonl ...] \
-  --out telemetry.json
+  --consent --out telemetry.json
 ```
 
-Use `--min-frames` to exclude short contacts from pooled group statistics.
+The explicit `--consent` flag is required; without it the CLI refuses to export.
 
 ## Consent and retention
 
