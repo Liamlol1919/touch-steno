@@ -250,3 +250,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Preserved the unverified tracking-ID/anatomical-label boundary in the report.
 - [x] Added synthetic in-memory analyzer tests for timing, episodes, invalid cues, correlation, and manifest identity.
 - [ ] No hardware bimanual result is claimed; the analyzer now needs a real cued capture.
+
+## Iteration 28 — 2026-09-25
+
+- [x] Closed issue #6: training-path and starter-brief documentation is complete.
+- [x] Closed superseded issue #20: the old greedy LM escalation and quantitative claims were explicitly retracted.
+- [x] Kept real cued hardware, correction-time, and rate measurements open in the remaining issues.
+- [x] No new hardware, WPM, or training-performance result was added.
