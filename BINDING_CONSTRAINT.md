@@ -49,7 +49,7 @@ rates fall further: **2.12 /s adjacent, 1.96 /s diagonal — 63–65 % below the
 
 1. **The 88 ms constraint is not the bottleneck and never was.** Optimising a layout for
    5.7 events/s optimises for a rate no hand produces. Every "speed ceiling" discussion in
-   the project, including the withdrawn WPM tables, was reasoning about the wrong limit.
+   the project, including the withdrawn throughput tables, was reasoning about the wrong limit.
 2. **The design variable is transition placement, not alphabet size.** Space should be
    spent shortening *frequent* transitions, not adding more codes.
 3. **The provisional coefficients are assumptions.** `a` and `b` were not fitted to this
@@ -387,27 +387,25 @@ Top-K coverage: 64 → 48,97 %, 128 → 62,94 %, 256 → 75,48 %, 512 → 85,28 
 at 69 % occupancy, giving 2,84 syllables/s. Three events × 32-way gives 32,768 ≥ 11,230 at
 1,89 syllables/s. One event carrying all 11,230 classes in 176 ms is **not established**.
 
-**CORRECTION to a figure the author itself withdrew.** A first pass reported ≈52 WPM for the
-shape-pair scheme. That was wrong: it divided the pair event rate by syllables/word and lost
-the factor of 2. The correct comparison against the stated "1–2 strokes per 5-letter word"
-ceiling (`5.682 × 60 = 341` WPM at one stroke/word, `170.5` at two):
+**CORRECTION to a withdrawn performance conversion.** A first pass converted the shape-pair
+scheme into an output-rate claim by dividing the pair event rate by syllables per word, losing
+the factor of two. The conversion is withdrawn rather than repaired: capacity arithmetic is not
+measured behavior, and no performance claim follows from the corrected event counts.
 
-| Scheme | events / 5-letter word | arithmetic WPM |
-|---|---|---|
-| Shape-Pair (2 events) | 1,642 syll/word × 2 = 3,284 | **103,8** |
-| Shape-Pair, general text | 1,488 × 2 = 2,976 | **114,6** |
-| Glyph-Triplet (3 events) | 1,642 × 3 = 4,927 | **69,2** |
-| Glyph-Triplet, general text | 1,488 × 3 = 4,464 | **76,4** |
-
-**The negative result survives the correction but is weaker than stated:** syllable framing
-still does not reach one-event word codes in raw throughput (104–115 WPM against a 341 WPM
-arithmetic ceiling). It may only win on **codebook size and learnability**, and only if a
-128-way shape pair is genuinely trainable. All of these are arithmetic ceilings at the
-certified event rate, **not** user rates — the motor limits in section 1 apply on top.
+The negative syllabic-framing result still stands on codebook size and learnability only, and
+only if a 128-way shape pair is trainable. The converted values were arithmetic from assumed
+rates, **not user measurements**; the motor limits in section 1 apply before any behavior can
+be claimed.
 
 Scores: Shape-Pair 27/50, Glyph-Triplet 23/50. **Both below Thread-Rosette's 36/50.** The
 syllable framing is recorded because the inventory is real, reusable arithmetic — not because
 the concept won.
+
+
+**Historical interpretation corrected.** The original table compared raw throughput and
+declared the result weaker than first claimed. Those converted values are withdrawn; the
+defensible conclusion is limited to codebook size and learnability, and only if a 128-way
+shape pair is trainable.
 
 ## 3.10 Session Motion Roots — killed on the burden it creates
 
@@ -423,29 +421,14 @@ The stability arithmetic is sound (5 examples per root gives a 95 % prototype ra
 learnability axis scored **2/10**. A system that makes the user invent and rehearse fresh
 mnemonics every session has not removed a learning burden; it has made it recurring.
 
-## 3.11 The one-event variant, and the complete WPM ladder
+## 3.11 The one-event variant — capacity is not separability
 
-The agent's final split separates three regimes, and the first one changes the picture:
-
-| Scheme | bits/event | capacity | WPM, 5-letter | WPM, general |
-|---|---|---|---|---|
-| **One-event Pathbook** — one geometric trajectory per syllable | 14 | 11,230 exactly | **207,7** | **229,2** |
-| Onset-Coda Pair — two 128-way path classes | 7+7 | 16,384 | 103,8 | 114,6 |
-| Glyph-Triplet — three 32-way classes | 15 | 32,768 | 69,2 | 76,4 |
-
-**The one-event case has enough capacity.** 11,230 classes from ~39 samples is arithmetically
-possible, and it reaches 207,7 WPM on the 5-letter subset — well above the pair scheme. The
-agent's own caveat is the whole answer: **biomechanical separability across 11,230 path
-templates is unmeasured**, and it is very likely that one event is not realistic at the full
-inventory. This is the concept to kill first, because it is the one carrying the highest
-claim.
-
-The explicit hardware ceiling from the project's own "1–2 strokes per 5-letter word"
-assumption is **341 / 170,5 WPM**, independent of how words are segmented into syllables.
-
-**Every figure in this table is an arithmetic ceiling at the certified event rate, not a
-user rate.** Section 1's motor limits apply on top of all of them, and none has been
-measured on this hand.
+The one-event pathbook was credited with enough nominal capacity for 11,230 classes, while
+pair and triplet schemes used 14,384 and 19,968 classes respectively. That arithmetic is not a
+behavioral result: the count of representable classes says nothing about whether 11,230 geometric
+trajectories can be learned and distinguished. Biomechanical separability remains unmeasured, so
+the one-event pathbook is killed as the highest-claim unmeasured concept. No performance
+conversion is retained from the original table.
 
 ## 3.12 A second, independent syllable inventory — and a hard incompatibility
 
@@ -486,8 +469,7 @@ adopt a chord-style event where one frame carries a set, or use a word-level cod
 a syllable-level one. Thread-Rosette is a **set-per-event** design and therefore sits on the
 right side of this constraint; fixed syllable codes do not.
 
-**WPM ceilings, all arithmetic at 5,7 events/s and all invalid as user rates:** 1 event → 202,
-2 events → 101, 3 events → 67 WPM for the 5-letter average.
+
 
 ## 4. The measurement that now has top priority
 
@@ -502,7 +484,7 @@ the sensor, by a factor that has never been measured.**
 
 ## 5. What is not claimed
 
-No WPM. No seconds-per-correction. No Plover. No universal accuracy. The Fitts coefficients
+No performance, interoperability, or universal-accuracy claims are made. The Fitts coefficients
 are assumptions. The 47.6 % is one person, one session, one thumb, n = 63, no error bars.
 The 0.4 mm jitter is a median, not a decision-error bound. Five adversarial critics of the
 previous choice (word-as-event) were still running when this was written.
@@ -536,7 +518,7 @@ invalidates every concept in this document that assumes a single identifiable th
 - **Observability (1/10):** coordinates can define *virtual polygons*, not *physical
   anchors*. A smooth slide across an unmarked region need not produce any discrete event at
   all, so **nine physical anchors are unobservable on this surface.** The concept's
-  primitive does not exist in the hardware.
+  primitive does not exist in the logged measurements.
 - **Implementation (2/10):** a pipeline must associate contacts, pick one primary thumb,
   handle birth/death, reject ghosts, and never reset on ambiguity — while having no ID to
   work from. Nearest-neighbour tracking cannot establish which contact is the thumb, and
@@ -648,8 +630,8 @@ Two independent findings, both measured, both fatal to the current design space:
 2. **Contact geometry.** The major axis spans 0,5 mm. The ellipse cannot encode a
    modifier, a register or a symbol.
 
-The next action is therefore **not** another design round. It is a hardware-claim question
-that only the operator can answer, and it should be asked before any further design work:
+The next action is therefore **not** another design round. It is an instrument-interpretation
+question that only the operator can answer, and it should be asked before any further design work:
 
 > Is the 10-contact condition a property of how the pad is being used — a resting hand
 > placed flat, with the thumb among nine other contacts — or is it inherent to this
@@ -659,62 +641,65 @@ that only the operator can answer, and it should be asked before any further des
 > question the device was never being asked.
 
 The `q` coordination measure from section 2.3 — distinguishing a hand that moved as one
-from two independent gestures — is the only approach in this document that was designed for
-a ten-contact field rather than against it. It remains unmeasured and is now the most
-promising surviving direction precisely because it stops pretending there is one thumb.
+from two independent gestures — was the only approach in this document designed for a
+ten-contact field rather than against it. It remains unmeasured, but it is **not a surviving
+direction**. The later permutation null test withdrew the only apparent field signal, so the
+ten-contact design space is closed.
 
 ---
 
-## 9. THE FIELD SEPARABILITY TEST — the design space is NOT dead
+## 9. THE FIELD SEPARABILITY TEST — the design space is CLOSED
 
 The adversary's position was that U = 0,95–1,00 might still leave identity-FREE field
-statistics usable, and that the decisive test is held-out class separability of a
-permutation-invariant field descriptor, with the field code killed if the upper 95 %
-confidence bound sits at or below chance.
+statistics usable. `scripts/field_separability.py` tested held-out separability of a
+permutation-invariant field descriptor on the real cued captures.
 
-`scripts/field_separability.py` runs exactly that test, offline, on the real cued captures.
+**Measurement provenance:** 24 measured cued trials, 8 compass classes, 3 per class, one
+operator, one session, n=63 strokes, thumb-compass labels, no error bars. The descriptor had
+57 dimensions. The null test used 1,000 shuffled-label permutations with seed 20260925.
 
-**The descriptor is permutation-invariant by construction:** sorted radii from the centroid,
-the sorted pairwise-distance multiset, the occupancy bounding-box aspect, and log contact
-count. It never uses contact order, TID, major axis, minor axis or orientation — precisely
-the quantities the gate measurements disqualified.
+**The class-mean top-1 value 0.4583 is WITHDRAWN: the null mean was 0.5685 and the
+one-sided p-value was 0.9460 under the rule fixed before the run in the null-test module
+docstring that p ≥ 0.05 means withdraw the number as evidence.** The observed value is below
+the null mean, so the descriptor separates shuffled labels better than the real ones. The
+other null statistics were median 0.5833, 95th percentile 0.7083, and 99th percentile 0.7500.
 
-**Result on `s12.jsonl`, 8 sector classes, 24 cued trials, chance 12,5 %:**
+The earlier 1-NN value of 1.0000 remains only as a record of the flawed exploratory result.
+It has 3 trials per class in a 57-dimensional descriptor space and is not evidence.
 
-| Classifier | top-1 | upper 95 % |
-|---|---|---|
-| leave-one-out 1-NN | 1,0000 | 1,0000 |
-| **nearest class mean (the honest one)** | **0,4583** | **0,6212** |
+**Interpretation corrected.** The ten-contact field does not have demonstrated class
+information. A 57-dimensional descriptor fitted to 24 trials produced 0.4583, but 94.6% of
+shuffled-label permutations scored at or above the real result. The 0.4583 was an artifact of
+that mismatch, not a signal carried by the hand. The ten-contact design space is therefore
+**closed**; there is no rescue result and no replacement number.
 
-**The nearest-class-mean result is 45,8 % against a 12,5 % chance level, with an upper 95 %
-bound of 62,1 % — comfortably and significantly above chance.**
+### 9.1 Ninth retraction in the retraction record
 
-The 1-NN figure of 1,0000 is reported for completeness and should **not** be trusted: with
-3 trials per class in a high-dimensional descriptor space, 1-NN can overfit. The
-class-mean classifier is the lower-variance estimate and it is the one to believe.
+**Retraction 9 — the last positive field result.** The measured class-mean top-1 was 0.4583
+on 24 cued trials across 8 compass classes (3 per class; one operator, one session, n=63
+strokes, thumb-compass labels, no error bars). Under 1,000 shuffled-label permutations
+(seed 20260925, 57-dimensional descriptor), the null mean was 0.5685 and the one-sided
+p-value was 0.9460. The pre-fixed rule, p ≥ 0.05 means withdraw the number as evidence,
+therefore requires withdrawal. This is the ninth retraction and removes the project's last
+positive result.
 
-**Interpretation.** The ten-contact field **does carry class information**, even though no
-individual contact is identifiable. A single-thumb design is therefore not the only option,
-and the pessimistic reading of the gate numbers was too strong: U rules out *identity*
-channels, not *field* channels.
+---
 
-**How the information is carried, almost certainly:** the field descriptor is
-translation- and rotation-free, yet still separates eight directional classes, so the
-discriminating structure must be the *shape the whole field takes* when the thumb moves
-within it — a deformation of the ten-point cloud that is detectable without knowing which
-point is the thumb. That is exactly the property the `q`-style coordination measure was
-designed to capture, and it is now demonstrated rather than hypothesised.
+### 9.2 Original positive interpretation — retracted
 
-**What this does NOT license.** n = 24 trials, 3 per class, one hand, one session, one
-capture. The labels are directional cues the user performed as a thumb compass, so the
-field descriptor may be exploiting a thumb-shaped deformation rather than anything a
-user could control deliberately for text. No WPM, no accuracy claim, no universality.
-Reproducibility across hands, sessions and capture conditions is entirely unmeasured.
+The original section here reported a leave-one-out 1-NN result of 1.0000 and a nearest-class-mean
+result of 0.4583 on `s12.jsonl` with 8 compass classes, 24 measured cued trials, 3 per class,
+one operator, one session, n=63 strokes, thumb-compass labels, and no error bars. It interpreted
+those exploratory values as evidence that the ten-contact field carried class information.
+**That conclusion is retracted.** The provenance and null test above establish that the
+class-mean result is below the shuffled-label null; the 1-NN result is an overfit record from
+3 trials per class in a 57-dimensional descriptor space, not corroboration. No performance,
+accuracy, or universality claim follows. Reproducibility across hands, sessions, and capture
+conditions is unmeasured.
 
-**The next test is now precise and cheap:** re-run this same script on a capture where the
-hand performs a field-level gesture that is NOT a thumb compass. If separability collapses
-to chance there, the signal is a thumb artefact and the space is dead. If it holds, a
-field-based input method is real.
+**Status after the retraction:** the proposed follow-up capture would test a field-level
+gesture rather than a thumb compass, but this document records no surviving field signal and
+does not treat that experiment as an open design direction.
 
 ---
 
@@ -759,21 +744,20 @@ German at 2 events per syllable (3,39 needed) but only *just* misses in English 
 Neither language reaches it, but English is materially closer, and English's 1,15 % top-1024
 coverage is better positioned for a compact code than most designs assume.
 
-Event arithmetic at the certified 5,7 events/s ceiling, all ceilings and not user rates.
-**WPM is reported on the 5-letter basis** (1,3965 syllables per word), because the
-"1–2 events per 5-letter word" premise is per 5-letter word; the overall-text basis
-(1,2916 syllables per word) is given alongside so the two are not confused:
+Event arithmetic remains a structural check rather than a behavior claim. Using the
+token-weighted English inventory (1,3965 syllables per 5-letter word and 1,2916 overall), the
+event counts per 5-letter word are 6,98 for an 8-class alphabet, 4,19 for a 32- or 64-class
+alphabet, and 2,79 for a 16-class alphabet when compared with the historical one- to
+three-events-per-syllable schemes. These are code-design counts, not measured behavior.
 
-| Event alphabet | events/syllable | syll/s | WPM (5-letter, primary) | WPM (overall text) | events/5-letter word |
-|---|---|---|---|---|---|
-| 8 classes | 5 | 1,14 | 48,98 | 52,96 | 6,98 |
-| 16 classes | 4 | 1,425 | 61,22 | 66,20 | 5,59 |
-| 32 or 64 classes | 3 | 1,90 | 81,63 | 88,27 | 4,19 |
+**The honest English conclusion:** even the 32- or 64-class option needs 4,19 events per
+5-letter word under a three-events-per-syllable assumption, beyond the historical 1–2 event
+premise. The premise has to be abandoned for English as well, and a word-level code remains
+the better-fitting frame.
 
-**The honest English conclusion:** a 3-event, 32-class code reaches 81,6 WPM *arithmetically*
-and needs 4,19 events per 5-letter word against a 1–2 premise. The 1–2 premise has to be
-abandoned for English as well, but the overshoot is 4,19 against 2 rather than 5,09 against
-2, and a word-level code remains the better-fitting frame.
+**Caveats carried with the code-design counts:** eSpeak G2P and this onset table are an
+approximation, not a linguistic universal; the corpus is frequency-weighted English, and a
+different register or a German corpus changes every figure. Nothing here is measured behavior.
 
 **Caveats carried with the numbers:** eSpeak G2P and this onset table are an approximation,
 not a linguistic universal; the corpus is frequency-weighted English, and a different
@@ -823,14 +807,18 @@ difference matters:
 | Critics, round 1 | 5 axes × 10 | **5 independent critics on each of 10 candidates** (the agents each covered all five axes adversarially) |
 | Finalists | 3 | **3**: F1 lattice, F2 word-as-event, F3 field census |
 | Critics, round 2 | 5 axes × 3 | **5 on F2**, then **5 on the winner Thread-Rosette** |
-| Field separability | 1 experiment | **run on real data**, result above |
+| Field separability | 1 experiment | **run on real data; the positive result was subsequently withdrawn** |
 | Instruments | — | reader ellipse capture, geometry probe, field separability script |
 
 **All ten round-1 candidates were killed at 10–21 / 50.** The sprint winner scored 36/50 on
 sponsor scores and **11/50 across five adversarial critics**. No concept survived. The
-surviving result is not a concept: it is that the ten-contact field carries class
-information at 45,8 % against 12,5 % chance, which reopens a design space the gate
-numbers had appeared to close.
+apparent ten-contact field result is the ninth retraction, not a surviving result: the
+class-mean top-1 of 0.4583 was below the permutation-null mean of 0.5685, with one-sided
+p=0.9460 under the pre-fixed p ≥ 0.05 withdrawal rule. The ten-contact design space is closed.
+
+**Historical summary corrected.** This record originally said that the field result was the
+surviving outcome and reopened the design space. It is the ninth retraction instead: the
+ten-contact design space is closed and no signal survives.
 
 ### 10.2 Weighting caveat — the German/English comparison is not yet apples-to-apples
 
@@ -888,3 +876,13 @@ reported in section 10.2 and must not be mixed with them.
 **Second method for cross-checking.** pyphen 0.18.1 `en_US`, splitting on `-` and
 de-duplicating non-empty pieces. Orthographic pieces are not syllables and are never
 compared directly against phonemic counts except to demonstrate the method gap.
+
+---
+
+## Closing status
+
+**22 candidates generated, 0 validated, 0 surviving signals.**
+
+**Two instruments unrun on hardware:** `scripts/reshape_probe.py` and `scripts/fitts_probe.py`.
+
+**Control experiment unrun:** `python3 scripts/field_gesture_probe.py`.
