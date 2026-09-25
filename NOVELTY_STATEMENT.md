@@ -46,12 +46,27 @@ method*. Everything below is a claim we are willing to defend.
    the thumbs are mirrored *and* only 10–25 % suppressable. Any method that keys on
    "parallel vs mirrored" is wrong, and we can demonstrate it.
 
-## Standing caveat on novelty
+## Standing caveat on novelty, with the precision measured
 
-These are one hand, three sessions (~80 s of recorded motion), one device, and one operator.
-W12's own advice applies: publish the rig and the numbers so the claims can be re-measured.
-Until an independent session reproduces 11.96 mm / 5.04 mm and the r² table, these are
-**measurements from one hand**, not population statistics. The documents label them that way.
+One hand, three sessions (~80 s of recorded motion), one device, one operator. But the caveat
+is not uniform, and the difference matters:
+
+| claim type | precision actually achieved |
+|---|---|
+| coupling *within* a session | **tight**: r = +0.958 with n = 312 gives a Fisher 95% CI of [+0.947, +0.966]; the strong pairs are precisely estimated |
+| rest noise floor *within* a session | tight: 17 resting contacts, worst-case percentiles reported rather than means |
+| coupling *across* sessions | **not measurable at all** — tracking IDs are ephemeral, so no pair repeats (issue #9) |
+| any of it *across hands or days* | **zero data**; 327 pair fits, all from this operator |
+
+So the honest phrasing is: *the model is well determined within a session and completely
+undetermined outside it.* That is also why the coupling calibration is per-session by
+necessity rather than by choice, and why the per-user rest-floor session
+(`guided_calibration.py --task noise`) is the cheapest way to buy generalisation.
+
+W12's advice applies throughout: publish the rig and the numbers so the claims can be
+re-measured. Until an independent session reproduces 11.96 mm / 5.04 mm and the r² table,
+these are **measurements from one hand**, not population statistics. The documents label them
+that way.
 
 ## Provenance
 
