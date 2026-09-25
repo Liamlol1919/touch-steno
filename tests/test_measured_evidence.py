@@ -828,5 +828,84 @@ class TestQuantileHelpers(unittest.TestCase):
         self.assertEqual(rse.max_run([False, False]), 0)
 
 
+class TestCandidateRanking(unittest.TestCase):
+    """The language layer is the correctness lever - these pin that it behaves sanely."""
+
+    def _model(self):
+        import candidate_ranking as cr
+        return cr.SymbolModel.from_counts(
+            {"a": 40, "b": 10, "c": 30, "e": 50, "n": 25},
+            {("a", "b"): 8, ("b", "e"): 6, ("e", "a"): 5, ("a", "c"): 7, ("c", "e"): 9})
+
+    def test_posterior_is_a_distribution(self):
+        import candidate_ranking as cr
+        scored = [("a", -0.2), ("b", -1.5), ("c", -3.0)]
+        post = cr.posterior(scored)
+        self.assertAlmostEqual(sum(p for _s, p in post), 1.0, places=9)
+        self.assertEqual(post[0][0], "a", "posterior preserves the ranking")
+
+    def test_posterior_is_scale_free(self):
+        """Decision must not depend on how many symbols the lexicon happens to contain."""
+        import candidate_ranking as cr
+        small = cr.posterior([("a", -1.0), ("b", -1.2)])
+        big = cr.posterior([("a", -11.0), ("b", -11.2)])
+        self.assertAlmostEqual(dict(small)["a"], dict(big)["a"], places=9)
+
+    def test_language_evidence_can_overrule_geometry(self):
+        """With comparable unigram evidence, a strong bigram decides.
+
+        Two earlier versions of this test asserted that language evidence beats an
+        overwhelming unigram. It does not, and should not: the interpolation weights a
+        bigram at alpha=0.65, so a near-certain unigram survives. That conservatism is
+        deliberate - a steno decoder that lets a bigram overrule a confident geometric read
+        will turn clear signals into wrong ones. The useful property is that language evidence
+        decides when the unigram evidence is comparable.
+        """
+        import candidate_ranking as cr
+        m = cr.SymbolModel.from_counts({"a": 100, "q": 100}, {("a", "q"): 80})
+        tied = m.score([("a", 0.50), ("q", 0.50)], prev="a")
+        self.assertEqual(tied[0][0], "q", "comparable unigrams -> the bigram decides")
+        wide = m.score([("a", 0.95), ("q", 0.30)], prev="a")
+        self.assertEqual(wide[0][0], "a", "a wide geometry gap still wins")
+        conservative = cr.SymbolModel.from_counts({"a": 1000, "q": 1}, {("a", "q"): 100})
+        held = conservative.score([("a", 0.50), ("q", 0.50)], prev="a")
+        self.assertEqual(held[0][0], "a",
+                         "a near-certain unigram is not overruleable - by design")
+
+    def test_ambiguous_candidates_are_retracted_not_committed(self):
+        """Retraction triggers on a low posterior, not on weak geometry.
+
+        A first version used two candidates with a large unigram difference and expected a
+        retraction; the model committed, correctly, because with no preceding symbol the
+        unigram is the only evidence and it was decisive. Genuine ambiguity is two
+        candidates that the language model cannot separate.
+        """
+        import candidate_ranking as cr
+        m = self._model()
+        text, log = cr.decode_stream(
+            [(0.0, 0.5, [("a", 0.50), ("c", 0.50)])], m, )
+        self.assertEqual(log[0]["action"], "retract")
+        self.assertEqual(text, "")
+
+    def test_retraction_undoes_the_previous_commit(self):
+        import candidate_ranking as cr
+        m = cr.SymbolModel.from_counts(
+            {"x": 100, "y": 100}, {("x", "y"): 1}, commit_posterior=0.55)
+        # first stroke is unambiguous, second is a coin flip between two even-frequency letters
+        strokes = [(0.0, 0.9, [("x", 0.9)]), (0.1, 0.5, [("y", 0.5), ("x", 0.5)])]
+        text, log = cr.decode_stream(strokes, m)
+        self.assertEqual(log[0]["action"], "commit")
+        self.assertIn("retract", [e["action"] for e in log],
+                      "an ambiguous stroke must be retracted, not committed")
+        self.assertLessEqual(len(text), 1)
+
+    def test_correction_load_scales_with_event_rate(self):
+        import lm_recovery as lr
+        res = {"retract_rate": 0.2}
+        a = lr.correction_load(res, 3.0)["corrections_per_s"]
+        b = lr.correction_load(res, 6.0)["corrections_per_s"]
+        self.assertAlmostEqual(b, 2 * a, places=6)
+
+
 if __name__ == "__main__":
     unittest.main()

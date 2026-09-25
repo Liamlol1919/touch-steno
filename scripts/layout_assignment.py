@@ -89,11 +89,19 @@ def calibrate_sigma(target_fence: float = 0.35, trials: int = 600,
     return (lo + hi) / 2
 
 
-def build_confusion(trials: int, seed: int, sigma: float) -> dict:
-    """8x8 sector confusion under the calibrated noise model, via the real decoder."""
+def build_confusion(trials: int, seed: int, sigma: float,
+                    radius_mm: float | None = None) -> dict:
+    """8x8 sector confusion under the calibrated noise model, via the real decoder.
+
+    ``radius_mm`` defaults to the module radius. It must be a parameter rather than a
+    constant: the confusion structure is what the LM recovery experiment has to be measured
+    against, and a matrix built at r=20 reports 82% diagonal where r=15 reports 68%. The
+    first version of lm_recovery.py hit exactly that and produced a meaningless 100%.
+    """
     rng = random.Random(seed)
     conf = {a: {b: 0 for b in SECTORS} for a in SECTORS}
-    speed = RADIUS / (WINDOW * DT)          # mean speed inside the detection window
+    r_use = RADIUS if radius_mm is None else float(radius_mm)
+    speed = r_use / (WINDOW * DT)          # mean speed inside the detection window
     for true_sector in SECTORS:
         ang = math.radians(SECTORS.index(true_sector) * 45.0)
         vx, vy = math.cos(ang), -math.sin(ang)
