@@ -846,3 +846,36 @@ English weighting and is unaffected.
 What is now marked provisional: the size of the English-versus-German gap. Recomputing the
 German inventory with token weighting is a short job and should be done before any
 cross-language claim is made in a design document.
+
+### 10.3 Reproducible method specification
+
+Recorded so the English figures in section 10 can be re-derived rather than trusted.
+
+**Corpus.** `hermitdave/FrequencyWords` 2018, `en_50k.txt`, at commit
+`525f9b560de45753a5ea01069454e72e9aa541c6`, file sha256 `5351ff…b458`.
+
+**Pronunciation.** `espeak-ng -q --ipa=3 --sep=_ -v en-us`, eSpeak-ng **1.52.0**.
+
+**Normalisation before segmentation.** Strip U+0301 and U+030C (stress), U+02D0 (length),
+U+200D (joiner) and the `_` separators; normalise the dedicated syllabic-i glyph; group
+`tʃ`/`dʒ` affricates, English rising diphthongs, and vowel+ɹ nuclei.
+
+**Segmentation.** Vowel nuclei are located from the IPA. Each consonant run between two
+nuclei is assigned the **longest legal English onset**, falling back to the longest
+sonority-rising suffix when no legal onset exists. Legal onset templates are: C + liquid or
+glide; `/sC/` where C is a voiceless obstruent or a sonorant; and stop + s/fricative +
+liquid triples (`str`, `spr`, `skr`, `spl`). The coda receives whatever remains.
+
+**Inventory key.** Stress-free onset + nucleus + coda.
+
+**Exclusions.** The three no-vowel outputs (`psst`, `qu`, `ís`) are excluded from syllable
+statistics but retained in the word-entropy calculation, so the two statistics have
+consistent denominators: syllable stats cover 725 114 237 of 725 119 374 tokens, and word
+entropy covers all of them.
+
+**Weighting.** Token-weighted for the headline figures. Type-unweighted means are also
+reported in section 10.2 and must not be mixed with them.
+
+**Second method for cross-checking.** pyphen 0.18.1 `en_US`, splitting on `-` and
+de-duplicating non-empty pieces. Orthographic pieces are not syllables and are never
+compared directly against phonemic counts except to demonstrate the method gap.
