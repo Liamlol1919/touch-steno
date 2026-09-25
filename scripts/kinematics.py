@@ -19,14 +19,14 @@ import threading
 import time
 from pathlib import Path
 
+import raw_schema  # noqa: E402
 
 class Recorder:
-    """Schreibt pro SYN-Frame eine JSONL-Zeile:
+    """Writes one versioned raw contact-frame JSONL record per SYN frame.
 
-        {"t": 123.456789, "c": {"<tid>": [x_mm, y_mm, major_mm]}}
-
-    tid als String-Key; leeres "c" ist legal. Ziel-Ordner wird angelegt;
-    existiert die Datei schon, Fehler — ausser force=True (ueberschreibt).
+    v1 records contain ``schema``, ``version``, ``t`` and ``c``. Contact IDs
+    are string keys and an empty ``c`` is legal. Legacy unversioned recordings
+    remain readable through ``_load``.
     """
 
     def __init__(self, out_path, force: bool = False):
@@ -41,7 +41,7 @@ class Recorder:
               contacts: dict[int, tuple[float, float, float]]) -> None:
         c = {str(tid): [float(x), float(y), float(m)]
              for tid, (x, y, m) in contacts.items()}
-        self._fh.write(json.dumps({"t": float(t), "c": c}) + "\n")
+        self._fh.write(json.dumps(raw_schema.encode_frame(t, c)) + "\n")
 
     def close(self) -> None:
         if self._fh is None:
@@ -169,7 +169,7 @@ def _load(path: Path) -> list[dict]:
     with path.open(encoding="utf-8") as fh:
         for line in fh:
             if line.strip():
-                payload.append(json.loads(line))
+                payload.append(raw_schema.decode_record(json.loads(line)))
     return payload
 
 

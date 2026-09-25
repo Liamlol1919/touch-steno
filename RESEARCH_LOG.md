@@ -32,7 +32,7 @@
 - [ ] Cued PTH-660 run: `guided_calibration.py --task sectors`, then evaluate the real session.
 - [ ] Cued tempo run: measure deliberate event rate per gesture; do not infer it from 88 ms latency.
 - [ ] Cued chord run: calibrate peak-ratio and lag thresholds; keep chords unimplemented until then.
-- [ ] Stabilize a versioned raw-event JSONL schema and replay path.
+- [x] Stabilize a versioned raw-event JSONL schema and legacy replay path.
 - [ ] Add per-user rest/palm covariance calibration and replayable threshold sweeps.
 - [ ] Define opt-in privacy-safe telemetry and correction/undo metrics.
 - [x] Normalize `guided_calibration.py` paired manifest records and make `evaluate_session.py`
@@ -75,3 +75,11 @@ measured PTH-660 throughput.
 - [x] Kept legacy guided manifests on the explicit aggregate fallback.
 - [x] Added provenance and one-to-one schedule tests; guided schedule is not observed timing.
 - [ ] A cued PTH-660 run is still required to measure actual user throughput.
+
+## Iteration 6 — 2026-09-25 06:45–06:52 CEST
+
+- [x] Added explicit `touchsteno.raw_frame` v1 encoding.
+- [x] Kept legacy `{t,c}` recordings readable through the canonical loader.
+- [x] Added fail-closed handling for unknown schema/version values.
+- [x] Added recorder round-trip, legacy compatibility and schema documentation.
+- [ ] Raw sessions still require a privacy review and real-device capture.

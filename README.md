@@ -17,6 +17,8 @@ Research and implementation notes for high-speed text input on a continuous touc
 - `scripts/synthetic_intent_benchmark.py`, `scripts/make_benchmark.py`, `scripts/envelope_sweep.py` and `scripts/wpm_ceiling.py` — deterministic analysis tools; synthetic results are not hardware claims.
 - `scripts/session_manifest.py` and `tests/test_session_manifest.py` — shared normalization
   for complete and legacy paired cue manifests.
+- [RAW_FRAME_SCHEMA.md](RAW_FRAME_SCHEMA.md) and `scripts/raw_schema.py` — versioned raw-frame
+  JSONL contract with legacy replay compatibility.
 - `tests/` — standard-library unit tests for decoder invariants, measured constants and benchmark artefacts.
 
 ## Important evidence note

@@ -135,6 +135,8 @@ For every test publish raw and corrected WPM, CER/WER, KSPC, latency, correction
 - stop if pain, numbness or unusual fatigue appears.
 
 ## Minimal data schema
+Raw contact-frame JSONL uses the versioned contract in [RAW_FRAME_SCHEMA.md](RAW_FRAME_SCHEMA.md).
+The per-contact experiment record below is a separate labelled/derived schema.
 
 ```json
 {

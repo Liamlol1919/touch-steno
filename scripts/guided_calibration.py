@@ -44,6 +44,7 @@ import threading
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import kinematics  # noqa: E402
 import session_manifest  # noqa: E402
+import raw_schema  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 SECTORS_8 = ("N", "NE", "E", "SE", "S", "SW", "W", "NW")
@@ -190,7 +191,9 @@ def merge(args) -> int:
         for fr in raw:
             t = float(fr["t"])
             label = next((lab for s, e, lab in spans if s <= t < e), None)
-            fh.write(json.dumps({"t": t, "c": fr["c"], "task": label}) + "\n")
+            labelled_frame = raw_schema.encode_frame(t, fr["c"])
+            labelled_frame["task"] = label
+            fh.write(json.dumps(labelled_frame) + "\n")
             n_tot += 1
             n_lab += label is not None
     print(f"{n_lab}/{n_tot} Frames mit Label -> {labelled}")
