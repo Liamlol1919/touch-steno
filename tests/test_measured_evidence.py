@@ -932,5 +932,54 @@ class TestCandidateRanking(unittest.TestCase):
         self.assertEqual(log[0]["action"], "commit")
         self.assertIn("a", text)
 
+
+class TestRankSeamIntegration(unittest.TestCase):
+    """candidate_ranker (seam) and candidate_ranking (model) must compose, not duplicate."""
+
+    def _fixture(self):
+        import candidate_ranker as seam
+        import candidate_ranking as lang
+        # No a->l bigram and a low unigram for l, so 'l' wins on geometry alone while
+        # 'e' wins on language. The first version of this fixture included an a->l bigram,
+        # which made 'l' legitimately win and made the test meaningless.
+        model = lang.SymbolModel.from_counts(
+            {"a": 40, "e": 50, "i": 25, "l": 10}, {})
+        cands = [{"text": "l", "confidence": 0.34},
+                 {"text": "i", "confidence": 0.30},
+                 {"text": "e", "confidence": 0.22}]
+        return seam, model, cands
+
+    def test_language_can_overrule_the_geometric_favourite_through_the_seam(self):
+        import rank_seam_demo as demo
+        seam, model, cands = self._fixture()
+        scores = demo.language_scores_for(cands, model, prev="a")
+        ranked = seam.rank_candidates(cands, language_scores=scores)
+        top = ranked["selected"]["text"]
+        self.assertNotEqual(top, "l", "the most confident candidate must not always win")
+
+    def test_seam_alone_keeps_the_geometric_order(self):
+        """Without a language model the seam must be a no-op, not a hidden scorer."""
+        seam, _model, cands = self._fixture()
+        ranked = seam.rank_candidates(cands)
+        self.assertEqual([r["candidate"]["text"] for r in ranked["ranked"]],
+                         ["l", "i", "e"])
+
+    def test_seam_and_model_agree_on_the_synthetic_case(self):
+        import rank_seam_demo as demo
+        seam, model, cands = self._fixture()
+        scores = demo.language_scores_for(cands, model, prev="a")
+        seam_order = [r["candidate"]["text"]
+                      for r in seam.rank_candidates(cands, language_scores=scores)["ranked"]]
+        model_order = [s for s, _lp in model.score(
+            [(c["text"], c["confidence"]) for c in cands], "a")]
+        self.assertEqual(seam_order, model_order)
+
+    def test_seam_preserves_provenance(self):
+        seam, _model, cands = self._fixture()
+        out = seam.rank_candidates(cands)
+        self.assertIn("schema", out)
+        self.assertIn("version", out)
+        self.assertTrue(all("candidate" in r and "rank_score" in r for r in out["ranked"]))
+
 if __name__ == "__main__":
     unittest.main()
