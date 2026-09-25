@@ -26,11 +26,32 @@ synthetic and real cued data.
 | tempo tracking 1 Hz | 0.99 | 0.99 detected / 1.00 cued |
 | tempo tracking 2 Hz | 0.98 | |
 | tempo tracking 3 Hz | 0.97 | |
-| **tempo tracking 4 Hz** | **0.32** | **collapse** |
-| **tempo tracking 5 Hz** | **0.31** | **collapse** |
+| tempo tracking 4 Hz | 0.33 (n=3) | **RETRACTED, see correction below** |
+| tempo tracking 5 Hz | 0.67 (n=3) | **RETRACTED, see correction below** |
 | chord detection | tp 2, fp 0, **fn 4** | the weak spot, see below |
 
 ## The three findings that matter
+
+### 0. RETRACTION: the "3 Hz ceiling" was a measurement artifact
+
+The first version of this document claimed the detector collapses above 3 Hz. **That claim is
+withdrawn.** It came from counting *events per block* rather than matching each cued gesture
+to its own event; at high rates consecutive gestures merge into one event, so the count-based
+metric under-reports.
+
+`scripts/envelope_sweep.py` re-measures it by matching per gesture, with at least 8 cued
+gestures per cell:
+
+| gesture length | detection rate at 1–6 Hz |
+|---|---|
+| **100 ms** | **0 % at every rate** |
+| 150–350 ms | **100 % at every rate from 1 to 6 Hz** |
+| 500 ms | 62 % at 1 Hz, falling to 36 % at 6 Hz |
+
+So the robust findings are: a 100 ms gesture is never detected; 150–350 ms is detected
+reliably all the way to 6 Hz; 500 ms is unreliable. There is **no measured 3 Hz ceiling**.
+The earlier "88 ms detection *and* 88 ms segmentation" argument remains plausible as a
+mechanism, but it is not what the data shows, so it is not claimed.
 
 ### 1. Detection and segmentation both cost 88 ms, and they compete
 
