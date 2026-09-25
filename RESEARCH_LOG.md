@@ -167,3 +167,11 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Added palm task tests and corrected cued-protocol ordering.
 - [x] Palm baseline is now separable from generic finger-rest/noise capture.
 - [ ] Real palm/rest hardware sessions remain outstanding.
+
+## Iteration 17 — 2026-09-25 07:54–08:02 CEST
+
+- [x] Added layered Plover JSON dictionary checker with duplicate-key, outline, translation
+  and cross-layer collision validation.
+- [x] Added `PLOVER_BRIEFS.md` and tests; no translation or speed claim was added.
+- [x] Language-layer TODO now has a concrete format/collision gate before brief authoring.
+- [ ] Real brief coverage, untranslate rate and speed delta remain unmeasured.

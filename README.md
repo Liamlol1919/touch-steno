@@ -29,6 +29,8 @@ Research and implementation notes for high-speed text input on a continuous touc
   aggregate-only telemetry export with no raw coordinates or identifiers.
 - `scripts/rest_calibration.py` and `tests/test_rest_calibration.py` — local per-user rest
   covariance/sweep artifact with source hashes and replay comparison.
+- [PLOVER_BRIEFS.md](PLOVER_BRIEFS.md) and `scripts/plover_dictionary_check.py` — layered
+  Plover JSON outline/translation validation with collision lint.
 - `tests/` — standard-library unit tests for decoder invariants, measured constants and benchmark artefacts.
 
 ## Important evidence note
