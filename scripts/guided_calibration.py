@@ -72,10 +72,40 @@ def resolve_reader_src(explicit):
                      "(gesucht: " + ", ".join(str(c) for c in candidates) + ")")
 
 
+WHAT_TO_DO = {
+    "noise": "BEIDE HAENDE LOCKER AUFPADEN, ALLE FINGER. 60 s NICHTS TUN. "
+             "Nicht reden, nicht zappeln.",
+    "palm": "HANDBALLEN FEST AUF DAS PAD. 60 s NICHTS TUN.",
+    "sectors": "DAUMEN IN DIE GENANNTE RICHTUNG SCHIEBEN, DANN ZURUECK ZUR MITTE. "
+               "Nur so weit wie angegeben.",
+    "tempo": "GLEICHER KLEINER SCHUB IM TAKT DER GENANNTEN ZAHL. "
+             "Ein Takt = hin und zurueck. Bei 5 Hz ist das Limit - nicht aufgeben.",
+    "correction": "SCHUB, UND WENN 'UNDO'kommt: sofort die letzte Bewegung rueckgaengig machen.",
+    "chord": "BEIDE DAUMEN GLEICHZEITIG, bzw. nur der linke. Auf den Cue achten.",
+    "identity": "DEN GENANNTEN DAUMEN ANHEBEN UND WIEDER ABLEGEN.",
+}
+
+
 def cue(text: str, seconds: float = 1.0) -> None:
-    sys.stdout.write(f"\r  {text}  ")
-    sys.stdout.flush()
-    time.sleep(seconds)
+    """Show the cue, then tick the remaining time down as plain lines.
+
+    No carriage returns. Redrawing in place depends on the terminal honouring \r, and
+    when it does not the session drowns in duplicate cue text - which is exactly what
+    happened on the operator's screen. Plain lines are identical everywhere.
+    """
+    print(f"\n  >>> {text}")
+    end_t = time.monotonic() + seconds
+    shown = None
+    while True:
+        left = end_t - time.monotonic()
+        if left <= 0:
+            break
+        whole = int(left) + (1 if left % 1 > 0.001 else 0)
+        if whole != shown and seconds > 2:
+            shown = whole
+            print(f"      noch {whole}s")
+        time.sleep(0.1)
+    print(f"      ==> JETZT  ({seconds:.1f}s)")
 
 
 def build_tasks(args) -> list[dict]:
@@ -104,7 +134,9 @@ def build_tasks(args) -> list[dict]:
                 cue = f"THUMB -> {name}"
                 if r:
                     cue += f"  ({r:.0f} mm out, back to centre)"
+                practice = rep < getattr(args, "practice_reps", 0)
                 tasks.append({"label": f"sector_{name}", "cue": cue,
+                              "practice": practice,
                               "seconds": args.sector_seconds, "sector": name,
                               "sector_angle_deg": SECTOR_ANGLE[name],
                               "axis": name in ("N", "E", "S", "W"),
@@ -244,11 +276,31 @@ def record(args, tasks: list[dict]) -> int:
     stop = threading.Event()
     thread = threading.Thread(target=reader.run, kwargs={"stop": stop}, daemon=True)
     thread.start()
+    if args.task in WHAT_TO_DO:
+        print("\n" + "=" * 70)
+        print(f"JETZT: {WHAT_TO_DO[args.task]}")
+        print(f"Block: {args.task} — {len(tasks)} Durchgaenge, "
+              f"~{sum(t['seconds'] for t in tasks):.0f} s")
+        print("=" * 70)
+    self_paced = getattr(args, "self_paced", False) and args.task in (
+        "sectors", "chord", "identity")
+    if not self_paced:
+        cue("START IN 3", 3.0)
     cue("READY", 2.0)
     try:
-        for task in tasks:
+        for idx, task in enumerate(tasks, 1):
+            if not self_paced:
+                print(f"\n--- Durchgang {idx}/{len(tasks)} ---")
             t0 = time.monotonic()
-            cue(task["cue"], task["seconds"])
+            if self_paced:
+                print(f"\n--- Durchgang {idx}/{len(tasks)}"
+                      + ("  (UEBUNG, zaehlt nicht)" if task.get("practice") else "") + " ---")
+                print(f"\n  >>> {task['cue']}")
+                print("      fertig? ENTER druecken")
+                input()
+                print("      ==> JETZT")
+            else:
+                cue(task["cue"], task["seconds"])
             t1 = time.monotonic()
             # One complete object per cue. The old start/end pair was ambiguous
             # for repeated labels and could never be consumed safely by scoring.
@@ -308,6 +360,13 @@ def main() -> int:
     ap.add_argument("--rates", type=float, nargs="+",
                     default=[1.0, 2.0, 3.0, 4.0, 5.0])
     ap.add_argument("--sector-seconds", type=float, default=1.5)
+    ap.add_argument("--self-paced", action="store_true",
+                    help="wait for Enter after each cue instead of a countdown. A sector "
+                         "trial measures the label, not the duration, and an operator "
+                         "cannot read and execute a 1.5 s cue.")
+    ap.add_argument("--practice-reps", type=int, default=0,
+                    help="rounds at the start of --task sectors marked as practice and "
+                         "excluded from scoring.")
     ap.add_argument("--radius-mm", type=float, default=0.0,
                     help="target excursion for --task sectors, stated in the cue. "
                          "Issue #17 is a 12 vs 20 mm decision; without this the two "

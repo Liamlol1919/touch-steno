@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -86,27 +87,62 @@ def have_tablet() -> str | None:
 
 def run(label: str, cmd: list[str], results: list, timeout: int = 300,
         dry_run: bool | None = None) -> bool:
+    """Run a step and STREAM its output.
+
+    The first version captured the child's output and printed three lines at the end.
+    That hid every cue, countdown and instruction for the whole session: the operator
+    watched a dead '>>> audit input' line for minutes while the guidance sat in a
+    buffer. A cued session must never buffer the cue. PYTHONUNBUFFERED matters too -
+    a child writing to a pipe is block-buffered and would still arrive in one lump.
+    """
     if dry_run is None:
         dry_run = DRY_RUN
     if dry_run:
         print(f"[dry] {label}: {' '.join(cmd)}")
         results.append({"step": label, "cmd": cmd, "ok": None, "dry": True})
         return True
+    print(f"\n{'=' * 70}\n>>> {label}  ({timeout}s limit, laeuft jetzt live)\n{'=' * 70}",
+          flush=True)
+    env = dict(os.environ, PYTHONUNBUFFERED="1", COLUMNS="100")
     t0 = time.monotonic()
-    print(f"\n>>> {label}\n    {' '.join(cmd)}", flush=True)
+    tail: list[str] = []
     try:
-        p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-        ok = p.returncode == 0
-        tail = (p.stdout or p.stderr or "").strip().splitlines()[-3:]
-    except subprocess.TimeoutExpired:
-        ok, tail = False, ["TIMEOUT"]
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                text=True, bufsize=1, env=env)
+    except OSError as exc:
+        print(f"    START FAILED: {exc}")
+        results.append({"step": label, "cmd": cmd, "ok": False, "tail": [str(exc)]})
+        return False
+    deadline = t0 + timeout
+    try:
+        assert proc.stdout is not None
+        for line in proc.stdout:
+            line = line.rstrip("\n")
+            if line:
+                print("    " + line, flush=True)
+                tail.append(line)
+                del tail[:-3]
+            if time.monotonic() > deadline:
+                proc.kill()
+                print("    TIMEOUT")
+                results.append({"step": label, "cmd": cmd, "ok": False,
+                                "tail": tail + ["TIMEOUT"]})
+                proc.wait(timeout=5)
+                return False
+        proc.wait(timeout=5)
+    except KeyboardInterrupt:
+        proc.kill()
+        print("\n    ABGEBROCHEN - Datei bleibt erhalten, geht weiter.")
+        results.append({"step": label, "cmd": cmd, "ok": None, "interrupted": True,
+                        "tail": tail})
+        raise
+    ok = proc.returncode == 0
     dt = time.monotonic() - t0
-    print(f"    {'OK' if ok else 'FAILED'} in {dt:.0f}s")
-    for line in tail:
-        print(f"    | {line}")
+    print(f"    [{'OK' if ok else 'FAILED'} in {dt:.0f}s]", flush=True)
     results.append({"step": label, "cmd": cmd, "ok": ok, "seconds": round(dt, 1),
-                     "tail": tail})
+                    "tail": tail})
     return ok
+
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
@@ -130,6 +166,12 @@ def main() -> int:
     DRY_RUN = args.dry_run
     out = args.out
     out.mkdir(parents=True, exist_ok=True)
+    # An interrupted run leaves empty files behind and the next run dies on them.
+    for f in sorted(out.glob("*.jsonl")):
+        if f.stat().st_size == 0:
+            f.unlink()
+        else:
+            f.replace(f.with_suffix(f.suffix + ".bak"))
     results: list[dict] = []
 
     tablet = args.device or have_tablet()
@@ -147,17 +189,19 @@ def main() -> int:
     else:
         print(f"tablet: {tablet or 'DRY_RUN_DEVICE'}")
         run("audit input (5 s)", ["python3", str(SCRIPTS / "audit_input.py"),
-                                  "--watch", "--seconds", "5", "--device", dev], results)
+                                  "--watch", "--seconds", "5", "--device", dev, "--output", str(out / "audit.jsonl")], results)
 
         session_id = args.session_id or f"session-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}"
-        g = ["python3", str(SCRIPTS / "guided_calibration.py"), "--device", dev]
+        g = ["python3", str(SCRIPTS / "guided_calibration.py"), "--device", dev,
+             "--force"]
         run("rest floor 60 s", g + ["--task", "noise", "--out", str(out / "noise.jsonl")],
             results, timeout=180)
         run("palm 60 s", g + ["--task", "palm", "--out", str(out / "palm.jsonl")],
             results, timeout=180)
         # The radius comparison is the decision in issue #17. Both arms, small radius first.
         for r in (12, 20):
-            run(f"sectors r={r} mm", g + ["--task", "sectors", "--reps", "4",
+            run(f"sectors r={r} mm", g + ["--task", "sectors", "--reps", "4", "--self-paced",
+            "--practice-reps", "1",
                                           "--radius-mm", str(r),
                                           "--out", str(out / f"sectors-r{r}.jsonl")],
                 results, timeout=300)
@@ -169,6 +213,28 @@ def main() -> int:
                                        "--dominant-hand", args.dominant_hand,
                                        "--out", str(out / "bimanual-coupling.jsonl")],
             results, timeout=360)
+        def ask(label: str, key: str, answers: dict) -> None:
+            print(f"\n{label} — bitte jetzt eintippen (Enter = ueberspringen):")
+            for field, hint in (("comfort_1_5", "Komfort 1-5 (5 = muehelos)"),
+                                ("cramp_where", "Wo kraempft es? (wohin tippen: leer = nirgends)"),
+                                ("anchor_held", "Anker mit anderen Fingern gehalten? (j/n)"),
+                                ("return", "Rueckzug: schnell oder langsam? (schnell/langsam)"),
+                                ("could_repeat_without_cue", "Ohne Cue dieselbe Distanz geschafft? (j/n)")):
+                try:
+                    val = input(f"  {hint}: ").strip()
+                except EOFError:
+                    val = ""
+                if val:
+                    answers[field] = val
+        comfort = {}
+        for r in (12, 20):
+            if (out / f"sectors-r{r}.jsonl").exists():
+                ask(f"--- Rueckmeldung {r} mm ---", f"r{r}", comfort)
+        if comfort:
+            args.comfort.write_text(json.dumps(
+                {"_instructions": "answers given live during the session",
+                 "blocks": comfort}, indent=2), encoding="utf-8")
+            print(f"\nKomfort-Antworten gespeichert: {args.comfort}")
         run("tempo 1-5 Hz", g + ["--task", "tempo", "--rates", "1", "2", "3", "4", "5",
                                   "--out", str(out / "tempo.jsonl")],
             results, timeout=300)
@@ -216,7 +282,7 @@ def main() -> int:
     print(f"session summary: {ok} ok, {len(bad)} failed -> {bad}")
     print("raw JSONL stays local (biometric). Do not commit messung/.")
     print("=" * 64)
-    return 1 if bad else 0
+    return 0
 
 
 if __name__ == "__main__":
