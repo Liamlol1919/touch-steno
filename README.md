@@ -25,6 +25,8 @@ Research and implementation notes for high-speed text input on a continuous touc
   evidence boundaries.
 - `scripts/correction_metrics.py` and `tests/test_correction_metrics.py` — separates
   cue-to-undo-motion latency from explicitly logged text-repair latency.
+- [PRIVACY_TELEMETRY.md](PRIVACY_TELEMETRY.md) and `scripts/telemetry_export.py` — opt-in,
+  aggregate-only telemetry export with no raw coordinates or identifiers.
 - `tests/` — standard-library unit tests for decoder invariants, measured constants and benchmark artefacts.
 
 ## Important evidence note

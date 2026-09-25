@@ -35,7 +35,7 @@
 - [x] Stabilize a versioned raw-event JSONL schema and legacy replay path.
 - [ ] Add per-user rest/palm covariance calibration and replayable threshold sweeps.
 - [x] Define correction/undo metrics with explicit motion-versus-text provenance.
-- [ ] Define opt-in privacy-safe telemetry for raw sessions.
+- [x] Define opt-in privacy-safe aggregate telemetry for raw sessions.
 - [x] Normalize `guided_calibration.py` paired manifest records and make `evaluate_session.py`
   use one-to-one synthetic tempo/chord matching; legacy guided tempo remains aggregate mode.
 - [x] Add expected per-event cue timestamps to guided tempo capture; evaluator labels them
@@ -143,3 +143,11 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Added CLI regression coverage for human-readable evaluation output.
 - [ ] Real correction capture with a Plover/text repair log remains outstanding.
 - [x] Added stable `cue_id` fields to guided tasks and repair-log association.
+
+## Iteration 14 — 2026-09-25 07:31–07:40 CEST
+
+- [x] Added `telemetry_export.py` with aggregate-only output and explicit privacy flags.
+- [x] Added consent/retention policy and privacy tests proving no raw coordinates, IDs or
+  session names enter telemetry.
+- [x] Raw JSONL remains a separate restricted artifact; no raw export switch was added.
+- [ ] Local privacy review and real consented capture remain outstanding.
