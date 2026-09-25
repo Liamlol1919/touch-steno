@@ -286,3 +286,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Adapter ignores Plover object contents and forwards only permitted counter/delta events.
 - [x] Added adapter-to-recorder-to-metrics integration coverage.
 - [ ] A real Plover hook installation and consented capture remain outstanding in issue #24.
+
+## Iteration 33 — 2026-09-25
+
+- [x] Added `language_corpus_manifest.py` for consent, held-out split, relative-path, hash, retention, and event-log validation.
+- [x] Validator reports no reference text, event content, or local paths.
+- [x] Added structural, consent, hash/path, and output-privacy tests.
+- [ ] A real consented held-out corpus and its deletion record remain outstanding in issue #24.
