@@ -728,15 +728,21 @@ clusters (`str`, `spr`, `skr`, `spl`), with sonority fallback. 49 997 / 50 000 t
 
 | Quantity | Value |
 |---|---|
-| Unique phonemic syllables, top 20k | 7 577 (`log₂` 12,887) |
-| Unique phonemic syllables, top 50k | **12 870** (`log₂` 13,652) |
-| Weighted syllable entropy | **9,085 bits/syllable** |
+| Unique phonemic syllables, top 20k | 7 566 (`log₂` 12,885) |
+| Unique phonemic syllables, top 50k | **12 853** (`log₂` 13,650) |
+| Weighted syllable entropy | **9,0796 bits/syllable** |
 | Mean syllables per word | **1,2916** |
 | Mean syllables per 5-letter word | **1,3965** |
 | Word unigram entropy | 9,476 bits/token → `2^H` = **712,30** |
 
-Token-mass coverage: 128 → 61,60 % · 256 → 73,50 % · 512 → 83,33 % · 1024 → **91,15 %** ·
-2048 → 96,19 % · 4096 → 98,82 % · 8192 → 99,81 % · 12 870 → 100 %.
+Token-mass coverage: 128 → 61,63 % · 256 → 73,60 % · 512 → 83,54 % · 1024 → **91,26 %** ·
+2048 → 96,21 % · 4096 → 98,83 % · 8192 → 99,81 % · 12 853 → 100 %.
+
+**Revised after a rhotic-handling fix.** An earlier pass consumed a following /ɹ/ after
+eSpeak /ɚ/, which can legitimately onset the next nucleus. Correcting that moved the top-50k
+inventory from 12 870 to **12 853** and the entropy from 9,085 to **9,0796**. The structural
+conclusion is untouched, because it depends on the mean syllables per 5-letter word, which
+did not move: 1,396494.
 
 ### Why English is structurally easier than German, and by how much
 
@@ -781,7 +787,7 @@ German figures: **pyphen 0.18.1 `en_US`**, unique non-empty orthographic hyphena
 
 | Method | top 20k types | top 50k types |
 |---|---|---|
-| English phonemic (eSpeak) | 7 577 | **12 870** |
+| English phonemic (eSpeak) | 7 566 | **12 853** |
 | English orthographic (pyphen) | 12 384 | **26 838** |
 | German phonemic (eSpeak) | 5 370 | 9 170 |
 | German orthographic (pyphen) | — | 11 230 |
@@ -859,6 +865,9 @@ Recorded so the English figures in section 10 can be re-derived rather than trus
 **Normalisation before segmentation.** Strip U+0301 and U+030C (stress), U+02D0 (length),
 U+200D (joiner) and the `_` separators; normalise the dedicated syllabic-i glyph; group
 `tʃ`/`dʒ` affricates, English rising diphthongs, and vowel+ɹ nuclei.
+
+**Rhotic handling.** A following /ɹ/ is NOT consumed after eSpeak /ɚ/, because it can onset
+the next nucleus. Getting this wrong inflated the inventory by 17 types.
 
 **Segmentation.** Vowel nuclei are located from the IPA. Each consonant run between two
 nuclei is assigned the **longest legal English onset**, falling back to the longest
