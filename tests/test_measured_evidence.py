@@ -531,6 +531,57 @@ class TestSeparationModel(unittest.TestCase):
         self.assertGreaterEqual(sm.K_FRAMES - worst, 1,
                                 "margin is at least one frame by construction")
 
+
+class TestLayoutAssignment(unittest.TestCase):
+    """W16 reported this as NOT FOUND in the literature; we measure it instead."""
+
+    def _conf(self, trials=300, seed=5):
+        import layout_assignment as la
+        sigma = la.calibrate_sigma(trials=200, seed=3)
+        return la, sigma, la.build_confusion(trials, seed, sigma)
+
+    def test_confusions_are_overwhelmingly_adjacent(self):
+        """Measured: 99.6% of confusion mass goes to a neighbouring sector, 0.4% skips.
+
+        Not a hard ring - a 2-sector skip does occur, just 3 times in 4800 trials. The design
+        rule is therefore "never place minimal pairs on adjacent sectors", with a small
+        residual risk across the compass, not "adjacency is the only failure".
+        """
+        la, _s, conf = self._conf(trials=600)
+        idx = {name: i for i, name in enumerate(la.SECTORS)}
+        adj = skip = 0
+        for a, row in conf.items():
+            for b, n in row.items():
+                if a == b or not n:
+                    continue
+                if abs(idx[a] - idx[b]) in (1, 7):
+                    adj += n
+                else:
+                    skip += n
+        self.assertGreater(adj / (adj + skip), 0.99,
+                           "confusion must be overwhelmingly to a neighbour")
+
+    def test_on_axis_rule_beats_naive_and_optimiser_beats_it(self):
+        import layout_assignment as la
+        la_, _s, conf = self._conf()
+        freq = la.zipf(8)
+        naive = [i % 8 for i in range(8)]
+        axis = la.on_axis_first(8)
+        opt, _e = la.optimise(freq, conf, iters=4000, seed=5)
+        e_naive = la.expected_error(freq, naive, conf)
+        e_axis = la.expected_error(freq, axis, conf)
+        e_opt = la.expected_error(freq, opt, conf)
+        self.assertLess(e_axis, e_naive, "on-axis-first rule must beat naive order")
+        self.assertLessEqual(e_opt, e_axis + 1e-9,
+                             "the annealer must not be worse than the rule")
+
+    def test_direction_error_exceeds_sensor_noise(self):
+        """The fitted per-frame noise is several times the resting noise floor."""
+        la, sigma, _c = self._conf()
+        self.assertGreater(sigma, 3 * la.REST_STEP_P99,
+                           "aim error dominates sensor noise; a better sensor would "
+                           "not fix direction accuracy")
+
 class TestQuantileHelpers(unittest.TestCase):
     def test_quantile_bounds(self):
         vals = [float(i) for i in range(100)]
