@@ -20,30 +20,31 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
   open-source, zero-force algorithms. All delivered; W1 verified against
   Hager-Ross & Schieber 2000 (PMC6773164) and Zatsiorsky 2000 (PMID 10766271).
 
-## 05:33–05:47 — falsification, filter, WPM, rest model, decision
-- 17 evidence tests (`tests/test_measured_evidence.py`): rest never fires, mover fires,
-  5-frame burst does not, 250 WPM/2-events-per-syllable exceeds the ceiling (pinned as an
-  invariant). 20/20 with agent 1's tests.
-- `scripts/intent_filter.py`: the "step 2 trigger" the design chat asked for, with measured
-  constants (v>=40 mm/s, k>=8 frames, per-pair signed regression, r^2>=0.5). Suppresses 175
-  followers in the ten-finger session, 0 in the thumb session — as the r^2 predicted.
-- KEY MEASUREMENT: free-motion event rate is 2.56 events/s, not the 11.4/s latency ceiling.
-- `scripts/wpm_ceiling.py`: 250 WPM only fits under the ceiling with 1 event per syllable.
-- Verified the 360 WPM human record (Kislingbury, Guinness, 97.23%): ~6 strokes/s, so the
-  detector has ~1.8x headroom over a world-record human. Corrected my own pessimistic
-  framing; the binding constraint is the language layer.
-- `scripts/guided_calibration.py`: the four falsification tests are now runnable
-  (tempo ramp, 8-sector compass with axis metadata, chord-vs-single, rest floor), with a
-  sidecar manifest and `--merge` for labelled frames.
-- `scripts/rest_model.py` + REST_MODEL.md: the "drift instead of position" premise survives
-  only with an adaptive baseline. Sliding W=19 (~209 ms) cuts the REST residual max from
-  11.96 mm to 5.04 mm and drops the required persistence from 8 frames to 2 (~4x latency).
-- W5/W6/W7/W8/W9/W10 worker research integrated. W5 and W6 independently conclude 8-way is
-  the defensible limit; W7 finds no evidence for a capacitive hole mask; W9 turns the
-  language layer into a prioritised backlog.
+## 05:47–06:05 — decoder, calibration limit, novelty, confidence
+- `scripts/stroke_decoder.py`: the seam between the measured event layer and the language
+  layer. Two measured findings while building it: contact count is NOT a chord criterion
+  (108/108 events would be chords with ten fingers down; ~7 unexplained contacts per event),
+  and peak alignment + magnitude is the criterion that works. A test caught a 45-degree
+  rotation in the sector table.
+- `scripts/pipeline_replay.py`: all stages audited against each other. AUDIT PASSED on 3
+  sessions. Caught the chord-counting bug end-to-end.
+- `scripts/calibration_transfer.py`: the per-pair coupling does NOT transfer across sessions
+  at all - tracking IDs are never reused (55-74 vs 136-150). The coupling model is
+  per-session unless contact identity is anatomical. Added `--task identity` to the guided
+  harness so the labelled dataset is a scripted 5-minute session.
+- W12 prior-art pass -> NOVELTY_STATEMENT.md: enslavement and drift compensation are known;
+  what is new is the quantified resting operating point in mm and the per-pair regression
+  suppression of touch-point covariation. Recorded what we must NOT claim.
+- W9 -> language layer is the 40->150 WPM lever (issue #7). W10 -> nobody has published
+  keyless steno above 16.8 WPM / 17.4% error; best flat sequential is 38-55 WPM. Success
+  criterion reframed (CROSS_VALIDATION 1.8).
+- Verified the 360 WPM record (Kislingbury, 97.23%) and corrected my own pessimistic WPM
+  framing: the detector has 1.8x headroom over a world-record human.
+- `scripts/rest_model.py` + REST_MODEL.md: the drift premise survives only with an adaptive
+  baseline (W=19: 11.96 -> 5.04mm) and the persistence drops from 8 frames to 2.
 - DECISION_HOLEMASK_VS_SOFTWARE.md: software suppression first, no hole mask, with
-  reversal criteria stated in advance.
-- Orchestration switched from `git push` to `scripts/gh_commit.py` (GitHub API from the
-  current remote head) so the two agents never fight over local git state.
-- Open issues for agent 1: #1 thresholds, #2 init artefact, #3 coupling classes (+correction),
-  #4 40ms vs 88ms, #5 WPM ceiling (+correction), #6 training path.
+  reversal criteria.
+- Orchestration moved to `scripts/gh_commit.py` (GitHub API) - no local git state, no
+  conflicts with agent 1. Note: do NOT `git reset --hard` after a gh commit, it silently
+  reverts to a stale local copy (this happened once and cost 6 tests).
+- 29 tests green. 9 issues open for agent 1, still no replies.
