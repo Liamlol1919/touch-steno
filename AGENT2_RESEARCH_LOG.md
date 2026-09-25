@@ -193,3 +193,29 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
   tree was stale until I re-synced - tests must be run against origin/main, not a local copy.
 - Remaining open: #14 (speed ceiling wording), #12, #9, #7, #6 - all legitimately
   agent1-side or hardware-blocked.
+
+## 06:45–06:50 — sampling precision, dataset validation, and the last open number
+- Quantified the sampling precision behind every coupling claim: within a session it is TIGHT
+  (r=+0.958, n=312, Fisher 95% CI [+0.947,+0.966]); across sessions it is NOT MEASURABLE
+  (tracking IDs are ephemeral); across hands/days there is ZERO data (327 pair fits, one
+  operator). The honest phrasing is now in NOVELTY_STATEMENT: the model is well determined
+  within a session and completely undetermined outside it.
+- W19 (correction latency) returned an explicit NOT FOUND: no published number says a
+  3-5 events/s input can be corrected after the fact without the undo path becoming the
+  bottleneck. That negative result IS the finding - it is the one open number that decides
+  whether the 100-218 WPM ceiling is reachable, and it is a measurement, not a literature
+  question.
+- Added --task correction to the guided harness: alternating sector stroke and deliberate
+  undo, so corrections/min and repair latency can be read off a cued stream.
+- scripts/identity_dataset_check.py: validates a finger-identity capture before it trains
+  anything. The label is only the cue; a sloppy session silently poisons the dataset. Checks
+  the presence GAP of each contact per cue and reports VALID/MISSING/AMBIGUOUS. Exit 0 only
+  if every cue is valid, so it can gate a pipeline step. Two bugs found and fixed in the
+  process (whole-window absence instead of a gap; a test fixture whose manifest window closed
+  before the lift).
+- CUED_SESSION_PROTOCOLS.md: the six tasks in one place, ordered by information per minute,
+  with the three scoring traps that produced wrong numbers pinned.
+- W18 (bimanual/drift/fatigue) still running; it targets the largest untested assumption -
+  every measurement so far is within-hand.
+- 73 tests green in the merged tree after agent1's schema-version work; verified the old
+  captures still load and analyse.
