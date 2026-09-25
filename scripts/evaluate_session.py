@@ -4,8 +4,8 @@
 This is the measurement the project has been missing. Every threshold so far was justified
 by distributions (rest vs mover, coupling r²) but never by an accuracy number.
 With a labelled synthetic session (one complete record per cue) or a guided session
-(normalized complete records; aggregate tempo blocks unless per-event marks are added),
-the full pipeline can be scored:
+(normalized complete records; new tempo records carry an expected cue schedule, while
+legacy records remain aggregate), the full pipeline can be scored:
 
   * sector confusion matrix (was the decoded direction the cued one?)
   * axis-vs-diagonal accuracy, because the literature says axes are the reliable half
@@ -33,6 +33,7 @@ import stroke_decoder  # noqa: E402
 import session_manifest  # noqa: E402
 
 AXES = {"E", "N", "W", "S"}
+TEMPO_MATCH_TOLERANCE_FLOOR_S = 0.12  # persistence window plus small phase margin
 
 
 def load_manifest(path: Path) -> list[dict]:
@@ -75,12 +76,13 @@ def score_tempo(record: dict, events: list[dict]) -> dict:
             "label": record.get("label"), "cued_hz": want,
             "detected_hz": round(detected_hz, 2),
             "events": detected, "mode": "aggregate_block_count",
+            "cue_provenance": record.get("event_provenance", "aggregate_block"),
             "cued_gestures": record.get("reps"),
             "ratio": round(detected_hz / want, 2) if want else None,
         }
 
     expected = [float(record["t_start"]) + float(mark) for mark in marks]
-    tolerance = max(0.12, 0.5 / want if want else 0.12)
+    tolerance = max(TEMPO_MATCH_TOLERANCE_FLOOR_S, 0.5 / want if want else 0.12)
     unmatched = set(range(len(inside)))
     matched_flags = []
     for cue_time in expected:
@@ -103,6 +105,7 @@ def score_tempo(record: dict, events: list[dict]) -> dict:
         "label": record.get("label"), "cued_hz": want,
         "detected_hz": round(detected_hz, 2),
         "events": matched, "mode": "one_to_one_cues",
+        "cue_provenance": record.get("event_provenance", "synthetic_cue_marks"),
         "cued_gestures": len(expected), "missed": len(expected) - matched,
         "merged": merged,
         "ratio": round(detected_hz / want, 2) if want else None,

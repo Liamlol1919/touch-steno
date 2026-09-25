@@ -2,24 +2,29 @@ import json
 import sys
 import tempfile
 import unittest
+from types import SimpleNamespace
 from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parent.parent / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 import evaluate_session  # noqa: E402
+import guided_calibration  # noqa: E402
+import make_benchmark  # noqa: E402
 import session_manifest  # noqa: E402
 
 
 class TestSessionManifest(unittest.TestCase):
     def test_normalizes_legacy_paired_records(self):
         records = [
-            {"label": "sector_E", "t_start": 1.0, "sector": "E"},
-            {"label": "sector_E", "t_end": 1.5},
+            {"label": "tempo_1hz", "t_start": 1.0, "events": [0.0],
+             "event_provenance": "expected_cue_schedule"},
+            {"label": "tempo_1hz", "t_end": 1.5},
         ]
         normalized = session_manifest.normalize_records(records)
         self.assertEqual(normalized, [{
-            "label": "sector_E", "t_start": 1.0, "t_end": 1.5, "sector": "E",
+            "label": "tempo_1hz", "t_start": 1.0, "t_end": 1.5,
+            "events": [0.0], "event_provenance": "expected_cue_schedule",
         }])
 
     def test_preserves_complete_records_and_drops_open_tail(self):
@@ -78,6 +83,34 @@ class TestSessionManifest(unittest.TestCase):
         self.assertEqual(result["mode"], "aggregate_block_count")
         self.assertEqual(result["events"], 2)
         self.assertEqual(result["cued_gestures"], 4)
+    def test_guided_tempo_tasks_include_expected_cue_schedule(self):
+        args = SimpleNamespace(task="tempo", rates=[2.0], seconds_per_rate=2.0)
+        task = guided_calibration.build_tasks(args)[0]
+        self.assertEqual(task["events"], [0.0, 0.5, 1.0, 1.5])
+        self.assertEqual(task["event_provenance"], "expected_cue_schedule")
+
+    def test_guided_tempo_score_labels_expected_schedule(self):
+        record = {
+            "label": "tempo_1hz", "t_start": 10.0, "t_end": 12.0,
+            "rate_hz": 1.0, "events": [0.0, 1.0],
+            "event_provenance": "expected_cue_schedule",
+        }
+        result = evaluate_session.score_tempo(
+            record, [{"t_start": 10.1}, {"t_start": 11.1}])
+        self.assertEqual(result["mode"], "one_to_one_cues")
+        self.assertEqual(result["cue_provenance"], "expected_cue_schedule")
+        self.assertEqual(result["events"], 2)
+
+    def test_guided_tempo_rejects_non_positive_duration(self):
+        args = SimpleNamespace(task="tempo", rates=[1.0], seconds_per_rate=0.0)
+        with self.assertRaises(ValueError):
+            guided_calibration.build_tasks(args)
+
+    def test_synthetic_tempo_marks_are_explicitly_ground_truth(self):
+        _frames, manifest = make_benchmark.build(7, 0, [2.0], 0, 0)
+        tempo = next(row for row in manifest if row["label"] == "tempo_2.0hz")
+        self.assertEqual(tempo["event_provenance"], "synthetic_ground_truth")
+
 
 
 

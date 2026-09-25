@@ -173,7 +173,9 @@ def build(seed: int, sectors_reps: int, tempo_rates, chord_reps: int,
                     tracks["2"]["x"][idx] = vx * 20.0 * f * COUPLING_FINGER
                     tracks["2"]["y"][idx] = vy * 20.0 * f * COUPLING_FINGER
             marks.append(round(t0, 4))
-        emit_block(tracks, f"tempo_{rate}hz", {"rate_hz": rate, "events": marks})
+        emit_block(tracks, f"tempo_{rate}hz", {
+            "rate_hz": rate, "events": marks,
+            "event_provenance": "synthetic_ground_truth"})
 
     # 4. chord vs single alternation
     for c in range(chord_reps):

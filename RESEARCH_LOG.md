@@ -36,8 +36,9 @@
 - [ ] Add per-user rest/palm covariance calibration and replayable threshold sweeps.
 - [ ] Define opt-in privacy-safe telemetry and correction/undo metrics.
 - [x] Normalize `guided_calibration.py` paired manifest records and make `evaluate_session.py`
-  use one-to-one synthetic tempo/chord matching; guided tempo is explicitly aggregate mode.
-- [ ] Add per-event timestamps to guided tempo capture before claiming per-gesture real throughput.
+  use one-to-one synthetic tempo/chord matching; legacy guided tempo remains aggregate mode.
+- [x] Add expected per-event cue timestamps to guided tempo capture; evaluator labels them
+  `expected_cue_schedule`, distinct from observed hardware timing.
 
 ## Iteration 3 — 2026-09-25 06:18–06:24 CEST
 
@@ -67,3 +68,10 @@ GitHub API after checking the remote head; no local branch is assumed authoritat
 The corrected sub-gate envelope realizes 1.01–1.48 Hz for 150–350 ms synthetic gestures.
 The separate 100–218 WPM figures are conditional fast-return cycle-model outputs, not
 measured PTH-660 throughput.
+
+## Iteration 5 — 2026-09-25 06:40–06:45 CEST
+
+- [x] Added expected per-event cue schedules to guided tempo tasks.
+- [x] Kept legacy guided manifests on the explicit aggregate fallback.
+- [x] Added provenance and one-to-one schedule tests; guided schedule is not observed timing.
+- [ ] A cued PTH-660 run is still required to measure actual user throughput.

@@ -13,6 +13,8 @@ The raw contact frames go to a second file; `merge` stitches them into labelled 
 Tasks
   tempo      deliberate short strokes at 1, 2, 3, 4, 5 events/s -> the number that decides
              whether 150-250 WPM is reachable at all (CROSS_VALIDATION 1.4)
+             Each tempo record stores expected relative cue times; these are targets, not
+             observed user timestamps, and the evaluator labels that provenance explicitly.
   sectors    8-way thumb compass, one sector per cue, N repetitions -> confusion matrix,
              split axes vs diagonals (CROSS_VALIDATION 1.5)
   chord      two-thumb chords on cue, alternating with single-thumb strokes -> tests
@@ -77,11 +79,17 @@ def build_tasks(args) -> list[dict]:
     """Each task is a dict: label, cue text, duration, and target metadata."""
     tasks: list[dict] = []
     if args.task == "tempo":
+        if args.seconds_per_rate <= 0:
+            raise ValueError("seconds_per_rate must be positive")
         for rate in args.rates:
+            if rate <= 0:
+                raise ValueError("tempo rates must be positive")
             n = max(4, int(round(rate * args.seconds_per_rate)))
             tasks.append({"label": f"tempo_{rate}hz", "cue": f"{rate} EVENTS/S",
                           "seconds": args.seconds_per_rate, "rate_hz": rate,
-                          "reps": n})
+                          "reps": n,
+                          "events": [round(i / rate, 6) for i in range(n)],
+                          "event_provenance": "expected_cue_schedule"})
     elif args.task == "sectors":
         for rep in range(args.reps):
             order = SECTORS_8 if rep % 2 == 0 else tuple(reversed(SECTORS_8))
