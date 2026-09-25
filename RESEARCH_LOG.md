@@ -293,3 +293,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Validator reports no reference text, event content, or local paths.
 - [x] Added structural, consent, hash/path, and output-privacy tests.
 - [ ] A real consented held-out corpus and its deletion record remain outstanding in issue #24.
+
+## Iteration 34 — 2026-09-25
+
+- [x] Added `language_corpus_retention.py` for deterministic retain/deleted/overdue status.
+- [x] Retention checks never delete files or emit corpus paths/content.
+- [x] Added future-date, overdue, deleted, and invalid-manifest tests.
+- [ ] Actual consented capture, operator deletion, and deletion record remain outstanding in issue #24.

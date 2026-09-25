@@ -43,6 +43,7 @@ Research and implementation notes for high-speed text input on a continuous touc
  `scripts/plover_event_adapter.py` — semantic callback boundary; no Plover import or text inspection.
 - [LANGUAGE_CORPUS_MANIFEST.md](LANGUAGE_CORPUS_MANIFEST.md) and
  `scripts/language_corpus_manifest.py` — consent, held-out split, hash, and retention validation.
+ `scripts/language_corpus_retention.py` — non-destructive retention/deletion status check.
 - [CANDIDATE_RANKING.md](CANDIDATE_RANKING.md) and `scripts/candidate_ranker.py` —
   confidence/language ranked candidates without committing text.
 - [LEXICON_DECODING.md](LEXICON_DECODING.md) and `scripts/lexicon_decoder.py` —

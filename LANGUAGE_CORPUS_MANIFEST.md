@@ -31,3 +31,14 @@ python3 scripts/language_corpus_manifest.py messung/manifest.json --json
 Output contains only schema/version, validity, event-log validity, and concise errors. It
 never copies paths or file contents. A valid manifest proves local structure and consent
 metadata only; it does not prove translation accuracy, human correction time, or WPM.
+
+Retention can be checked without reading or copying the corpus:
+
+```bash
+python3 scripts/language_corpus_retention.py messung/manifest.json \
+  --today 2026-09-25 --json
+```
+
+The result is `retain` before the date, `deleted` when both local files are absent after the
+date, and `overdue` when files remain after the date. The helper never deletes files or
+prints their paths; deletion remains an explicit operator action.
