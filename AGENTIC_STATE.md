@@ -1,13 +1,13 @@
 # Agentic State Ledger
 
 **Loop:** 10× autonomous product-engineering meta-plan  
-**Current phase:** 3 — Offline branch comparison complete; synthetic kill-gate preparation
+**Current phase:** 3 — Frozen `SYNTH-BRANCH-1` comparison complete; redesign/hold
 **Evidence class of current product slice:** `IMPLEMENTED`
 **Active candidate:** Clean English steno transport plus offline contract validator
-**Promoted offline research branch:** Contact-field representation — research priority only, not human-validated
-**Rejected/hold branch:** FCPT current selectable-thumb primitive rejected; retain layout arithmetic only on hold
-**Open falsification test:** Frozen `SYNTH-BRANCH-1` held-out synthetic comparison
-**Next executable action:** Create the frozen `SYNTH-BRANCH-1` manifest and offline synthetic harness, then run the declared Contact Field, Elastic Word control, and FCPT arithmetic gates without device or external-repository access
+**Promoted offline research branch:** None; no branch is promoted to product
+**Rejected/hold branches:** Contact Field representation rejected as current primary, pending redesign/hold; FCPT current selectable-thumb primitive rejected, arithmetic only
+**Open falsification test:** Contact Field redesign must declare a fresh representation and evidence boundary before any new comparator
+**Next executable action:** Hold and redesign the Contact Field representation if justified; do not inflate claims, retune to erase failed gates, or promote Elastic Word from synthetic control/fallback status
 
 ## Decisions
 
@@ -38,26 +38,13 @@ unimplemented.
 - **Simplex-10:** retain as the **IMPLEMENTED PROTOTYPE** product baseline. Its next gate is
   real anatomy/identity/false-commit and held-out chord evidence, plus a frozen profile
   identifier and layout fingerprint before any adapter.
-- **Contact-field:** **PRIMARY OFFLINE RESEARCH CANDIDATE / HOLD.** Its red-team priority
-  is 61/100 because the representation is aligned with anonymous contact input. It is
-  still only an offline geometry utility: cardinality, segmentation, timing, palm/rest,
-  confidence, correction, and cross-session behavior are unvalidated. Advance only through
-  the frozen `SYNTH-BRANCH-1` discriminability and false-commit gates.
-- **Word-as-event:** **CONTROL/FALLBACK OFFLINE RESEARCH BRANCH / HOLD.** Its red-team
-  priority is 59/100. Synthetic path normalization, bounded scoring, and per-template
-  abstention are executable, but segmentation, dictionary/OOD decoding, held-out words,
-  and correction are absent. It cannot become an end-to-end fallback until an
-  anonymous-contact-to-single-writer-path constructor exists.
-- **FCPT:** **CURRENT SELECTABLE-THUMB PRIMITIVE REJECTED; ARITHMETIC HELD.** Stable
-  single-contact attribution is a non-compensable veto under the recorded
-  0-key-event/24-ambiguous-NACK capture condition. Retain corpus/layout arithmetic only
-  behind exact exhaustive, greedy-counterexample, held-out 5%, 24/27 parameter-grid, and
-  bootstrap-stability gates. Passing arithmetic gates does not revive the primitive.
+The completed frozen `SYNTH-BRANCH-1` run supersedes the earlier static comparison. Its exact results and gate evaluation are recorded in `SYNTH_BRANCH_1_RESULTS.md`.
 
-The exact weighted scorecard, hard vetoes, implemented/missing layers, privacy/anatomy/
-timing risks, and kill tests are frozen in `BRANCH_REDTEAM.md`. All branch conclusions
-remain offline evidence and make no hardware-validity, human-performance, WPM,
-throughput, correction, or text-accuracy claim.
+- **Contact-field:** **REJECTED AS CURRENT PRIMARY REPRESENTATION; REDESIGN/HOLD.** The frozen run reports macro recall `0.585`, coverage `0.8`, wrong-commit rate `0.28`, conditional accepted-event error `0.35`, null false-commit upper95 `0.013347160654775625`, and nuisance recall `0.9625` clean, `0.7625` mild, `0.3375` moderate, and `0.0` severe. It clears basic discriminability but fails the wrong-commit/accepted-error and nuisance requirements; no hold label overrides those failed gates.
+- **Word-as-event / Elastic Word:** **SYNTHETIC CONTROL/FALLBACK / HOLD.** The frozen comparator reports macro recall `1.0`, coverage `0.8888888888888888`, wrong-commit rate `0.0`, conditional accepted-event error `0.0`, and nuisance recall `1.0` in every stratum. The reported null upper95 is `0.013347160654775625`; regardless of that bound, the result does not establish anonymous-contact segmentation, end-to-end event construction, correction, or product readiness.
+- **FCPT:** **CURRENT SELECTABLE-THUMB PRIMITIVE REJECTED; ARITHMETIC HELD.** The frozen run has 27 modeled-cost settings and `recognition_metrics=null`. Modeled cost is not recognition accuracy, hardware evidence, or human evidence.
+
+No branch is promoted to product. Synthetic comparator results are not hardware, human, WPM, correction, or text-accuracy evidence.
 
 ## Reference integration targets
 

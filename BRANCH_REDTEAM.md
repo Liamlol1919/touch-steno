@@ -1,14 +1,16 @@
 # Offline Branch Red-Team Decision
 
 **Decision date:** 2026-09-25  
-**Evidence boundary:** completed static red-team review of three offline implementations; no synthetic comparison run, hardware replay, human session, or external integration was performed for this decision.  
-**Decision:** keep Contact Field as the primary **offline research candidate**, keep Elastic Word as the **control/fallback research candidate**, and reject FCPT's current selectable-thumb primitive while retaining only its layout arithmetic as a held branch.
+**Evidence boundary:** the earlier static comparison is superseded by the completed frozen `SYNTH-BRANCH-1` synthetic run. This remains offline synthetic evidence only; no hardware replay, human session, WPM, correction, text-accuracy, or external integration evidence was produced.
+**Decision:** reject Contact Field as the current primary representation; retain Elastic Word as a synthetic control/fallback; keep FCPT arithmetic-only with its selectable-thumb primitive rejected. No branch is promoted to product.
 
 ## 1. Decision and hard vetoes
 
-1. **Primary offline research branch — Contact Field (`nextgen/contact_field.py`).** Its anonymous, unordered XY contact-field input matches the surviving identity-free design direction. Promotion here means research priority only. It is not a decoder, event detector, classifier, or product candidate.
-2. **Control/fallback research branch — Elastic Word (`nextgen/elastic_word.py`).** It is the matched shape/template control with bounded normalization and an explicit accept/abstain threshold. It cannot be an end-to-end fallback while it requires an ordered path that the anonymous contact pipeline cannot construct.
-3. **Reject/hold — FCPT (`nextgen/fcpt.py`).** Reject the current primitive that requires a stable selected thumb/contact and a 24-cell target identity. Retain the deterministic corpus/layout arithmetic only; do not treat its score as MT, throughput, anatomy, or human evidence.
+1. **Contact Field — rejected as the current primary representation (`nextgen/contact_field.py`).** The frozen synthetic run clears basic discriminability but fails wrong-commit, conditional accepted-event error, and nuisance-retention requirements. It is not a product candidate and requires redesign or an explicit hold decision.
+2. **Elastic Word — synthetic control/fallback only (`nextgen/elastic_word.py`).** It passes the frozen recognition comparator, but remains non-end-to-end because anonymous-contact segmentation and path construction are absent.
+3. **FCPT — reject current primitive; hold arithmetic only (`nextgen/fcpt.py`).** The run has 27 modeled-cost settings and no recognition metrics. Modeled cost is not accuracy, and the stable selected-thumb primitive remains rejected.
+
+The earlier static weighted comparison is retained below as historical design context, not as the current branch decision. The completed frozen result is recorded in `SYNTH_BRANCH_1_RESULTS.md`.
 
 The hard vetoes are non-compensable:
 
@@ -36,7 +38,7 @@ Ratings are 0–10 research-priority judgments grounded in the implemented artif
 
 Arithmetic: Contact Field `200+75+60+45+30+70+50+80 = 610/10 = 61.0`; Elastic Word `75+90+90+60+70+80+45+80 = 590/10 = 59.0`; FCPT `25+30+105+60+30+90+50+90 = 480/10 = 48.0`.
 
-## 3. Contact Field — primary offline research candidate
+## 3. Contact Field — rejected current representation
 
 ### Implemented capabilities
 
@@ -198,4 +200,4 @@ A run is void—not a pass or fail—if the manifest changes after results are s
 
 ### Next executable action
 
-Create one frozen `SYNTH-BRANCH-1` manifest and offline synthetic harness, without device or external-repository access, then run the three task-specific comparisons above and record machine-readable results against their exact gates. The first action is the frozen manifest, not implementation changes to the three prototypes. Any code or test work that follows is a later, separately authorized step; this document records the comparison and next gates only.
+Hold and redesign the Contact Field representation only if a new, explicitly authorized design is justified. Do not inflate the frozen synthetic result, retune thresholds to erase the failed safety/nuisance gates, or promote Elastic Word from its synthetic control status. Any future work must begin with a declared representation redesign and a fresh evidence boundary; no branch is currently promoted to product.
