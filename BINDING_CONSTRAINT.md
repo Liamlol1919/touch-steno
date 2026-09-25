@@ -753,13 +753,16 @@ German at 2 events per syllable (3,39 needed) but only *just* misses in English 
 Neither language reaches it, but English is materially closer, and English's 1,15 % top-1024
 coverage is better positioned for a compact code than most designs assume.
 
-Event arithmetic at the certified 5,7 events/s ceiling, all ceilings and not user rates:
+Event arithmetic at the certified 5,7 events/s ceiling, all ceilings and not user rates.
+**WPM is reported on the 5-letter basis** (1,3965 syllables per word), because the
+"1–2 events per 5-letter word" premise is per 5-letter word; the overall-text basis
+(1,2916 syllables per word) is given alongside so the two are not confused:
 
-| Event alphabet | events/syllable | syll/s | WPM (5-letter) | events/5-letter word |
-|---|---|---|---|---|
-| 8 classes | 5 | 1,14 | 48,98 | 6,98 |
-| 16 classes | 4 | 1,425 | 61,22 | 5,59 |
-| 32 or 64 classes | 3 | 1,90 | 81,63 | 4,19 |
+| Event alphabet | events/syllable | syll/s | WPM (5-letter, primary) | WPM (overall text) | events/5-letter word |
+|---|---|---|---|---|---|
+| 8 classes | 5 | 1,14 | 48,98 | 52,96 | 6,98 |
+| 16 classes | 4 | 1,425 | 61,22 | 66,20 | 5,59 |
+| 32 or 64 classes | 3 | 1,90 | 81,63 | 88,27 | 4,19 |
 
 **The honest English conclusion:** a 3-event, 32-class code reaches 81,6 WPM *arithmetically*
 and needs 4,19 events per 5-letter word against a 1–2 premise. The 1–2 premise has to be
