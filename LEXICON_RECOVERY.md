@@ -10,11 +10,15 @@ For each target character:
 
 1. The intended sector selects the row `P(observed | intended)`.
 2. An observed sector is sampled from that row.
-3. Candidates are built from the column `P(intended | observed)`, then truncated to top-3.
-4. The target word is used only after decoding to score reachability and selection.
+3. Each row is normalized by its detection count, then the observed-sector column is
+   normalized under an explicit uniform true-sector prior. This matters because undetected
+   events give rows unequal totals.
+4. The resulting top-3 records are passed to the decoder; the target word is used only
+   afterward to score reachability and selection.
 
 The benchmark never conditions candidate generation on the target row after sampling. Its
-`conditioning` field is always `observed-sector-column`.
+`conditioning` field is always `observed-sector-column`; `true_sector_prior` records the
+uniform prior used for the column posterior.
 
 ## Run
 
@@ -32,12 +36,16 @@ PTH-660 measurements.
 
 ## Reported metrics
 
-- `top1_symbol_accuracy`: sensor top-1 character accuracy;
+- `top1_symbol_accuracy`: posterior top-1 character accuracy;
 - `top3_symbol_availability`: target character present in the top-3 candidate set;
-- `top1_word_accuracy`: raw observed-sector word accuracy;
-- `word_reachability_rate`: target appears among decoder-ranked lexicon words;
+- `top1_word_accuracy` and `top1_word_reachability_rate`: target equals the top-1 posterior
+  sequence;
+- `top3_word_reachability_rate` and `word_reachability_rate`: target appears among decoder-ranked
+  lexicon words;
+- `observed_word_accuracy`: raw observed-sector word accuracy, retained separately;
 - `selected_word_accuracy`: decoder proposal equals the target;
-- `ambiguous_rate`: multiple reachable words tied after the prior rule;
+- `selected_word_accuracy_conditional_reachable`: selected accuracy over reachable trials;
+- `ambiguous_rate` and `ambiguous_rate_reachable`: unresolved ties over all and reachable trials;
 - `unreachable_rate`: no lexicon word fits the candidate sets;
 - `mean_reachable_words`: average size of the reachable candidate set;
 - `correction_opportunities_per_word`: one model-level repair opportunity for an unresolved,

@@ -35,7 +35,8 @@ def _word_scores(model, words: list[str]) -> dict[str, float]:
 
 
 def evaluate_channel(confusion: dict, trials: int, radius_mm: float, seed: int,
-                     words: list[str], model) -> dict:
+                     words: list[str], model, *,
+                     confusion_trials_per_sector: int | None = None) -> dict:
     """Evaluate observed-sector candidate generation and lexicon search."""
     letter_of = dict(lr.SECTOR_LETTER)
     sector_of = {letter: sector for sector, letter in lr.SECTOR_LETTER.items()}
@@ -45,7 +46,8 @@ def evaluate_channel(confusion: dict, trials: int, radius_mm: float, seed: int,
                 "letters": sorted(set(letter_of.values()))}
     language_scores = _word_scores(model, pool)
     rng = random.Random(seed)
-    top1_word_hits = selected_hits = reachable = ambiguous = unreachable = 0
+    top1_word_hits = observed_word_hits = selected_hits = reachable = 0
+    selected_reachable_hits = ambiguous = unreachable = 0
     correction_opportunities = 0
     top3_symbols = top1_symbols = total_symbols = 0
     reachable_word_total = 0
@@ -53,25 +55,30 @@ def evaluate_channel(confusion: dict, trials: int, radius_mm: float, seed: int,
         target = rng.choice(pool)
         positions = []
         observed_word = []
+        top1_word = []
         for char in target:
             observed = lr.sample_observed(sector_of[char], confusion, rng)
             candidates = lr.top_candidates(observed, confusion, letter_of)
             positions.append(candidates)
             observed_word.append(letter_of[observed])
+            top1_word.append(candidates[0]["text"] if candidates else None)
             total_symbols += 1
             top1_symbols += bool(candidates and candidates[0]["text"] == char)
             top3_symbols += char in {candidate["text"] for candidate in candidates}
         report = lexicon_decoder.decode_word(positions, pool, language_scores)
         reachable_word_total += report["reachable_word_count"]
-        reachable += target in {row["text"] for row in report["ranked"]}
+        is_reachable = target in {row["text"] for row in report["ranked"]}
+        reachable += is_reachable
         ambiguous += report["status"] == "ambiguous"
         unreachable += report["status"] == "unreachable"
         selected = report["selected"]
         selected_text = selected["text"] if selected else None
         selected_hits += selected_text == target
+        selected_reachable_hits += is_reachable and selected_text == target
         if report["status"] != "resolved" or selected_text != target:
             correction_opportunities += 1
-        top1_word_hits += observed_word == list(target)
+        top1_word_hits += top1_word == list(target)
+        observed_word_hits += observed_word == list(target)
     denominator = max(1, trials)
     return {
         "schema": SCHEMA,
@@ -82,14 +89,22 @@ def evaluate_channel(confusion: dict, trials: int, radius_mm: float, seed: int,
         "wordlist_size": len(words),
         "lexicon_size": len(pool),
         "conditioning": "observed-sector-column",
+        "true_sector_prior": "uniform",
+        "confusion_trials_per_sector": confusion_trials_per_sector,
         "synthetic_but_calibrated": True,
         "language_prior": "character-bigram-from-supplied-lexicon",
         "top1_symbol_accuracy": round(top1_symbols / max(1, total_symbols), 4),
         "top3_symbol_availability": round(top3_symbols / max(1, total_symbols), 4),
         "top1_word_accuracy": round(top1_word_hits / denominator, 4),
+        "top1_word_reachability_rate": round(top1_word_hits / denominator, 4),
+        "top3_word_reachability_rate": round(reachable / denominator, 4),
+        "observed_word_accuracy": round(observed_word_hits / denominator, 4),
         "word_reachability_rate": round(reachable / denominator, 4),
         "selected_word_accuracy": round(selected_hits / denominator, 4),
+        "selected_word_accuracy_conditional_reachable": round(
+            selected_reachable_hits / max(1, reachable), 4),
         "ambiguous_rate": round(ambiguous / denominator, 4),
+        "ambiguous_rate_reachable": round(ambiguous / max(1, reachable), 4),
         "unreachable_rate": round(unreachable / denominator, 4),
         "mean_reachable_words": round(reachable_word_total / denominator, 4),
         "correction_opportunities_per_word": round(
@@ -99,9 +114,12 @@ def evaluate_channel(confusion: dict, trials: int, radius_mm: float, seed: int,
 
 def run(trials: int, radius_mm: float, seed: int, words: list[str], model) -> dict:
     sigma = la.calibrate_sigma(trials=300, seed=3)
-    confusion = la.build_confusion(max(200, trials // 20), seed, sigma,
+    confusion_trials = max(200, trials // 20)
+    confusion = la.build_confusion(confusion_trials, seed, sigma,
                                    radius_mm=radius_mm)
-    return evaluate_channel(confusion, trials, radius_mm, seed, words, model)
+    return evaluate_channel(
+        confusion, trials, radius_mm, seed, words, model,
+        confusion_trials_per_sector=confusion_trials)
 
 
 def main() -> int:

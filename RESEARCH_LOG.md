@@ -219,3 +219,18 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Reported top-1/top-3 availability, word reachability, selection, ambiguity, unreachable rate, and word-level correction opportunities separately.
 - [x] Added `LEXICON_RECOVERY.md` and behavioral tests; no WPM or hardware result was added.
 - [ ] A real cued PTH-660 candidate capture and human seconds-per-correction measurement remain outstanding.
+
+## Iteration 24 — 2026-09-25
+
+- [x] Corrected observed-column normalization for unequal confusion-row totals using an explicit uniform true-sector prior.
+- [x] Separated posterior top-1 metrics from raw observed-sector accuracy.
+- [x] Added top-1/top-3 word reachability and conditional selected-word metrics.
+- [x] Added unequal-row and metric-boundary regression tests.
+- [ ] Real cued hardware candidates and human correction-time observations remain outstanding.
+
+## Iteration 25 — 2026-09-25
+
+- [x] Documented evdev `tracking_id` as session-local contact association, not anatomical identity.
+- [x] Added per-session identity/calibration assumptions to all recommended architectures.
+- [x] Clarified that anatomical identity and hand-relative association are unvalidated future options.
+- [x] Closed the documentation portion of issue #9; no cross-session model or hardware capability was claimed.

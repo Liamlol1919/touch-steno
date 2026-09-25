@@ -166,11 +166,12 @@ signatures, and the decision that seconds-per-correction is unmeasured in the li
 `scripts/lexicon_decoder.py` implements the corrected search boundary: it consumes bounded
 top-3 sensor candidates, searches a supplied lexicon word-by-word, preserves candidate
 provenance, and uses a word prior only for exact sensor-score ties. It returns a reversible
-proposal, not committed text. `scripts/lexicon_recovery.py` now re-measures the conditioned
+proposal, not committed text. `scripts/lexicon_recovery.py` re-measures the conditioned
 synthetic channel from observed-sector columns and reports reachability, selection,
-ambiguity, unreachable cases, and word-level correction opportunities. These are
-implementation/benchmark results, not PTH-660 or WPM results; the greedy recovery table
-remains withdrawn.
+ambiguity, unreachable cases, and word-level correction opportunities. Observed-column
+candidates use row-total normalization and an explicit uniform true-sector prior, so
+undetected events do not silently bias the posterior. These are implementation/benchmark
+results, not PTH-660 or WPM results; the greedy recovery table remains withdrawn.
 
 ## What would change the picture
 

@@ -17,6 +17,24 @@ WPM result exists yet; the current synthetic envelope realizes about 1.01–1.48
 Training progression, acceptance gates and the starter Plover brief deliverable are defined in
 [TRAINING_PATH.md](TRAINING_PATH.md). No speed range in this table is a PTH-660 result.
 
+## Calibration and identity portability
+
+The PTH-660 evdev `tracking_id` is a contact-lifetime key, not a reusable anatomical finger
+label. The default deployment therefore recalibrates neutral/rest state and any coupling
+matrix at the start of every session. No architecture below may transfer a finger-specific
+model across sessions merely by matching numeric tracking IDs.
+
+| Architecture | Identity/calibration assumption |
+|---|---|
+| A. Rest-gated tap-sequence | Contact geometry and coupling are session-local; portable finger mapping requires validated identity or hand-relative association. |
+| B. QWERTY finger-identity Bayesian | Cross-session personal models require a validated anatomical or hand-relative identity mechanism; evdev IDs alone are insufficient. |
+| C. Micro-drift directional gestures | The neutral anchor is session-local; single-contact decoding avoids cross-contact identity transfer but not per-session recalibration. |
+| D. 8VIM/Cirrin-style word gesture | No multi-finger identity is required, but user vocabulary and gesture calibration remain session/user-specific. |
+| E. Dasher/predictive fallback | No anatomical identity is required; user-specific language and calibration data still need explicit ownership and reset. |
+
+Until an identity model is validated across posture and session boundaries, label these
+architectures `per-session` in benchmark reports.
+
 ## A. Rest-gated tap-sequence + Plover (recommended primary)
 
 ### Interaction

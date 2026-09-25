@@ -57,6 +57,28 @@ class TestLexiconRecovery(unittest.TestCase):
         self.assertEqual([row["text"] for row in candidates], ["a", "c", "e"])
         self.assertTrue(all(row["source"] == "observed-sector-column"
                             for row in candidates))
+    def test_unequal_detection_rows_use_uniform_prior_posterior(self):
+        sectors = ("E", "NE", "N", "NW", "W", "SW", "S", "SE")
+        confusion = {truth: {observed: 0 for observed in sectors} for truth in sectors}
+        confusion["N"].update({"E": 9, "N": 1})
+        confusion["S"].update({"E": 1})
+        candidates = lm_recovery.top_candidates("E", confusion)
+        by_text = {row["text"]: row["confidence"] for row in candidates}
+        self.assertGreater(by_text["c"], by_text["t"])
+        self.assertAlmostEqual(sum(row["confidence"] for row in candidates), 1.0)
+
+    def test_top1_metrics_are_posterior_not_observed_label(self):
+        sectors = ("E", "NE", "N", "NW", "W", "SW", "S", "SE")
+        confusion = {truth: {observed: 0 for observed in sectors} for truth in sectors}
+        confusion["E"]["E"] = 1
+        confusion["NW"]["E"] = 1
+        report = lexicon_recovery.evaluate_channel(
+            confusion, trials=1, radius_mm=12.0, seed=5,
+            words=["eee"], model=self._model(["eee"]))
+        self.assertEqual(report["top1_word_accuracy"], 0.0)
+        self.assertEqual(report["observed_word_accuracy"], 1.0)
+        self.assertEqual(report["top3_word_reachability_rate"], 1.0)
+        self.assertEqual(report["selected_word_accuracy_conditional_reachable"], 1.0)
 
 
 if __name__ == "__main__":

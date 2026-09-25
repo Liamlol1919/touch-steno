@@ -78,6 +78,19 @@ Every contact frame should preserve at least:
 }
 ```
 
+### Identity scope
+
+`tracking_id` is an evdev contact-lifetime association key, not an anatomical finger label.
+It can associate contacts within one touch stream and support per-session coupling fits, but
+the driver is not required to reuse it after lift, reconnect, or restart. The decoder must
+not infer a finger identity from its numeric value or transfer a finger-specific model by
+matching IDs across sessions.
+
+Cross-session calibration requires a separately validated identity mechanism: anatomical
+identity, or a hand-relative association computed within each new session. Until one exists,
+rebuild neutral/rest and coupling calibration at session start and label the result
+`per-session`.
+
 Derived per-contact features:
 
 - `v_peak`, `v_mean`, `acceleration_peak`;
@@ -162,7 +175,7 @@ Every candidate/committed record should reference the raw-event window. The repl
 
 ## Open engineering questions
 
-- Can the actual PTH-660 stream expose touch area and stable contact IDs on the target Linux version?
+- Can the actual PTH-660 stream expose a validated anatomical identity or hand-relative association, rather than only an ephemeral contact ID, on the target Linux version?
 - Does Bluetooth produce the same axes and timing as USB?
 - Is a static palm gate sufficient, or is a learned per-user contact-classifier required?
 - How should a real two-finger chord override dependency suppression?

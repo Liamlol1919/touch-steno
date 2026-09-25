@@ -57,6 +57,7 @@ rate before quoting any rate-dependent number.
 ## What no protocol can substitute for
 
 The *cross-session* transfer of the coupling model, and anything across hands. Tracking IDs
-are ephemeral (issue #9), so the coupling matrix is rebuilt per session by necessity, and the
-only route to portability is the finger-identity model, which needs the `identity` capture
-plus a model. Until then, calibrate at the start of each session and say so.
+are ephemeral (issue #9), so the coupling matrix is rebuilt per session by necessity. A
+validated anatomical identity model or a per-session hand-relative association could provide
+portable labels; neither is currently validated for this device. Until then, calibrate at
+the start of each session and say so.

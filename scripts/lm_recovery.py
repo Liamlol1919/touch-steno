@@ -101,15 +101,19 @@ def sample_observed(truth_sector: str, confusion: dict, rng: random.Random) -> s
 
 def top_candidates(observed: str, confusion: dict,
                    letter_of: dict[str, str] | None = None) -> list[dict]:
-    """Return top-3 P(true sector | observed sector) records."""
+    """Return top-3 P(true sector | observed) under a uniform true-sector prior."""
     mapping = SECTOR_LETTER if letter_of is None else letter_of
-    column = {truth: row.get(observed, 0) for truth, row in confusion.items()}
-    total = sum(column.values()) or 1
+    posterior = {}
+    for truth, row in confusion.items():
+        row_total = sum(row.values())
+        if row_total and row.get(observed, 0) and truth in mapping:
+            posterior[truth] = row[observed] / row_total
+    total = sum(posterior.values()) or 1.0
     candidates = [
-        {"text": mapping[truth], "confidence": count / total,
+        {"text": mapping[truth], "confidence": weight / total,
          "source": "observed-sector-column", "observed_sector": observed,
          "true_sector": truth}
-        for truth, count in column.items() if count and truth in mapping
+        for truth, weight in posterior.items()
     ]
     return sorted(candidates, key=lambda row: (-row["confidence"], row["text"]))[:3]
 
