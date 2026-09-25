@@ -110,3 +110,59 @@ hand makes without being asked to make it.**
 read the achieved envelope from the recording: if the operator can hold a 30 mm arc cleanly
 after a short practice, option 1 is live. If they cannot, option 2 or 3 is forced, and that
 is a design decision the project should make explicitly rather than discover late.
+
+## Resolution: the radius is 12–15 mm, triangulated three ways
+
+W20 measured thumb reach and comfort consensus. The decisive numbers:
+
+| envelope | value | source |
+|---|---:|---|
+| 90 %-consensus **comfort** patch | **~3.8 × 10.1 mm** | https://ergoweb.com/thumb-reach-distances-and-envelopes-for-handheld-devices |
+| 70 %-consensus bounding box | **~21.9 × 30.4 mm** | same |
+| maximum reach, large-hand males (not comfort) | 61.4 ± 9.7 mm | same |
+| thumb length vs maximum reach | r = 0.26, p = 0.015 (weak) | same |
+
+A r = 30 mm compass sweeps a 60 × 60 mm area. **That does not fit inside the 70 %-consensus
+box**, and it is an order of magnitude beyond the 90 %-comfort patch.
+
+Now put our own measurement next to it:
+
+| source | posture | envelope |
+|---|---|---|
+| this user, this pad, this project | six fingers anchored, both hands down | **24.6 × 18.2 mm** bbox, max radius 15.1 mm |
+| W20, 70 % consensus | one-hand phone grip | ~22 × 30 mm |
+| W20, 90 % consensus | one-hand phone grip | ~4 × 10 mm |
+
+Our measured envelope lands **on the 70 % consensus box**, despite a completely different
+posture and population. That agreement between an individual's recorded movement and a
+published consensus map is the strongest triangulation available without new hardware.
+
+### The decision
+
+**Design at r ≈ 12–15 mm. Not 20, not 30.**
+
+- r = 12 mm: accuracy 0.576 — below what the layout can carry
+- r = 15 mm: accuracy ~0.68
+- r = 20 mm: 0.822, but it is at or beyond the 70 % envelope and needs validation
+- r = 30 mm: 0.957, **outside every measured comfort envelope** — max reach, not comfort
+
+### The consequence nobody wanted, and the one the evidence forces
+
+At an ergonomic radius the compass has **32–42 % label error**. The language layer cannot
+be an optimisation on top of that; it is the component that makes the input usable. That
+promotes W9's dictionary and correction backlog from "the speed lever" to **"the correctness
+lever"**, and it is the first time in this project that a design choice is forced by three
+independent lines of evidence rather than chosen.
+
+It also retires option 1 from the addendum above: training a 60 mm sweep is not a speed/accuracy
+trade any more, it is asking the hand to leave its measured comfort envelope. Option 3
+(change the primitive so accuracy does not depend on excursion radius) is the only one that
+escapes the trade, and it deserves a design pass.
+
+### Limits of the triangulation
+
+W20's reach data is one-hand phone grip, not a six-finger-anchored flat pad — it explicitly
+flags that as NOT FOUND. So it is an approximation for our posture, and our own measurement
+is the only anchored-posture number we have. The cued sector session remains the check: if a
+trained operator can hold 20 mm cleanly and comfortably, the working point moves one notch
+up; if not, it stays at 12–15.
