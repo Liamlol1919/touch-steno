@@ -10,7 +10,7 @@ It also refuses to pretend: if the tablet is absent, the hardware-dependent step
 SKIPPED rather than silently producing empty files, and the summary says so.
 
 Usage:
-    python3 scripts/session_runner.py --quick          # ~8 min, the highest-value blocks
+    python3 scripts/session_runner.py --quick          # highest-value blocks, including bimanual
     python3 scripts/session_runner.py                  # full sequence
     python3 scripts/session_runner.py --out messung --json report.json
 """
@@ -112,9 +112,13 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, default=Path("messung"))
     ap.add_argument("--quick", action="store_true",
-                    help="noise, palm, sectors at both radii, tempo - the decisive blocks")
+                    help="noise, palm, sectors at both radii, bimanual coupling, tempo - the decisive blocks")
     ap.add_argument("--json", type=Path)
     ap.add_argument("--device")
+    ap.add_argument("--session-id", default=None,
+                    help="pseudonymous ID stored in bimanual cue metadata")
+    ap.add_argument("--dominant-hand", choices=("left", "right", "ambidextrous", "unknown"),
+                    default="unknown")
     ap.add_argument("--dry-run", action="store_true",
                     help="print every command without running anything")
     ap.add_argument("--comfort", type=Path,
@@ -128,7 +132,11 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
     results: list[dict] = []
 
-    dev = args.device or have_tablet()
+    tablet = args.device or have_tablet()
+    dev = tablet
+    if args.dry_run and not dev:
+        dev = "DRY_RUN_DEVICE"
+        print("dry-run: no tablet required; printing hardware plan")
     if not dev:
         print("NO TABLET FOUND (expected 'Wacom Intuos Pro M Finger').")
         print("Hardware steps will be SKIPPED. The stopwatch correction test still works:")
@@ -137,10 +145,11 @@ def main() -> int:
         results.append({"step": "device", "ok": False,
                         "detail": "no Wacom finger device"})
     else:
-        print(f"tablet: {dev}")
+        print(f"tablet: {tablet or 'DRY_RUN_DEVICE'}")
         run("audit input (5 s)", ["python3", str(SCRIPTS / "audit_input.py"),
                                   "--watch", "--seconds", "5", "--device", dev], results)
 
+        session_id = args.session_id or f"session-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}"
         g = ["python3", str(SCRIPTS / "guided_calibration.py"), "--device", dev]
         run("rest floor 60 s", g + ["--task", "noise", "--out", str(out / "noise.jsonl")],
             results, timeout=180)
@@ -152,6 +161,14 @@ def main() -> int:
                                           "--radius-mm", str(r),
                                           "--out", str(out / f"sectors-r{r}.jsonl")],
                 results, timeout=300)
+        run("bimanual 1/2/3 Hz", g + ["--task", "bimanual",
+                                       "--bimanual-rates", "1", "2", "3",
+                                       "--bimanual-seconds", "40",
+                                       "--bimanual-rest-seconds", "10",
+                                       "--session-id", session_id,
+                                       "--dominant-hand", args.dominant_hand,
+                                       "--out", str(out / "bimanual-coupling.jsonl")],
+            results, timeout=360)
         run("tempo 1-5 Hz", g + ["--task", "tempo", "--rates", "1", "2", "3", "4", "5",
                                   "--out", str(out / "tempo.jsonl")],
             results, timeout=300)
@@ -192,7 +209,7 @@ def main() -> int:
     ok = sum(1 for r in results if r.get("ok") is True)
     bad = [r["step"] for r in results if r.get("ok") is False]
     summary = {"out": str(out), "steps": results, "ok": ok, "failed": bad,
-               "tablet": dev}
+               "tablet": tablet}
     if args.json:
         args.json.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print("\n" + "=" * 64)

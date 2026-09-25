@@ -234,3 +234,11 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Added per-session identity/calibration assumptions to all recommended architectures.
 - [x] Clarified that anatomical identity and hand-relative association are unvalidated future options.
 - [x] Closed the documentation portion of issue #9; no cross-session model or hardware capability was claimed.
+
+## Iteration 26 — 2026-09-25
+
+- [x] Added a distinct counterbalanced `bimanual` guided task for issues #16/#18.
+- [x] Added explicit left/right hand-event metadata, expected-cue provenance, session ID, and dominant-hand fields.
+- [x] Added bimanual capture to the session runner and made dry-run print the hardware plan without a tablet.
+- [x] Added schedule, manifest, runner, and dry-run regression tests.
+- [ ] No bimanual hardware result is claimed; raw capture and a later analyzer remain required.

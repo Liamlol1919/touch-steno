@@ -20,6 +20,8 @@ Tasks
   chord      two-thumb chords on cue, alternating with single-thumb strokes -> tests
              whether a real chord is separable from the mirrored drag (the one pair class
              with r^2 = 0.10-0.25)
+  bimanual   counterbalanced 1/2/3 Hz left/right thumb alternation vs simultaneous
+             contact -> raw cross-hand interference/coupling capture (issues #16/#18)
   noise      hands resting, no task -> the per-user rest floor, which every threshold
              must be re-derived against
 
@@ -143,6 +145,67 @@ def build_tasks(args) -> list[dict]:
                 tasks.append({"label": f"identity_{f}",
                               "cue": f"LIFT + REPLACE {f.upper()}",
                               "seconds": args.identity_seconds, "finger": f})
+    elif args.task == "bimanual":
+        rates = getattr(args, "bimanual_rates", [1.0, 2.0, 3.0])
+        block_seconds = getattr(args, "bimanual_seconds", 40.0)
+        rest_seconds = getattr(args, "bimanual_rest_seconds", 10.0)
+        session_id = getattr(args, "session_id", "unspecified")
+        dominant_hand = getattr(args, "dominant_hand", "unknown")
+        if not rates or any(rate <= 0 for rate in rates):
+            raise ValueError("bimanual rates must be positive")
+        if block_seconds <= 0 or rest_seconds < 0:
+            raise ValueError("bimanual duration must be positive and rest non-negative")
+        blocks = []
+        for rate in rates:
+            event_count = max(1, int(round(rate * block_seconds)))
+            if event_count < 2:
+                raise ValueError("bimanual blocks need at least two events")
+            if rate == 2.0:
+                conditions = (("simultaneous", None), ("alternating", "right"))
+            else:
+                conditions = (("alternating", "left"), ("simultaneous", None))
+            for condition_index, (mode, start_hand) in enumerate(conditions):
+                blocks.append((rate, event_count, mode, start_hand, condition_index))
+        block_index = 0
+        for rate, event_count, mode, start_hand, condition_index in blocks:
+            condition_order = ("simultaneous_then_alternating" if rate == 2.0
+                               else "alternating_then_simultaneous")
+            for event_index in range(event_count):
+                if mode == "alternating":
+                    hand = start_hand if event_index % 2 == 0 else (
+                        "right" if start_hand == "left" else "left")
+                    label = f"bimanual_alternating_{hand}"
+                    cue_text = f"{hand.upper()} THUMB TAP"
+                    event_hands = [hand]
+                    events = [0.0]
+                else:
+                    label = "bimanual_simultaneous"
+                    cue_text = "BOTH THUMBS TOGETHER"
+                    event_hands = ["left", "right"]
+                    events = [0.0, 0.0]
+                tasks.append({
+                    "label": label, "cue": cue_text, "seconds": 1.0 / rate,
+                    "post_cue_seconds": 0.0, "bimanual_mode": mode,
+                    "rate_hz": rate, "condition_order": condition_order,
+                    "block_index": block_index, "condition_index": condition_index,
+                    "event_index": event_index, "events": events,
+                    "event_hands": event_hands,
+                    "event_provenance": "expected_cue_schedule",
+                    "hand_provenance": "cued_anatomical_side_not_tracking_id",
+                    "session_id": session_id, "dominant_hand": dominant_hand,
+                })
+            if block_index < len(blocks) - 1:
+                tasks.append({
+                    "label": "bimanual_rest", "cue": "REST - BOTH HANDS STILL",
+                    "seconds": rest_seconds, "post_cue_seconds": 0.0,
+                    "rest": True, "bimanual_mode": "rest", "events": [],
+                    "event_hands": [], "event_provenance": "expected_cue_schedule",
+                    "hand_provenance": "cued_anatomical_side_not_tracking_id",
+                    "session_id": session_id, "dominant_hand": dominant_hand,
+                    "rate_hz": None, "block_index": block_index,
+                    "condition_index": condition_index, "event_index": None,
+                })
+            block_index += 1
     for index, task in enumerate(tasks):
         task.setdefault("cue_id", f"{args.task}-{index:04d}")
     return tasks
@@ -191,7 +254,9 @@ def record(args, tasks: list[dict]) -> int:
             # for repeated labels and could never be consumed safely by scoring.
             log.write(json.dumps({**task, "t_start": t0, "t_end": t1}) + "\n")
             log.flush()
-            cue("...", 0.15)
+            gap = float(task.get("post_cue_seconds", 0.15))
+            if gap > 0:
+                cue("...", gap)
     except KeyboardInterrupt:
         print("\nAbbruch.")
     finally:
@@ -234,7 +299,7 @@ def main() -> int:
                     help="directory containing wacom_touch.py (default: probe this "
                          "repo's src/ and sibling commind* checkouts)")
     ap.add_argument("--task", choices=("tempo", "sectors", "chord", "noise",
-                                        "identity", "correction", "palm"))
+                                        "identity", "correction", "palm", "bimanual"))
     ap.add_argument("--out", default="messung/calibration.jsonl")
     ap.add_argument("--device", default=None)
     ap.add_argument("--force", action="store_true")
@@ -253,7 +318,17 @@ def main() -> int:
     ap.add_argument("--rest-seconds", type=float, default=60.0)
     ap.add_argument("--identity-seconds", type=float, default=2.0)
     ap.add_argument("--correction-seconds", type=float, default=1.5)
+    ap.add_argument("--bimanual-rates", type=float, nargs="+", default=[1.0, 2.0, 3.0])
+    ap.add_argument("--bimanual-seconds", type=float, default=40.0,
+                    help="target seconds per bimanual rate/condition block")
+    ap.add_argument("--bimanual-rest-seconds", type=float, default=10.0)
+    ap.add_argument("--session-id", default=None,
+                    help="pseudonymous session identifier stored in bimanual cues")
+    ap.add_argument("--dominant-hand", choices=("left", "right", "ambidextrous", "unknown"),
+                    default="unknown")
     args = ap.parse_args()
+    if args.session_id is None:
+        args.session_id = f"bimanual-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}"
     if args.merge:
         return merge(args)
     if not args.task:

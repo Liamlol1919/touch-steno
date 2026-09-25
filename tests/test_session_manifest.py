@@ -118,6 +118,63 @@ class TestSessionManifest(unittest.TestCase):
         tempo = next(row for row in manifest if row["label"] == "tempo_2.0hz")
         self.assertEqual(tempo["event_provenance"], "synthetic_ground_truth")
 
+    def test_guided_bimanual_task_exposes_hand_events_and_provenance(self):
+        args = SimpleNamespace(
+            task="bimanual", bimanual_rates=[1.0], bimanual_seconds=4.0,
+            bimanual_rest_seconds=1.0, session_id="p01", dominant_hand="right")
+        tasks = guided_calibration.build_tasks(args)
+        taps = [task for task in tasks if task["bimanual_mode"] != "rest"]
+        self.assertEqual(taps[0]["label"], "bimanual_alternating_left")
+        self.assertEqual(taps[1]["label"], "bimanual_alternating_right")
+        self.assertEqual(taps[4]["label"], "bimanual_simultaneous")
+        self.assertEqual(taps[4]["events"], [0.0, 0.0])
+        self.assertEqual(taps[4]["event_hands"], ["left", "right"])
+        self.assertEqual(taps[0]["session_id"], "p01")
+        self.assertEqual(taps[0]["dominant_hand"], "right")
+        self.assertEqual(taps[0]["hand_provenance"],
+                         "cued_anatomical_side_not_tracking_id")
+        self.assertTrue(all(task["post_cue_seconds"] == 0.0 for task in tasks))
+
+    def test_guided_bimanual_conditions_are_counterbalanced(self):
+        args = SimpleNamespace(
+            task="bimanual", bimanual_rates=[1.0, 2.0, 3.0],
+            bimanual_seconds=2.0, bimanual_rest_seconds=0.1,
+            session_id="p01", dominant_hand="unknown")
+        tasks = guided_calibration.build_tasks(args)
+        first = {}
+        for task in tasks:
+            if task["bimanual_mode"] == "rest":
+                continue
+            first.setdefault((task["rate_hz"], task["block_index"]), task)
+        self.assertEqual(first[(1.0, 0)]["bimanual_mode"], "alternating")
+        self.assertEqual(first[(1.0, 0)]["event_hands"], ["left"])
+        self.assertEqual(first[(1.0, 1)]["bimanual_mode"], "simultaneous")
+        self.assertEqual(first[(2.0, 2)]["bimanual_mode"], "simultaneous")
+        self.assertEqual(first[(2.0, 3)]["bimanual_mode"], "alternating")
+        self.assertEqual(first[(2.0, 3)]["event_hands"], ["right"])
+        self.assertEqual(first[(3.0, 4)]["bimanual_mode"], "alternating")
+        self.assertEqual(first[(3.0, 4)]["event_hands"], ["left"])
+        self.assertEqual(first[(3.0, 5)]["bimanual_mode"], "simultaneous")
+
+    def test_guided_bimanual_rejects_invalid_schedule(self):
+        with self.assertRaises(ValueError):
+            guided_calibration.build_tasks(SimpleNamespace(
+                task="bimanual", bimanual_rates=[0.0], bimanual_seconds=4.0,
+                bimanual_rest_seconds=1.0))
+        with self.assertRaises(ValueError):
+            guided_calibration.build_tasks(SimpleNamespace(
+                task="bimanual", bimanual_rates=[1.0], bimanual_seconds=0.5,
+                bimanual_rest_seconds=1.0))
+
+    def test_manifest_preserves_bimanual_metadata(self):
+        record = {
+            "label": "bimanual_simultaneous", "t_start": 1.0, "t_end": 1.5,
+            "events": [0.0, 0.0], "event_hands": ["left", "right"],
+            "event_provenance": "expected_cue_schedule",
+            "hand_provenance": "cued_anatomical_side_not_tracking_id",
+            "session_id": "p01", "dominant_hand": "unknown",
+        }
+        self.assertEqual(session_manifest.normalize_records([record]), [record])
 
 
 

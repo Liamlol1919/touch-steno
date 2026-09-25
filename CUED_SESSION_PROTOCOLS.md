@@ -10,6 +10,7 @@ open question has a specific measurement attached to it.
 | `sectors` | `--task sectors` | 8-sector confusion matrix, axes vs diagonals, split by gesture length | **highest value** |
 | `tempo` | `--task tempo` | can a trained user reach 3–5 events/s deliberately? (free motion gives 0.9–2.6) | **highest value** |
 | `correction` | `--task correction` | cue-to-undo-motion latency; text-repair latency only with an explicit repair log | **highest unresolved speed number** (W19: NOT FOUND in literature) |
+| `bimanual` | `--task bimanual` | paced left/right thumb alternation vs simultaneous contact; raw cross-hand coupling capture for issues #16/#18 | **highest unanswered hardware question** |
 | `chord` | `--task chord` | is a real two-finger chord separable from a mirrored drag? | chord criterion is unvalidated |
 | `noise` | `--task noise` | per-user rest floor → the per-user gate (SEPARATION_MODEL) | cheap, 60 s |
 | `palm` | `--task palm` | palm-contact rest floor and false-trigger baseline | **required companion to noise** |
@@ -21,10 +22,53 @@ open question has a specific measurement attached to it.
    table in `SEPARATION_MODEL.md`. Everything else is safer once this is known.
 2. **`palm`** (60 s) — captures palm contact separately from finger rest.
 3. **`sectors`** (~2 min for 4 repetitions) — the accuracy number the whole report is missing.
-4. **`tempo`** (~2 min) — the training question behind the speed target.
-5. **`correction`** (~3 min) — the open number from W19; run `scripts/correction_metrics.py`.
-6. **`chord`**, **`identity`** — only after the above, because they are the most expensive
+4. **`bimanual`** (~5 min) — counterbalanced 1/2/3 Hz alternating-vs-simultaneous two-thumb
+   capture; run only with stable pad placement and explicit session/hand provenance.
+5. **`tempo`** (~2 min) — the training question behind the speed target.
+6. **`correction`** (~3 min) — the open number from W19; run `scripts/correction_metrics.py`.
+7. **`chord`**, **`identity`** — only after the above, because they are the most expensive
    interpretation per minute of capture.
+
+## Bimanual coupling capture
+
+This is a raw two-thumb interference capture, not a correction-throughput or same-hand chord
+test. The default schedule is six 40-second blocks at 1/2/3 Hz, separated by 10-second rest
+blocks:
+
+1. 1 Hz alternating, starting left;
+2. 1 Hz simultaneous;
+3. 2 Hz simultaneous;
+4. 2 Hz alternating, starting right;
+5. 3 Hz alternating, starting left;
+6. 3 Hz simultaneous.
+
+Run it with explicit provenance:
+
+```bash
+python3 scripts/guided_calibration.py --task bimanual \
+  --bimanual-rates 1 2 3 --bimanual-seconds 40 --bimanual-rest-seconds 10 \
+  --session-id p01-2026-09-25 --dominant-hand right \
+  --out messung/bimanual-coupling.jsonl
+```
+
+Every cue stores `bimanual_mode`, `rate_hz`, `events`, `event_hands`,
+`event_provenance=expected_cue_schedule`, `hand_provenance`, `session_id`, `dominant_hand`,
+and a unique `cue_id`. Expected times are targets relative to `t_start`, not observed
+participant timestamps. The cued left/right label is not proof that a driver tracking ID is
+anatomical left/right; identity attribution remains a separate within-session analysis.
+
+The hardware-free plan is:
+
+```bash
+python3 scripts/session_runner.py --dry-run --quick \
+  --session-id dry-run --dominant-hand unknown
+```
+
+It prints the bimanual command without creating capture or manifest files. Do not add this
+task to generic sector/tempo scoring yet. A later analyzer must report realized rate,
+inter-hand interval spread, simultaneous onset error, and raw coupling before any follower
+suppression. This protocol produces no bimanual result by itself; stop for pain, numbness,
+cramp, or unusual reach.
 
 `correction_metrics.py --repair-log` accepts only JSONL records with numeric `t`,
 `type="text_repair"`, `action="undo"`, `cue_id` matching the manifest, and
