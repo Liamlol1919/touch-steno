@@ -160,10 +160,13 @@ runtime authority. Raw contacts never leave touch-steno. commindv2 must not open
 evdev device or run a second decoder. The archived `input_zones.json` is historical evidence,
 never an implicit layout authority or compatibility shortcut.
 
-The coordinator's next integration action is contract design, not code: specify the event
-version, side semantics, NACK representation, ordering/deduplication fields, and privacy
-exclusions; then red-team the contract for stale-layout ambiguity, duplicate events, and
-accidental raw-contact leakage. Runtime implementation requires a separate explicit decision.
+The closed design proposal is recorded in `INTEGRATION_CONTRACT_V1.md`. It defines a
+`DESIGN`-only, process-local `hello` plus ordered `key`/`nack`/`reset` records, an epoch,
+contiguous sequence, opaque event identity, pinned profile/layout fingerprint, strict
+privacy allowlist, and fail-closed duplicate, gap, stale-layout, restart, and replay
+rejection. It supersedes the earlier loose event sketch only as a proposal; it is not
+runtime behavior. Freezing the concrete profile/fingerprint and authorizing an isolated
+offline implementation require a separate explicit decision.
 
 ## 3B. Innovation branch registry
 
@@ -174,10 +177,10 @@ and evidence class before it can advance.
 
 | Branch | Primitive / hypothesis | Current status | Next falsification or evidence gate |
 |---|---|---|---|
-| **Simplex-10 transport** (current branch) | The existing ten-bit transport and one-bit correction contract remain the clean-room English steno baseline. | Current design/implementation reference; not a reason to broaden ownership. | Audit the isolated `nextgen/` boundary and its replayable contract. |
-| **FCPT / Fitts-cost phoneme targets** | Place phoneme targets to minimize measured transition cost using Fitts-style distance/width terms; the layout is a motor-cost hypothesis, not a claim of a universal rate. | **RESEARCH BRANCH — not implemented.** | Fit movement coefficients on the actual hand and kill the branch if the fitted cost makes the intended event rate unattainable. |
-| **Continuous elastic word-as-event recognition** | Treat one continuous trajectory as an elastic word event, with normalization and confidence-gated rejection rather than letter-by-letter decoding. | **RESEARCH BRANCH — not implemented.** | Test held-out trajectory generalization, ambiguity/rejection behavior, correction cost, and the motor-time cost against the target array arm. |
-| **Contact-field / permutation-invariant gesture representation** | Represent a gesture by the shape of its contact field with a permutation-invariant descriptor, aiming to reduce contact-ID and finger-order sensitivity while retaining coupled-field information. | **RESEARCH BRANCH — not implemented.** | Test invariance to contact permutation and ID churn, separability under hand translation/rotation, leakage, and false-commit rates on replayable fixtures. |
+| **Simplex-10 transport** (current branch) | The existing ten-bit transport and one-bit correction contract remain the clean-room English steno baseline. | **IMPLEMENTED PROTOTYPE.** Its finite codec, 32-entry key profile, and Plover-shaped JSON are executable; hardware usability and the proposed process-local envelope remain unproved. | Run the real PTH-660 anatomy, identity, false-commit, posture-drift, and held-out chord study; freeze the exact profile identifier/layout fingerprint before any adapter. |
+| **FCPT / Fitts-cost phoneme targets** | Place phoneme targets to minimize measured transition cost using Fitts-style distance/width terms; the layout is a motor-cost hypothesis, not a claim of a universal rate. | **HOLD — DESIGN only; not implemented.** Provisional geometry, Fitts coefficients, phone inventory, compiler, and correction path are not human-validated. | Complete the language/observability prerequisites, then fit real movement cost with the registered 60-move protocol; kill if the fitted adjacent-move cost misses the preregistered bound. |
+| **Continuous elastic word-as-event recognition** | Treat one continuous trajectory as an elastic word event, with normalization and confidence-gated rejection rather than letter-by-letter decoding. | **HOLD — DESIGN only; not implemented.** The current instrument lacks the identity/geometry evidence needed to define a defensible event boundary. | Correct the recorder/segmentation contract, then run abstention, correction-cost, and held-out trajectory tests; count wrong commits and abstentions as failures. |
+| **Contact-field / permutation-invariant gesture representation** | Represent a gesture by the shape of its contact field with a permutation-invariant descriptor, aiming to reduce contact-ID and finger-order sensitivity while retaining coupled-field information. | **HOLD / REJECT current scripts as evidence — DESIGN branch; not implemented.** Existing descriptor, confidence-bound, variable-contact, and held-out evaluation methods are materially flawed. | Correct the method to permutation/translation/rotation/scale invariance with explicit contact-count validity, then require a non-compass held-out separability result above chance with false commits and cross-session robustness. |
 
 Branch registration does not change the `EXTERNAL`/`REFERENCE_ONLY` evidence class of the
 external repositories and does not authorize imports, device access, or runtime behavior.

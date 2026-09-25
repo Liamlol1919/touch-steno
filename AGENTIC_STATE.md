@@ -2,12 +2,15 @@
 
 **Loop:** 10× autonomous product-engineering meta-plan  
 **Current phase:** 1 — Contract and archive  
-**Evidence class of current product slice:** IMPLEMENTED  
+**Evidence class of current product slice:** `IMPLEMENTED`
 **Active candidate:** Clean English steno transport prototype  
+**Next design artifact:** `INTEGRATION_CONTRACT_V1.md` — closed `DESIGN` proposal, not runtime behavior
 **Last promoted candidate:** English steno transport in `nextgen/`  
 **Last rejected candidate:** Legacy sector-fitting as the product core  
 **Open falsification test:** Real PTH-660 anatomy, identity, and false-commit study  
-**Next executable action:** Define and red-team the versioned, process-local, side-specific English steno key/NACK event contract; do not add runtime integration yet
+**Next executable action:** After a separate implementation decision, freeze the concrete
+profile/layout fingerprint and build isolated offline contract fixtures plus a pure
+consumer state machine; do not connect, vendor, or modify any external repository
 
 ## Decisions
 
@@ -20,6 +23,30 @@
 ## Evidence boundary
 
 The current `nextgen/` code proves a ten-bit transport, one-bit correction contract, canonical English steno stroke profile, and Plover JSON boundary. It does not prove Plover runtime translation, hardware usability, WPM, correction time, or complete English vocabulary coverage.
+
+## Contract decision
+
+`INTEGRATION_CONTRACT_V1.md` is the next design artifact and supersedes the earlier loose
+event sketch only as a proposal. It closes a process-local `hello` plus ordered
+`key`/`nack`/`reset` records with a fresh stream epoch, exact contract version, pinned
+source/profile/layout fingerprint, contiguous sequence, opaque event ID, canonical
+side-specific English steno keys, strict privacy allowlist, and fail-closed duplicate,
+gap, stale-layout, restart, and replay rejection. The current `nextgen/` codec is
+semantically compatible but does not implement the envelope. No runtime integration or
+external-repository behavior is claimed.
+
+## Innovation branch decisions
+
+- **Simplex-10:** retain as the **IMPLEMENTED PROTOTYPE** baseline. Its next gate is
+  real anatomy/identity/false-commit and held-out chord evidence, plus a frozen profile
+  identifier and layout fingerprint before any adapter.
+- **FCPT:** **HOLD** as `DESIGN`, pending a real movement-cost fit after its language and
+  observability prerequisites. Provisional Fitts arithmetic is not human evidence.
+- **Word-as-event:** **HOLD** as `DESIGN`, pending instrument/segmentation correction and
+  held-out trajectory, abstention, and correction-cost tests.
+- **Contact-field:** **HOLD the branch and REJECT the current scripts as evidence.**
+  Advancement requires methodological correction and non-compass held-out separability,
+  false-commit, nuisance, and cross-session results.
 
 ## Reference integration targets
 
@@ -36,5 +63,6 @@ The ownership boundary is one-way and process-local: touch-steno is the sole PTH
 capture/decoder owner and emits only versioned, side-specific English steno key/NACK events.
 Raw contacts never leave touch-steno. commindv2 must not open the same evdev device or run a
 second decoder. The archived `input_zones.json` is historical evidence, not a layout
-authority or compatibility shim. The next integration action is contract design and red-team
-review only; no external repository or runtime path is implemented by this state update.
+authority or compatibility shim. The contract proposal is complete at the documentation
+level; the next action remains explicitly gated and no external repository or runtime path
+is implemented by this state update.

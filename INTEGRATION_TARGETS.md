@@ -69,11 +69,13 @@ Ownership is one-way: touch-steno produces the contracted event and commindv2 co
 A consumer-side policy, UI action, or graph mutation never causes the source to reinterpret or
 re-export raw contacts.
 
-## Event contract sketch (non-implementation)
+## Historical event contract sketch (superseded as design only)
 
-The following is a **contract sketch**, not a protocol implementation or a promise that either
-external repository currently exposes it. Any integration must freeze a named contract
-version before runtime work is considered.
+The following loose sketch is retained as prior history. It was never a protocol
+implementation or a promise that either external repository exposes it.
+`INTEGRATION_CONTRACT_V1.md` now supersedes it **only as the closed `DESIGN` proposal**
+for a process-local `hello` and ordered `key`/`nack`/`reset` contract. The proposal is
+not current runtime behavior in this project or either external target.
 
 ```text
 EnglishStenoKeyEvent {
@@ -96,14 +98,15 @@ Required interpretation:
 - `state: "nack"` is an explicit source event and must not be silently converted to a key.
 - Sequence and event identity are for ordering/deduplication in the consumer; they do not expose
   device identity, tracking IDs, coordinates, pressure, or contact lifetimes.
-- The exact canonical representation, versioning rules, and rejection behavior remain a future
-  integration decision and are not implemented by this document.
+- The exact v1 representation and fail-closed rules are now specified in
+  `INTEGRATION_CONTRACT_V1.md`, but remain unimplemented design rather than runtime
+  compatibility.
 
 ## Privacy boundary
 
 Raw contact frames, coordinates, areas, tracking IDs, device paths, calibration data, and
-contact-lifetime details remain inside touch-steno. Only the versioned, side-specific English
-steno key/NACK event described by the contract sketch may cross the process-local boundary.
+contact-lifetime details remain inside touch-steno. Only records permitted by the strict
+allowlist in `INTEGRATION_CONTRACT_V1.md` may cross the proposed process-local boundary.
 No reference target is authorized to collect raw contacts, replay private captures, or infer
 anatomical identity. Any future event extension requires an explicit privacy review and a
 versioned compatibility decision.
@@ -114,23 +117,14 @@ The archived `input_zones.json` is historical layout evidence, not a current cro
 layout authority. It must not be copied into a new runtime, silently treated as the commindv2
 layout, or used to resolve a mismatch between the source decoder and the application. In
 particular, a self-consistent archived file cannot prove that a second consumer is using the
-same keyboard, segmentation, or decoder semantics. The future integration contract must name
-its own source of truth and reject stale-layout ambiguity rather than add a compatibility
-shim.
-
-## Failure semantics
-
-- **On NACK:** acknowledge the rejection, expose its status through consumer state or diagnostics, and do not apply or retain steno text for that event.
-- **On an unknown schema version:** do not interpret the payload; reject it as incompatible and retain only status diagnostics according to the consumer's policy.
-- **On a dropped event:** advance or terminate the current consumer action according to its explicit timeout or cancellation policy; do not invent a replacement stroke.
-- **On confidence below threshold:** do not act on or emit the stroke. It may be recorded only as an aggregate, opt-in metric without raw biometric data.
-
-**Silence is a valid outcome.** A consumer must never synthesise text from a NACK, an incompatible version, a dropped event, or a low-confidence stroke.
+same keyboard, segmentation, or decoder semantics. `INTEGRATION_CONTRACT_V1.md` names
+the source-owned profile/layout fingerprint as the proposal's source of truth and rejects
+stale-layout ambiguity rather than adding a compatibility shim.
 
 ## No-implementation policy
 
 This target register is documentation only. Do not implement, vendor, fork, connect to, open a
 device from, or modify any listed external repository as part of this reference registration.
-The only permitted next step is a reviewed, versioned contract design and evidence-gated
-integration plan; any runtime implementation requires a separate explicit decision and must
+The next admissible work is offline contract conformance design after an explicit
+implementation decision. Any runtime implementation requires a separate decision and must
 retain the ownership, privacy, and no-second-decoder boundaries above.
