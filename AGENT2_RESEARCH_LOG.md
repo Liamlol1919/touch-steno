@@ -166,3 +166,30 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
 - Triage: closed #4, #5, #10, #11 as superseded (kept, not deleted, so the retraction history
   stays auditable). 11 open, all actionable and none carrying a retracted number.
 - 51 tests green.
+
+## 06:38–06:44 — layout, a sixth rejected hypothesis, and issue triage
+- LAYOUT_ASSIGNMENT.md + scripts/layout_assignment.py: W16 reported as NOT FOUND that no
+  layout was ever optimised from a MEASURED confusion matrix. Filled it. The calibration
+  produced the block's most useful number: fitted direction noise 1.84-2.03mm/frame against a
+  0.56mm sensor floor - a factor of 3.6. The direction error is aim and biomechanics, not
+  electronics, which is why the lever is training and language layer, not sensing.
+  Result: on-axis-first rule -30.5%, annealed optimum -36.1%, 99.6% of confusion mass goes to
+  a NEIGHBOURING sector -> never place a minimal pair on adjacent cells.
+- Sixth hypothesis tested and rejected: collinearity as a suppression veto. The premise
+  (enslavement is collinear) holds for the strongest pairs (cos 0.88-0.97) but not the
+  population - measured cost 24/159 real suppressions and ALL 57 benchmark suppressions.
+  Reverted, cos kept as a diagnostic. CROSS_VALIDATION 1.11 now lists all six rejections.
+- Chord issue closed with a measurement: a controlled generator detects 10/10 chords
+  regardless of peer speed, so the reported fn=4 was a scoring artifact, not a detector
+  failure. Chord support is UNVALIDATED rather than absent - a different engineering posture.
+- Issue #1 fixed by me: the protocol's threshold sweep (2-40mm/s, 1-12mm, 0.5-3mm) sat
+  BELOW the measured rest noise. Regridded with a persistence axis and the coupling between
+  gate and window stated.
+- Issue #2 closed as MIS-SCOPED by me: audit_input.py records raw evdev events, not
+  assembled contacts, so the init artefact cannot occur there. Checking saved wasted work.
+- Issue #13 verified closed by agent1's own commit (out-and-back adopted, 88ms latency floor
+  accepted, WPM labelled unmeasured).
+- 58 tests green in the MERGED tree (mine + agent1's session_manifest work). Note: my local
+  tree was stale until I re-synced - tests must be run against origin/main, not a local copy.
+- Remaining open: #14 (speed ceiling wording), #12, #9, #7, #6 - all legitimately
+  agent1-side or hardware-blocked.
