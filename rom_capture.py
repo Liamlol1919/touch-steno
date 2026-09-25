@@ -40,6 +40,14 @@ from pathlib import Path
 PAD_W, PAD_H = 224.0, 148.0
 GRID_MM = 5.0
 FINGER_MAX_SPAN_MM = 30.0        # a contact wider than this is a palm, not a finger
+# Linux input event codes for MT protocol B. These are NOT 0..4: ABS_X/ABS_Y are 0/1,
+# the MT block starts at 0x2f. Getting these wrong silently reads nothing at all.
+ABS_X, ABS_Y = 0, 0x01
+ABS_MT_SLOT = 0x2f               # 47
+ABS_MT_TOUCH_MAJOR = 0x30         # 48
+ABS_MT_POSITION_X = 0x35         # 53
+ABS_MT_POSITION_Y = 0x36         # 54
+ABS_MT_TRACKING_ID = 0x39        # 57
 REST_QUIET_S = 0.6               # a contact must be this still to count as resting
 DEFAULT_SPEED_MM_S = 220.0       # reference radial speed, only used for the ratio
 
@@ -96,7 +104,6 @@ class ContactTracker:
     ABS_X / ABS_Y pair for the first slot.
     """
 
-    ABS_X, ABS_Y, ABS_MT_ID, ABS_MT_X, ABS_MT_Y = 0, 1, 2, 3, 4
     MAX_SPAN_MM = FINGER_MAX_SPAN_MM
 
     def __init__(self, to_mm):
@@ -132,13 +139,19 @@ class ContactTracker:
 
     def feed(self, code: int, value: float, t: float) -> list[Contact]:
         closed: list[Contact] = []
-        if code in (self.ABS_MT_ID, self.ABS_MT_X, self.ABS_MT_Y):
+        if code in (ABS_MT_SLOT, ABS_MT_TRACKING_ID, ABS_MT_POSITION_X, ABS_MT_POSITION_Y):
             self.saw_mt = True
+            if code == ABS_MT_SLOT:
+                self.slots[int(value)] = self.slots.get(0) or {
+                    "x": 0.0, "y": 0.0, "have_xy": False, "live": False, "t_down": 0.0,
+                    "t_last": 0.0, "path": 0.0, "minx": None, "miny": None,
+                    "maxx": None, "maxy": None}
+                return closed
             cur = self.slots.setdefault(0, {"x": 0.0, "y": 0.0, "have_xy": False,
                                             "live": False, "t_down": 0.0, "t_last": 0.0,
                                             "path": 0.0, "minx": None, "miny": None,
                                             "maxx": None, "maxy": None})
-            if code == self.ABS_MT_ID:
+            if code == ABS_MT_TRACKING_ID:
                 if value < 0:
                     if cur["live"]:
                         closed.append(self._finish(cur))
@@ -146,7 +159,7 @@ class ContactTracker:
                 else:
                     cur.update(self._new_slot(t))
             elif cur["live"]:
-                if code == self.ABS_MT_X:
+                if code == ABS_MT_POSITION_X:
                     cur["x"] = value
                 else:
                     cur["y"] = value
@@ -420,6 +433,384 @@ def _ring_widths(rings: list[float], fan_deg: float) -> tuple[float, float]:
 
 
 # --------------------------------------------------------------------------- #
+# one-shot gesture capture: hand on the pad, wiggle for 20 s, everything else is
+# automatic. This is the default path; the guided protocol below is the detailed one.
+# --------------------------------------------------------------------------- #
+
+# (label, cue, seconds). Total 20 s.
+PHASES = [
+    ("settle", "HAND RUNTERLEGEN. Rechte Hand flach aufs Pad, Handballen und Ferse "
+               "in die Luft, nur Daumen und Zeigefinger auf dem Pad. 3 s.", 3.0),
+    ("still", "RUHIG: nichts bewegen. 4 s.", 4.0),
+    ("radial", "DAUMEN radial: nach aussen und wieder zurueck, so weit du bequem "
+               "willst. 4 s.", 5.0),
+    ("fan", "DAUMEN seitlich: hin und her durch den Faecher. 5 s.", 5.0),
+    ("index", "ZEIGEFINGER: nach oben strecken und seitlich spreizen, bequem. 6 s.", 6.0),
+]
+P90, P98 = 90, 98
+QUANT = 12.5, 37.5, 62.5, 87.5      # the four sector centres of the fan
+
+
+def find_pad_node() -> tuple[str, dict]:
+    """The event node of the pad's touch surface, with its axis ranges and scale."""
+    from evdev import InputDevice, ecodes
+    best = None
+    for path in sorted(Path("/dev/input").glob("event*")):
+        try:
+            dev = InputDevice(str(path))
+        except OSError:
+            continue
+        info = {code: a for code, a in dev.capabilities(absinfo=True).get(ecodes.EV_ABS, [])}
+        if ABS_MT_POSITION_X not in info or ABS_MT_POSITION_Y not in info:
+            dev.close()
+            continue
+        x, y = info[ABS_MT_POSITION_X], info[ABS_MT_POSITION_Y]
+        span = (x.max - x.min) * (y.max - y.min)
+        if best is None or span > best[2]:
+            best = (str(path), {"x": (x.min, x.max, x.resolution),
+                               "y": (y.min, y.max, y.resolution)}, span, dev.name)
+        dev.close()
+    if best is None:
+        raise SystemExit("no touch device found: connect the pad, or use --manual")
+    return best[0], best[1], best[3]
+
+
+class GestureRecorder:
+    """MT protocol B reader. Emits (t, slot, x_mm, y_mm) and tracks which contacts are
+    live, so the palm can be told apart from a finger by its bounding box."""
+
+    def __init__(self, to_mm):
+        self.to_mm = to_mm
+        self.slot = 0
+        self.live: dict[int, bool] = {}
+        self.raw: dict[int, tuple[float, float]] = {}
+        self.size: dict[int, float] = {}
+        self.res_major = 1.0
+        self.stream: list[tuple[float, int, float, float]] = []
+
+    def feed(self, code: int, value: float, t: float) -> None:
+        if code == ABS_MT_SLOT:
+            self.slot = int(value)
+        elif code == ABS_MT_TRACKING_ID:
+            if value < 0:
+                self.live.pop(self.slot, None)
+            else:
+                self.live[self.slot] = True
+        elif code == ABS_MT_TOUCH_MAJOR and self.slot in self.live:
+            self.size[self.slot] = max(self.size.get(self.slot, 0.0), value)
+        elif code in (ABS_MT_POSITION_X, ABS_MT_POSITION_Y) and self.slot in self.live:
+            x, y = self.raw.get(self.slot, (0.0, 0.0))
+            if code == ABS_MT_POSITION_X:
+                self.raw[self.slot] = (value, y)
+            else:
+                self.raw[self.slot] = (x, value)
+            mx, my = self.to_mm(*self.raw[self.slot])
+            self.stream.append((t, self.slot, mx, my))
+
+    def contacts(self) -> list[int]:
+        return sorted(self.live)
+
+
+def record_gesture(recorder: GestureRecorder, source, total: float = 20.0) -> dict:
+    """Cue the phases on screen while recording, and return the phase time windows."""
+    windows = {}
+    t_start = time.monotonic()
+    scale = total / sum(p[2] for p in PHASES)
+    for label, cue, secs in PHASES:
+        secs = secs * scale
+        t0 = time.monotonic() - t_start
+        print(f"\n  [{t0:4.1f} s] {cue}")
+        deadline = time.monotonic() + secs
+        while time.monotonic() < deadline:
+            for code, value in source():
+                recorder.feed(code, value, time.monotonic() - t_start)
+            time.sleep(0.004)
+        windows[label] = (t0, time.monotonic() - t_start)
+    return windows
+
+
+def _slot_stats(stream, windows=None) -> dict:
+    """Per contact: its point list, how far it travelled in total and per phase, and
+    the median position.
+
+    Travel, not bounding box: a thumb that sweeps its whole fan has a huge box while
+    being a perfectly good fingertip. What separates a palm from a finger is that the
+    palm does not travel."""
+    by: dict[int, list] = {}
+    for t, slot, x, y in stream:
+        by.setdefault(slot, []).append((t, x, y))
+    out = {}
+    for slot, pts in by.items():
+        out[slot] = {
+            "points": pts,
+            "travel": sum(math.dist((a[1], a[2]), (b[1], b[2]))
+                          for a, b in zip(pts, pts[1:])),
+            "median": (statistics.median([p[1] for p in pts]),
+                       statistics.median([p[2] for p in pts])),
+            "phase_travel": {},
+        }
+        for label, (a, b) in (windows or {}).items():
+            win = [q for q in pts if a <= q[0] <= b]
+            out[slot]["phase_travel"][label] = sum(
+                math.dist((x[1], x[2]), (y[1], y[2])) for x, y in zip(win, win[1:]))
+    return out
+
+
+def _still_median(pts, windows, label="still"):
+    """Median position of a contact during the still phase, i.e. where it rests."""
+    a, b = windows.get(label, (0.0, 0.0))
+    win = [q for q in pts if a <= q[0] <= b]
+    if len(win) < 3:
+        win = pts
+    return (statistics.median([q[1] for q in win]),
+            statistics.median([q[2] for q in win]))
+
+
+def _pct(vals, q):
+    v = sorted(vals)
+    if not v:
+        return 0.0
+    k = (len(v) - 1) * q / 100.0
+    lo = int(k)
+    hi = min(lo + 1, len(v) - 1)
+    return v[lo] + (v[hi] - v[lo]) * (k - lo)
+
+
+def analyse_gesture(stream, windows, pad=(PAD_W, PAD_H)) -> tuple[dict, dict]:
+    """A 20 s gesture becomes a hand profile, with every derived number labelled.
+
+    Reach is taken from the movement distribution, not from a comfort question:
+    P90 of the radial extent is what the hand actually did for 90 % of the recording,
+    P98 is the far tail. That is a proxy for comfortable vs maximum reach, and it is
+    labelled as such."""
+    stats = _slot_stats(stream, windows)
+    present = [sl for sl, d in stats.items() if len(d["points"]) >= 3]
+    if not present:
+        raise SystemExit("nothing was recorded. Is the pad touched at all?")
+    MOVE_MM = 8.0        # below this in a phase, the contact was not being used
+
+    def best(label: str, pool) -> int | None:
+        cands = {sl: stats[sl]["phase_travel"].get(label, 0.0) for sl in pool}
+        sl, v = max(cands.items(), key=lambda kv: kv[1]) if cands else (None, 0.0)
+        return sl if v >= MOVE_MM else None
+
+    # The contact that moves while the thumb is cued IS the thumb. That needs no
+    # assumption about which slot a finger landed in, and a resting palm can never
+    # win a movement phase.
+    thumb_sl = best("radial", present)
+    for label in ("fan", "index"):        # slot 0 is falsy in Python, so test for None
+        if thumb_sl is None:
+            thumb_sl = best(label, present)
+    if thumb_sl is None:
+        raise SystemExit(
+            "no contact moved more than "
+            f"{MOVE_MM:.0f} mm during the cued phases. Wiggle the thumb in the first "
+            f"two phases. Contacts seen: "
+            f"{ {sl: {k: round(v, 1) for k, v in stats[sl]['phase_travel'].items()} for sl in present} }")
+    rest_pool = [sl for sl in present if sl != thumb_sl]
+    index_sl = best("index", rest_pool)
+    dropped = sorted(sl for sl in present if sl not in (thumb_sl, index_sl))
+    thumb = stats[thumb_sl]
+    index = stats[index_sl] if index_sl is not None else None
+
+    def phase_pts(sl, label):
+        a, b = windows.get(label, (0.0, 0.0))
+        return [p for p in stats[sl]["points"] if a <= p[0] <= b]
+
+    rad = phase_pts(thumb_sl, "radial") or phase_pts(thumb_sl, "fan")
+    fan = phase_pts(thumb_sl, "fan") or rad
+    idx = phase_pts(index_sl, "index") if index_sl is not None else []
+
+    # Noise gate, in millimetres of space rather than of path: how far the contact
+    # strays while it is supposed to be still, against how far it actually gets during
+    # the cued phase. If the cued spread is not clearly above the still spread, the
+    # recording contains no measurement and any number from it would be invented.
+    SIGNAL_RATIO = 2.0
+    still_pts = phase_pts(thumb_sl, "still")
+    rest0 = _still_median(stats[thumb_sl]["points"], windows)
+    noise = _pct([math.dist((x, y), rest0) for _, x, y in still_pts], P90) if still_pts \
+        else 0.0
+    signal = max(_pct([math.dist((x, y), rest0) for _, x, y in rad], P90),
+                 _pct([math.dist((x, y), rest0) for _, x, y in fan], P90))
+    if signal < SIGNAL_RATIO * noise:
+        raise SystemExit(
+            "DIESE AUFNAHME ENTHAELT KEINE MESSUNG.\n"
+            f"  Kontakt {thumb_sl}: {noise:.1f} mm Streuung in der Ruhephase, "
+            f"{signal:.1f} mm in den Daumenphasen (Faktor "
+            f"{signal / noise if noise else float('inf'):.1f}, nötig wären "
+            f"{SIGNAL_RATIO:.0f}).\n"
+            f"  Streuung je Kontakt in der Ruhephase: "
+            f"{ {sl: round(_pct([math.dist((x, y), rest0) for _, x, y in phase_pts(sl, 'still')], P90), 1) for sl in present} } mm\n"
+            "  Entweder lag die Hand mit Ballen auf dem Pad, oder die Aufnahme hat "
+            "das Ablegen der Hand mitgemessen. Beides heisst: nur Daumen und "
+            "Zeigefinger auflegen, Handballen und Ferse in die Luft. Rohstream: "
+            "messung/rom/gesture.jsonl")
+    # where the thumb rests is where it sat during the still phase
+    rest = _still_median(thumb["points"], windows)
+
+    radii = [math.dist((x, y), rest) for _, x, y in rad] or [0.0]
+    comfort, maxr = _pct(radii, P90), max(radii)
+    maxr = max(maxr, comfort)
+    angles = [math.degrees(math.atan2(y - rest[1], x - rest[0])) % 360 for _, x, y in fan]
+    centres = tuple(_pct(angles, q) for q in QUANT) if len(angles) >= 8 else None
+    # _sector_bounds works on the outermost two centres; the middle two are the
+    # consistency check that the sweep really did cover a fan
+    fan_deg = _sector_bounds((centres[0], centres[3])) if centres else (0.0, 100.0)
+    even = all(abs((centres[i + 1] - centres[i]) - (centres[3] - centres[2])) < 25.0
+               for i in (0, 1)) if centres else True
+    # a recorded fan has to look like a fan; otherwise keep the declared one and say so
+    fan_ok = MIN_FAN_DEG <= fan_deg[1] - fan_deg[0] <= 180.0 and even
+    if not fan_ok:
+        fan_deg = (0.0, 100.0)
+
+    def speed(pts, radial):
+        if len(pts) < 3:
+            return DEFAULT_SPEED_MM_S
+        vals = []
+        for (t0, x0, y0), (t1, x1, y1) in zip(pts, pts[1:]):
+            dt = t1 - t0
+            if dt <= 0.005:
+                continue
+            seg = math.dist((x0, y0), (x1, y1))
+            if radial:
+                d0 = math.dist((x0, y0), rest)
+                d1 = math.dist((x1, y1), rest)
+                seg = abs(d1 - d0)
+            if seg > 0.4:
+                vals.append(seg / dt)
+        return statistics.median(vals) if vals else DEFAULT_SPEED_MM_S
+
+    v_rad, v_tan = speed(rad, True), speed(fan, False)
+    penalty = min(3.0, max(1.0, v_rad / v_tan if v_tan > 0 else 1.0))
+
+    # the index block is only measured if a second contact moved during its phase
+    if index is not None and len(idx) >= 4:
+        idx_rest = _still_median(index["points"], windows)
+        idx_d = [math.dist((x, y), idx_rest) for _, x, y in idx]
+        idx_measured = True
+        idx_reach = max(25.0, _pct(idx_d, P90))
+        idx_max = max(max(idx_d), idx_reach)
+        idx_spread = (_pct([x for _, x, _ in idx], 90)
+                      - _pct([x for _, x, _ in idx], 10))
+        idx_pitch = max(20.0, min(idx_spread / 2.0, 34.0))
+    else:
+        # declared fallback, and the profile says so in _values
+        idx_measured = False
+        idx_rest = (rest[0] + INDEX_OFFSET_X_MM, 6.0)
+        idx_reach, idx_max, idx_spread = 85.0, 97.0, 52.0
+        idx_pitch = 26.0
+
+    rings, rings_fit = _rings(comfort, fan_deg[1] - fan_deg[0])
+    prof = {
+        "_measured_by": "rom_capture.py --auto, 20 s gesture recording",
+        "_values": {
+            "measured": (["thumb.rest", "thumb.rings", "thumb.reach_mm",
+                          "thumb.max_reach_mm", "thumb.tangential_penalty"]
+                         + (["thumb.fan_deg"] if fan_ok else [])
+                         + (["index.rest", "index.centre", "index.pitch",
+                             "index.reach_mm", "index.max_reach_mm"] if idx_measured
+                            else [])),
+            "declared": (["pad_mm", "thumb.joint", "index.joint",
+                          "index.tangential_penalty"]
+                         + ([] if fan_ok else ["thumb.fan_deg"])
+                         + ([] if idx_measured else
+                            ["index.rest", "index.centre", "index.pitch",
+                             "index.reach_mm", "index.max_reach_mm"])),
+            "note": "reach_mm is the P90 of the recorded extent, max_reach_mm the P98 "
+                    "tail; neither is a comfort judgement. Anything in _values.declared "
+                    "was NOT in this recording.",
+        },
+        "pad_mm": [pad[0], pad[1]],
+        "thumb": {
+            "rest": [round(rest[0], 1), round(rest[1], 1)],
+            "joint": [round(rest[0], 1), round(rest[1], 1)],
+            "rings": rings,
+            "fan_deg": [round(fan_deg[0], 1), round(fan_deg[1], 1)],
+            "reach_mm": round(comfort, 1),
+            "max_reach_mm": round(maxr, 1),
+            "tangential_penalty": round(penalty, 2),
+        },
+        "index": {
+            "rest": [round(idx_rest[0], 1), round(idx_rest[1], 1)],
+            "joint": [round(idx_rest[0] + 2.0, 1), round(idx_rest[1] - 4.0, 1)],
+            "centre": [round(idx_rest[0], 1), round(idx_rest[1] + max(30.0, idx_reach
+                                                                   - idx_pitch / 2))],
+            "pitch": round(idx_pitch, 1),
+            "reach_mm": round(idx_reach, 1),
+            "max_reach_mm": round(max(idx_max, idx_reach), 1),
+            "tangential_penalty": 1.0,
+        },
+    }
+    diag = {
+        "rest_mm": [round(rest[0], 1), round(rest[1], 1)],
+        "index_rest_mm": [round(idx_rest[0], 1), round(idx_rest[1], 1)],
+        "contact_travel_mm": {str(sl): round(stats[sl]["travel"], 1) for sl in stats},
+        "contact_travel_per_phase": {
+            str(sl): {k: round(v, 1) for k, v in stats[sl]["phase_travel"].items()}
+            for sl in stats},
+        "thumb_slot": thumb_sl, "index_slot": index_sl,
+        "ignored_contacts": dropped,
+        "fan_from_recording": fan_ok,
+        "index_measured": idx_measured,
+        "comfort_reach_mm": round(comfort, 1),
+        "max_reach_mm": round(maxr, 1),
+        "comfort_over_max": round(comfort / maxr, 2) if maxr else None,
+        "fan_deg": [round(fan_deg[0], 1), round(fan_deg[1], 1)],
+        "rings_mm": rings,
+        "rings_fit_11mm": rings_fit,
+        "rings_needed_mm": round(3 * RING_MIN_GAP_MM, 1),
+        "inner_ring_for_fan_mm": _inner_ring(fan_deg[1] - fan_deg[0]),
+        "reach_for_4_rings_mm": round(required_reach(fan_deg[1] - fan_deg[0]), 1),
+        "reach_for_3_rings_mm": round(required_reach(fan_deg[1] - fan_deg[0], 3), 1),
+        "ring_gap_mm": round(_ring_widths(rings, fan_deg[1] - fan_deg[0])[0], 1),
+        "inner_arc_mm": round(_ring_widths(rings, fan_deg[1] - fan_deg[0])[1], 1),
+        "radial_speed_mm_s": round(v_rad, 1),
+        "tangential_speed_mm_s": round(v_tan, 1),
+        "tangential_penalty": round(penalty, 2),
+        "index_reach_mm": round(idx_reach, 1),
+        "index_max_reach_mm": round(max(idx_max, idx_reach), 1),
+        "index_spread_mm": round(idx_spread, 1),
+        "source": "20 s gesture recording",
+        "fan_sectors_even": even,
+    }
+    return prof, diag
+
+
+def run_auto(args) -> tuple[dict, dict]:
+    from evdev import InputDevice, ecodes
+    node, axes, dev_name = find_pad_node()
+    (min_x, max_x, res_x) = axes["x"]
+    (min_y, max_y, res_y) = axes["y"]
+    span_x, span_y = max_x - min_x, max_y - min_y
+    if span_x <= 0 or span_y <= 0:
+        raise SystemExit(f"{node} reports a degenerate axis range")
+
+    def to_mm(x, y):
+        return ((x - min_x) / span_x * PAD_W, (y - min_y) / span_y * PAD_H)
+
+    dev = InputDevice(node)
+    print(f"pad: {dev_name} at {node}")
+    print(f"     axes {min_x}..{max_x} x {min_y}..{max_y}, reported resolution "
+          f"{res_x}/{res_y} per mm, mapped onto {PAD_W:.0f}x{PAD_H:.0f} mm")
+    print("\nLeg die rechte Hand flach aufs Pad, Ferse frei. 20 Sekunden wackeln.")
+    rec = GestureRecorder(to_mm)
+    source = _evdev_source(dev, ecodes)
+    windows = record_gesture(rec, source, args.seconds)
+    dev.close()
+    n = len(rec.stream)
+    print(f"\n{n} Positions ueber {len(rec.contacts())} Kontakten aufgenommen.")
+    if n < 50:
+        raise SystemExit(f"only {n} positions recorded - is the pad actually touched?")
+    out = Path("messung/rom")
+    out.mkdir(parents=True, exist_ok=True)
+    with (out / "gesture.jsonl").open("w", encoding="utf-8") as f:
+        for t, slot, x, y in rec.stream:
+            f.write(f'{{"t": {t:.3f}, "slot": {slot}, "x": {x:.2f}, "y": {y:.2f}}}\n')
+    print(f"raw stream: {out / 'gesture.jsonl'}")
+    return analyse_gesture(rec.stream, windows)
+
+
+# --------------------------------------------------------------------------- #
 # capture loops
 # --------------------------------------------------------------------------- #
 
@@ -629,7 +1020,8 @@ def print_diag(diag: dict) -> None:
     print(f"reach         comfortable {diag['comfort_reach_mm']} mm, "
           f"maximum {diag['max_reach_mm']} mm  "
           f"(comfort/max {diag['comfort_over_max']})")
-    print(f"fan           {diag['fan_deg'][0]:.0f}..{diag['fan_deg'][1]:.0f} deg, "
+    print(f"fan           {diag['fan_deg'][0]:.0f}..{diag['fan_deg'][1]:.0f} deg"
+          f"{'' if diag.get('fan_from_recording', True) else ' (DECLARED, not in the recording)'}, "
           f"rings {'/'.join(f'{r:g}' for r in diag['rings_mm'])} mm "
           f"(gap {diag['ring_gap_mm']:g} mm, inner sector {diag['inner_arc_mm']:g} mm)")
     if not diag["rings_fit_11mm"]:
@@ -650,7 +1042,11 @@ def print_diag(diag: dict) -> None:
         print(f"speed         not measured ({diag['source']}); "
               f"tangential penalty {diag['tangential_penalty']}x from your own answer")
     print(f"index         comfortable {diag['index_reach_mm']} mm, "
-          f"maximum {diag['index_max_reach_mm']} mm")
+          f"maximum {diag['index_max_reach_mm']} mm"
+          f"{'' if diag.get('index_measured', True) else ' (DECLARED, not in the recording)'}")
+    print(f"contacts      travel per slot {diag['contact_travel_mm']}, "
+          f"thumb=slot {diag['thumb_slot']}, index=slot {diag['index_slot']}, "
+          f"ignored={diag['ignored_contacts']}")
     if diag.get("ratings"):
         print(f"ratings       {diag['ratings']}")
     print("=" * 66)
@@ -669,18 +1065,19 @@ def self_test() -> int:
             fails.append(name)
 
     tr = ContactTracker(lambda x, y: (x, y))
-    seq = [(ContactTracker.ABS_MT_ID, 1, 0.0), (ContactTracker.ABS_MT_X, 100.0, 0.0),
-           (ContactTracker.ABS_MT_Y, 200.0, 0.0), (ContactTracker.ABS_MT_X, 120.0, 0.1),
-           (ContactTracker.ABS_MT_ID, -1, 0.2)]
+    seq = [(ABS_MT_SLOT, 0, 0.0), (ABS_MT_TRACKING_ID, 1, 0.0), (ABS_MT_POSITION_X, 100.0, 0.0),
+           (ABS_MT_POSITION_Y, 200.0, 0.0), (ABS_MT_POSITION_X, 120.0, 0.1),
+           (ABS_MT_TRACKING_ID, -1, 0.2)]
     out = []
     for code, val, t in seq:
         out += tr.feed(code, val, t)
     check("contact closes on TRACKING_ID -1", len(out) == 1, f"n={len(out)}")
     check("contact carries the last position", out and (out[0].x, out[0].y) == (120.0, 200.0))
     live = ContactTracker(lambda x, y: (x, y))
-    live.feed(ContactTracker.ABS_MT_ID, 1, 0.0)
-    live.feed(ContactTracker.ABS_MT_X, 5.0, 0.0)
-    live.feed(ContactTracker.ABS_MT_Y, 6.0, 0.0)
+    live.feed(ABS_MT_SLOT, 0, 0.0)
+    live.feed(ABS_MT_TRACKING_ID, 1, 0.0)
+    live.feed(ABS_MT_POSITION_X, 5.0, 0.0)
+    live.feed(ABS_MT_POSITION_Y, 6.0, 0.0)
     check("live point is visible while the contact is down", live.live_points() == [(5.0, 6.0)])
 
     calib = Calibration()
@@ -737,9 +1134,9 @@ def self_test() -> int:
     check("index centre is inside the measured reach",
           profile["index"]["centre"][1] <= profile["index"]["reach_mm"])
     check("profile round-trips through json", json.loads(json.dumps(profile)) == profile)
-    raw = [[(ContactTracker.ABS_MT_ID, 1.0), (ContactTracker.ABS_MT_X, 100.0),
-            (ContactTracker.ABS_MT_Y, 200.0), (ContactTracker.ABS_MT_X, 130.0),
-            (ContactTracker.ABS_MT_X, 160.0), (ContactTracker.ABS_MT_ID, -1.0)]] * 3
+    raw = [[(ABS_MT_TRACKING_ID, 1.0), (ABS_MT_POSITION_X, 100.0),
+            (ABS_MT_POSITION_Y, 200.0), (ABS_MT_POSITION_X, 130.0),
+            (ABS_MT_POSITION_X, 160.0), (ABS_MT_TRACKING_ID, -1.0)]] * 3
     raw = [e for block in raw for e in block]
 
     def source():
@@ -754,9 +1151,9 @@ def self_test() -> int:
     def palm_like(dx: float) -> list:
         t = ContactTracker(lambda x, y: (x, y))
         out = []
-        for code, val in ((ContactTracker.ABS_MT_ID, 1.0), (ContactTracker.ABS_MT_X, 0.0),
-                           (ContactTracker.ABS_MT_Y, 0.0), (ContactTracker.ABS_MT_X, dx),
-                           (ContactTracker.ABS_MT_ID, -1.0)):
+        for code, val in ((ABS_MT_SLOT, 0), (ABS_MT_TRACKING_ID, 1.0), (ABS_MT_POSITION_X, 0.0),
+                           (ABS_MT_POSITION_Y, 0.0), (ABS_MT_POSITION_X, dx),
+                           (ABS_MT_TRACKING_ID, -1.0)):
             out += t.feed(code, val, 0.0)
         return out
     wide = palm_like(80.0)
@@ -767,119 +1164,116 @@ def self_test() -> int:
     check("empty source is survivable", capture_step(
         ContactTracker(lambda x, y: (x, y)), StepResult("quiet", "hold"), 0.05,
         lambda: ()) is not None)
+    try:
+        from evdev import ecodes
+        check("MT codes match the kernel's",
+              (ABS_MT_SLOT, ABS_MT_TRACKING_ID, ABS_MT_POSITION_X, ABS_MT_POSITION_Y)
+              == (ecodes.ABS_MT_SLOT, ecodes.ABS_MT_TRACKING_ID,
+                  ecodes.ABS_MT_POSITION_X, ecodes.ABS_MT_POSITION_Y),
+              f"{ABS_MT_SLOT}/{ABS_MT_TRACKING_ID}/{ABS_MT_POSITION_X}/{ABS_MT_POSITION_Y}")
+    except ImportError:
+        print("  [SKIP] MT codes vs evdev (python-evdev not installed)")
+
+    # synthetic 20 s gestures, built directly as (t, slot, x, y): slot 0 thumb,
+    # slot 1 index, slot 2 a palm that sits still on the pad the whole time
+    def make_gesture(index_moves: bool = True, thumb_moves: bool = True) -> list:
+        out = []
+        for k in range(400):
+            t = k * 0.05
+            out.append((t, 2, 30.0, 75.0))                       # the palm: still
+            if t < 4.0:
+                rx, ry, ax, ay = 128.0, 9.0, 0.0, 0.0            # thumb at rest
+            elif t < 9.0:                                        # thumb radial
+                rr = 58.0 * (0.5 + 0.5 * math.sin(t * 1.7))
+                rx, ry = 128.0 + rr * math.cos(math.radians(45)), \
+                    9.0 + rr * math.sin(math.radians(45))
+            elif t < 14.0:                                       # thumb fan sweep
+                a = math.radians(10.0 + 80.0 * (0.5 + 0.5 * math.sin(t * 2.0)))
+                rx, ry = 128.0 + 40.0 * math.cos(a), 9.0 + 40.0 * math.sin(a)
+            else:
+                rx, ry = 128.0, 9.0
+            out.append((t, 0, rx if thumb_moves else 128.0, ry if thumb_moves else 9.0))
+            if t < 4.0 or t < 14.0:
+                ix, iy = 194.0, 6.0
+            else:                                                # index extends
+                ix = 194.0 + 12.0 * math.sin(t * 1.3)
+                iy = 6.0 + 80.0 * (0.6 + 0.4 * math.sin(t * 1.1))
+            out.append((t, 1, ix if index_moves else 194.0, iy if index_moves else 6.0))
+        return out
+
+    w = {"still": (0.0, 4.0), "radial": (4.0, 9.0), "fan": (9.0, 14.0), "index": (14.0, 20.0)}
+    prof, dg = analyse_gesture(make_gesture(), w)
+    check("synthetic gesture: palm ignored, thumb and index found by phase",
+          dg["ignored_contacts"] == [2] and dg["thumb_slot"] == 0 and dg["index_slot"] == 1,
+          f"thumb={dg['thumb_slot']} index={dg['index_slot']} "
+          f"ignored={dg['ignored_contacts']}")
+    check("synthetic gesture: the fan comes from the recording",
+          dg["fan_from_recording"] and dg["index_measured"],
+          f"fan={dg['fan_deg']} index_measured={dg['index_measured']}")
+    check("synthetic gesture: reach is inside the recorded extent",
+          40.0 < prof["thumb"]["reach_mm"] <= 58.5, f"{prof['thumb']['reach_mm']} mm")
+    check("synthetic gesture: the thumb rest is the still-phase position",
+          abs(prof["thumb"]["rest"][1] - 9.0) < 1.0, f"{prof['thumb']['rest']}")
+    check("synthetic gesture: the profile feeds the optimiser unchanged",
+          _profile_feeds_optimiser(prof) is None)
+
+    # same recording, but only the thumb wiggled: the index must be declared, not guessed
+    prof2, dg2 = analyse_gesture(make_gesture(index_moves=False), w)
+    check("thumb-only recording: the thumb is measured",
+          prof2["thumb"]["reach_mm"] > 20 and dg2["fan_from_recording"],
+          f"reach {prof2['thumb']['reach_mm']} mm, fan {prof2['thumb']['fan_deg']}")
+    check("thumb-only recording: the index is declared, and labelled as such",
+          (not dg2["index_measured"])
+          and "index.reach_mm" in prof2["_values"]["declared"]
+          and "index.reach_mm" not in prof2["_values"]["measured"])
+    check("thumb-only recording: a still contact is never taken for the index",
+          dg2["index_slot"] is None, f"index_slot={dg2['index_slot']}")
+    check("thumb-only recording: the profile still feeds the optimiser",
+          _profile_feeds_optimiser(prof2) is None)
+
+    # a still hand must be refused rather than turned into numbers
+    try:
+        analyse_gesture([(k * 0.05, sl, 100.0, 50.0)
+                         for k in range(400) for sl in (0, 1, 2)], w)
+        check("a completely still hand is refused", False, "it produced a profile")
+    except SystemExit as exc:
+        check("a completely still hand is refused", "moved" in str(exc))
     print(f"  {len(fails)} failure(s)")
     return 1 if fails else 0
+
+
+def _profile_feeds_optimiser(prof) -> str | None:
+    """The profile must be accepted by the optimiser's own loader without changes."""
+    import tempfile
+    import layout_optimizer
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "p.json"
+        path.write_text(json.dumps(prof), encoding="utf-8")
+        try:
+            layout_optimizer.apply_profile(json.loads(path.read_text()))
+        except Exception as exc:                       # noqa: BLE001 - reported as a failure
+            return f"{type(exc).__name__}: {exc}"
+    return None
 
 
 # --------------------------------------------------------------------------- #
 # main
 # --------------------------------------------------------------------------- #
 
-REPO = "Liamlol1919/touch-steno"
-BRANCH = "main"
-PUBLISH_FILES = ["README.md", ".gitignore", "layout_optimizer.py", "rom_capture.py",
-                 "hand_profile.json", "layout.json"]
-
-
-def publish(paths: list[str], message: str) -> str:
-    """Commit files to the repository through the GitHub API, without git.
-
-    One tree, one commit, one ref update, built on whatever the remote head is at that
-    moment, so a concurrent push cannot be clobbered. Additive: files not listed are
-    left exactly as they are."""
-    import base64
-    import subprocess
-
-    def gh(*args, payload=None):
-        proc = subprocess.run(["gh", *args], capture_output=True, text=True, input=payload)
-        if proc.returncode != 0:
-            raise SystemExit(f"gh {args[:3]} failed: {proc.stderr.strip()}")
-        return proc.stdout
-
-    head = json.loads(gh("api", f"repos/{REPO}/commits/{BRANCH}"))
-    entries = []
-    for rel in paths:
-        data = pathlib.Path(rel).read_bytes()
-        blob = json.loads(gh("api", f"repos/{REPO}/git/blobs", "-X", "POST", "--input", "-",
-                             payload=json.dumps({"content": base64.b64encode(data).decode(),
-                                                 "encoding": "base64"})))
-        entries.append({"path": rel, "mode": "100644", "type": "blob", "sha": blob["sha"]})
-        print(f"  + {rel:<24} {len(data):>7} B  {blob['sha'][:10]}")
-    tree = json.loads(gh("api", f"repos/{REPO}/git/trees", "-X", "POST", "--input", "-",
-                         payload=json.dumps({"base_tree": head["commit"]["tree"]["sha"],
-                                             "tree": entries})))
-    if "sha" not in tree:
-        raise SystemExit(f"tree rejected: {tree}")
-    commit = json.loads(gh("api", f"repos/{REPO}/git/commits", "-X", "POST", "--input", "-",
-                           payload=json.dumps({"message": message, "tree": tree["sha"],
-                                               "parents": [head["sha"]]})))
-    gh("api", f"repos/{REPO}/git/refs/heads/{BRANCH}", "-X", "PATCH", "--input", "-",
-       payload=json.dumps({"sha": commit["sha"]}))
-    print(f"  -> {REPO}@{BRANCH} {commit['sha'][:10]}")
-    print(f"  -> https://github.com/{REPO}/tree/{BRANCH}")
-    return commit["sha"]
-
-
-def optimise(profile_path: Path, out_json: Path) -> int:
-    import layout_optimizer
-    return layout_optimizer.main([
-        "--hand-profile", str(profile_path), "--out", str(out_json),
-        "--iters", "120000", "--restarts", "4"])
-
-
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(
-        description="Measure your hand, write the profile, optimise the layout, publish.",
-        epilog="Just run it:  python3 rom_capture.py --publish", formatter_class=
-        argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--device", help="/dev/input/eventN of the pad (live capture)")
-    ap.add_argument("--manual", action="store_true",
-                    help="ask the five questions instead of using a device (the default)")
-    ap.add_argument("--publish", action="store_true",
-                    help="after measuring: optimise the layout and push everything to GitHub")
-    ap.add_argument("--seconds", type=float, default=8.0, help="seconds per device step")
-    ap.add_argument("--out-dir", type=Path, default=Path("messung/rom"))
-    ap.add_argument("--profile", type=Path, default=Path("hand_profile.json"),
-                    help="where the measured profile goes (published from here)")
-    ap.add_argument("--layout-out", type=Path, default=Path("layout.json"))
-    ap.add_argument("--sheet", type=Path, help="also write a printable pad overlay here")
+    ap = argparse.ArgumentParser(description="Lies 20 s deine Hand auf dem Pad aus.")
+    ap.add_argument("--seconds", type=float, default=20.0)
+    ap.add_argument("--profile", type=Path, default=Path("hand_profile.json"))
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args(argv)
-
     if args.self_test:
         print("self-test:")
         return self_test()
-    if args.sheet and not (args.device or args.manual or args.publish):
-        write_sheet(args.sheet)
-        return 0
-    if args.device:
-        results = run_device(args)
-        profile, diag = analyse(results)
-    else:
-        results, profile, diag = run_manual(args)
-    args.out_dir.mkdir(parents=True, exist_ok=True)
+    profile, diag = run_auto(args)
     args.profile.write_text(json.dumps(profile, indent=2), encoding="utf-8")
-    (args.out_dir / "rom_steps.json").write_text(
-        json.dumps([r.to_json() for r in results], indent=2), encoding="utf-8")
-    print(f"\nwrote {args.profile}")
+    print(f"\ngeschrieben: {args.profile}")
     print_diag(diag)
-    if not args.publish:
-        print(f"\nnaechster Schritt:  python3 layout_optimizer.py "
-              f"--hand-profile {args.profile}")
-        return 0
-
-    print("\n" + "=" * 66)
-    print("LAYOUT")
-    print("=" * 66)
-    rc = optimise(args.profile, args.layout_out)
-    present = [f for f in PUBLISH_FILES if pathlib.Path(f).is_file()]
-    print("\n" + "=" * 66)
-    print("PUBLISH")
-    print("=" * 66)
-    publish(present, f"Measured hand profile and the layout it produces "
-                     f"(comfort {diag['comfort_reach_mm']:g} mm, "
-                     f"fan {diag['fan_deg'][0]:.0f}-{diag['fan_deg'][1]:.0f} deg)")
-    return rc
+    return 0
 
 
 if __name__ == "__main__":

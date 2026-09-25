@@ -1,5 +1,34 @@
 {
-  "_measured_by": "rom_capture.py",
+  "_measured_by": "rom_capture.py --auto, 20 s gesture recording",
+  "_status": "REJECTED - not a usable measurement, do not optimise from this file",
+  "_rejected_because": [
+    "the recording started 2.3 s in, so the still phase also captured placing the hand: the contact strayed 111 mm while it was supposed to be still",
+    "five contacts were on the pad, i.e. the heel of the hand was resting on it, so every contact jitters",
+    "consequence: the thumb's measured reach came out as 12.6 mm with rings [23.2, 23.2, 23.2, 12.6] - nonsense, and it is not used"
+  ],
+  "_raw_data": "messung/rom/gesture.jsonl (per-contact point stream, 3824 points)",
+  "_how_to_redo": "python3 rom_capture.py - lay ONLY the thumb and the index on the pad, keep the heel of the hand in the air, and do not move while the first phase runs",
+  "_values": {
+    "measured": [],
+    "declared": [
+      "pad_mm",
+      "thumb.rest",
+      "thumb.joint",
+      "thumb.rings",
+      "thumb.fan_deg",
+      "thumb.reach_mm",
+      "thumb.max_reach_mm",
+      "thumb.tangential_penalty",
+      "index.rest",
+      "index.joint",
+      "index.centre",
+      "index.pitch",
+      "index.reach_mm",
+      "index.max_reach_mm",
+      "index.tangential_penalty"
+    ],
+    "note": "nothing in this file was measured. Every value is a declared design input. rom_capture.py now refuses recordings whose still-phase stray is not far below the cued-phase spread."
+  },
   "pad_mm": [
     224.0,
     148.0
@@ -14,17 +43,17 @@
       9.0
     ],
     "rings": [
-      23.2,
-      34.8,
-      46.4,
-      58.0
+      21.0,
+      31.0,
+      41.0,
+      51.0
     ],
     "fan_deg": [
       0.0,
       100.0
     ],
-    "reach_mm": 58.0,
-    "max_reach_mm": 64.0,
+    "reach_mm": 51.0,
+    "max_reach_mm": 56.0,
     "tangential_penalty": 1.35
   },
   "index": {
@@ -38,11 +67,11 @@
     ],
     "centre": [
       194.0,
-      77.0
+      78.0
     ],
-    "pitch": 34.0,
-    "reach_mm": 88.0,
-    "max_reach_mm": 100.0,
+    "pitch": 26.0,
+    "reach_mm": 85.0,
+    "max_reach_mm": 90.0,
     "tangential_penalty": 1.0
   }
 }
