@@ -31,13 +31,14 @@ significantly when movement is externally paced at 3 Hz** versus self-paced ~2 H
 (II: F = 46.7, p < 0.001; SI: F = 49.9, p < 0.001). Their subjects naturally chose
 ~2 Hz (range 0.7–3.3 Hz).
 
-Consequence for the speed target: at 250 WPM, 1.5 syllables/word and one event/syllable
-requires 6.25 events/s; two events/syllable requires 12.5 events/s. The literature says
-finger *independence* degrades at 3 Hz in a simple cyclic task. That is a human-control
-constraint, not a PTH-660 throughput measurement. The 88 ms persistence window is an
-evidence/latency requirement, not a maximum event rate. This is an argument against
-assuming that finger-independence results transfer to a new touch surface, not an argument
-that 250 WPM is impossible.
+Consequence for the speed target: at 250 WPM a syllable/chord every ~200–400 ms is
+≈ 2.5–5 events per second per hand. The literature says finger *independence* already
+degrades at 3 Hz in a simple cyclic task. Our 88 ms event floor (§2 below) corresponds to
+11.4 events/s, i.e. **well past the frequency at which independent finger control is
+already measurably degrading.** This is not an argument against the target — the two-thumb
+design deliberately does not ask the long fingers to alternate — but it *is* an argument
+against spending design effort on a ten-finger layout, and against assuming the
+finger-independence literature transfers to 5–10 Hz chording.
 
 ### 1.3 Direction resolution: literature caps breadth at 8
 
@@ -130,39 +131,38 @@ came from outside our data.
 | best measured surface/mobile typing, large sample | **36–38 WPM** (two-thumb 38, one-finger 29; 2.3 % uncorrected error; autocorrect +9) | 37,370-participant mobile study (W6) |
 | best measured touch/chording system in our literature set | 44.6 WPM (TOAST), 47 WPM (Twiddler experts after ~25 h) | W2, W6 |
 | best measured 10-finger passive tap system with IMU | 70.6 WPM after 2.5 h / 5 days | TypeAnywhere (W2) |
-| detector evidence window | 88 ms (8 frames) | latency/evidence requirement, **not** an event-rate ceiling | MEASURED_INTENT_FILTER |
+| our event budget at the measured 88 ms floor | ≈ 11.4 events/s ≈ 5.7–7.6 syllables/s ≈ 340–450 WPM **theoretical, error-free** | derived, VECTOR_DESIGN_CRITIQUE §3 |
 | our measured mover speeds | peak 133–309 mm/s, mean 16–40 mm/s, sustained runs 19–278 frames | MEASURED_BIOMECHANICS §3 |
 | our measured free-motion event rate | **2.56 events/s** (108 events in 42.3 s, ten fingers down) | MEASURED_INTENT_FILTER |
 
 ### 1.4 The WPM decision, computed rather than asserted
 
-`scripts/wpm_ceiling.py` turns the target and encoding assumptions into the required
-event rate. The 88 ms persistence window is an evidence/latency requirement, not a
-maximum event rate. The only measured rate used as a baseline here is the day-0 free-motion
-rate of **2.56 events/s**; trained deliberate throughput remains unknown.
+`scripts/wpm_ceiling.py` turns the measured numbers into the required event rate for each
+target. Inputs: detector ceiling 1/88 ms = **11.4 events/s**, measured free-motion rate
+**2.56 events/s**, syllables/word 1.5–2.0, events/syllable 1.0–2.0.
 
-| target | encoding | required events/s | × day-0 free motion |
-|---|---|---:|---:|
-| 150 WPM | 1 ev/syll, 1.5 syll/word | 3.75 | 1.46× |
-| 200 WPM | same | 5.00 | 1.95× |
-| 250 WPM | same | 6.25 | 2.44× |
-| 250 WPM | 1.5 ev/syll | 9.38 | 3.66× |
-| 250 WPM | 2.0 ev/syll | 12.50 | 4.88× |
-| 250 WPM | 2 syll/word + 2 ev/syll | 16.67 | 6.51× |
+| target | need (best case: 1 ev/syll, 1.5 syll/word) | × detector ceiling | × measured free motion |
+|---|---:|---:|---:|
+| 150 WPM | 3.75 ev/s | 0.33× | **1.46×** |
+| 200 WPM | 5.00 ev/s | 0.44× | **1.95×** |
+| 250 WPM | 6.25 ev/s | 0.55× | **2.44×** |
+| 250 WPM, 1.5 ev/syll | 9.38 ev/s | 0.82× | 3.66× |
+| 250 WPM, 2.0 ev/syll | 12.50 ev/s | **1.10× (over ceiling)** | 4.88× |
+| 250 WPM, 2 syll/word + 2 ev/syll | 16.67 ev/s | **1.47× (over ceiling)** | 6.51× |
 
 Decisions that follow, stated as constraints rather than opinions:
 
-1. **The event cost of an encoding is measurable.** A 250 WPM target needs 6.25 events/s
-   with one event per syllable, but 12.5 events/s with two. The latter is a much harder
-   motor target; the table does not prove that the detector makes it impossible.
-2. **Every target exceeds the day-0 free-motion baseline.** A trained tempo session must
-   measure whether the user can deliberately sustain the required rate. This is a
-   training question, not a consequence of the 88 ms latency.
-3. **The binding constraint is not established as the sensor frame rate.** Gesture length,
-   segmentation, independent finger motion, language-layer coverage and correction cost
-   all remain candidate constraints. The corrected synthetic sweep supports a
-   150–350 ms gesture envelope at the **realized** 1.01–1.48 Hz cue rates, not a universal
-   rate ceiling.
+1. **250 WPM is only physically reachable with a one-event-per-syllable encoding.** With a
+    2–3 event syllable it needs 12.5–16.7 events/s and *exceeds* the 88 ms detector
+    ceiling. That is not a tuning problem: no threshold tuning recovers an event rate the
+    detector cannot sample.
+2. **Every target needs a deliberate event rate 1.5–2.4× above what free finger motion
+    produced** in the measured session. That gap is a *training* requirement, and it is
+    the single most important thing to measure next: a rhythm/tempo session with the
+    operator tapping deliberately at increasing rates.
+3. The binding constraint is therefore neither the sensor (11.4/s headroom) nor the
+    channel capacity (~10 reliable bits), but **the user's sustainable deliberate event
+    rate per hand**, and the independence degradation that starts around 3 Hz.
 
 ### 1.6 The human anchor: 360 WPM is a verified human record
 
@@ -177,10 +177,11 @@ stretches). https://nymag.com/speed/2016/12/how-to-type-360-words-a-minute.html
 
 Three facts from that interview that settle the architecture question:
 
-1. **A 23-key mechanical steno machine demonstrates 360 WPM.** This is a human-capability
-   anchor, not a direct conversion to touch events/s: the interview does not establish a
-   strokes-per-word ratio for this project. The 250 WPM target still requires 6.25 events/s
-   under the explicit 1.5 syllables/word and one-event/syllable assumption.
+1. **A 23-key mechanical steno machine sustains 360 WPM.** 360 WPM with word-level
+    shortcuts is ≈ **6 strokes/s**. Our 250 WPM target needs 6.25 events/s. Those are the
+    same number. The 88 ms detector ceiling is 11.4 events/s, i.e. **1.8× the record
+    rate**. The sensor and the detector are not the constraint; they have roughly a
+    factor of two of headroom over a world-record human.
 2. **Steno is one simultaneous chord per syllable** — "you push them all at once. That's
     where the speed comes in." So the "1 event per syllable" requirement in 1.4 is not a
     compromise forced by our detector; it is *the proven steno model*. The design's
@@ -193,21 +194,23 @@ Three facts from that interview that settle the architecture question:
 
 Consequences for this project:
 
-- **Do not conflate an unmeasured touch result with a human capability claim.** A
-  150–250 WPM target is physically demonstrated on mechanical steno hardware, but whether
-  a new user reaches it on a 0G surface remains unproven. The tempo session measures that
-  gap; it must not be replaced by arithmetic from the detector latency.
-- **The language layer is a proven lever, not yet a measured touch bottleneck.** Plover
+- **Drop the framing that 150–250 WPM is a speculative target.** It is a *demonstrated
+  human rate* on a chorded device, and our sensing budget covers it with ~1.8× margin.
+  What is unproven is whether a *new* user reaches it on a 0G surface, and how long
+  training takes — which is exactly what the tempo session measures.
+- **The binding constraint is the language layer, not the motor layer.** Plover
   dictionaries, an LM, and per-user shortcuts are the levers that moved Kislingbury from
-  200 to 360 WPM on a mechanical steno machine. They should be built in parallel, while
-  the cued touch session measures motor throughput independently.
+  200 to 360 WPM. That re-prioritises the work: decoder effort belongs in the dictionary/LM
+  and in the correction path, not in squeezing more events out of the fingers.
 - **The free-motion 2.56 events/s is an untrained baseline**, and should be labelled as
   such. It is the "day 0" number, not a ceiling.
 
-The architecture documents now separate published human capability from unmeasured PTH-660
-throughput. "No published 0G-surface system reaches this rate" remains true; "this rate is
-beyond human capability" is false, and the 360 WPM steno record is the relevant human anchor.
-The cued touch session must measure the missing device-specific rate.
+Open question this raises for agent 1: `RECOMMENDED_ARCHITECTURES.md` and
+`COMPREHENSIVE_RESEARCH_REPORT.md:13` both currently frame 150–250 WPM as not evidenced.
+That framing is right for *published touch/steno research on 0G surfaces* and wrong as a
+statement about human capability. Please separate the two explicitly: "no published
+0G-surface system reaches this rate" is true; "this rate is beyond human capability" is
+false, and a 360 WPM steno record exists.
 
 ### 1.7 A concrete layout rule that follows: put the targets on the axes
 
@@ -232,10 +235,12 @@ should be tested on a confusion matrix split by sector (axes vs diagonals), not 
 overall diagonal. That split belongs in the slow-stroke session of
 `VECTOR_DESIGN_CRITIQUE.md` §8.
 
-Reading these together: the 88 ms detector latency is not itself the demonstrated
-bottleneck. The corrected synthetic envelope establishes gesture-length behavior at realized
-1.01–1.48 Hz, not 150+ WPM sensing headroom. Simultaneity, individuation, per-stroke
-reliability, return/segmentation cost and language coverage remain open constraints.
+Reading these together: the *sensing* side has enough headroom for 150+ WPM. The
+*decoding and human* side is where every published system actually lands, at 36–70 WPM.
+Agent 1's report already refused to quote 150–250 WPM as an evidenced property
+(`COMPREHENSIVE_RESEARCH_REPORT.md:13`); this document now agrees with that from the
+hardware side as well, and identifies why: not sensor bandwidth, but simultaneity,
+individuation at high frequency, and per-stroke reliability.
 
 ### 1.8.1 The ceiling claim was actively searched for counterexamples, and held
 
@@ -359,3 +364,31 @@ Two process notes from this exchange:
 - A worker recommendation is a hypothesis with an author, not a finding. The rule adopted
   earlier ("a number is not a finding until the metric that produced it has a test") extends
   to recommendations: the test above pins the rejection, so it cannot be re-adopted silently.
+
+### 1.11 Six hypotheses tested and rejected — the negative results are the contribution
+
+Every one of these sounded reasonable, was implemented, and was measured into oblivion. They
+are recorded because the next person will otherwise try them again.
+
+| # | hypothesis | measured result | where |
+|---:|---|---|---|
+| 1 | 3 Hz event-rate ceiling | metric artifact; no ceiling exists | addendum in BENCHMARK_RESULTS |
+| 2 | ~5.5 events/s theoretical ceiling | never measured; the rate axis was never realised | addendum 3 |
+| 3 | the reversal turn threshold is under-tuned | identical results for 30–120°; only 150° breaks | addendum 2 |
+| 4 | the whole-event direction estimator beats the 8-frame window | 1.00 → **0.00** on a 45° hooked stroke | §1.10 |
+| 5 | raising the gate to 60 mm/s is free safety | costs 350–500 ms gesture coverage; real gestures average 355 ms | issue #15, closed |
+| 6 | suppression should require collinearity (cos ≥ 0.70) | costs 24/159 real suppressions and **all** benchmark suppressions; a dragged follower sits at cos ≈ 0.43 | `intent_filter.py` comment |
+
+The pattern behind them:
+
+- **Five of six were claims about how the system behaves, made before checking.** The three
+  that survived contact with measurement (the 8-frame window, the 40 mm/s gate, the return
+  phase) all came out *simpler* than the alternative that replaced them.
+- **Two were harness bugs, four were model bugs.** Both families produce confident, wrong
+  numbers that survive code review and a pipeline audit.
+- **The strongest result came from a rejected hypothesis**: fitting the direction noise to the
+  measured on-fence rate showed it is 3.6× the sensor floor, which is why the priority belongs
+  with the language layer and training rather than with sensing.
+
+The operational rule, now applied in both directions: *the author of a number is not the
+person who signs it off*, and *a worker recommendation is a hypothesis with an author*.

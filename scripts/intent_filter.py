@@ -52,6 +52,13 @@ MIN_RUN_FRAMES = 8
 # A follower is called "explained" when the per-pair fit explains at least this share of
 # its energy. Finger row 0.62-0.92, cross-hand 0.72-0.74, thumb<->thumb 0.10-0.25.
 MIN_R2_TO_SUPPRESS = 0.5
+# TRIED AND REVERTED: requiring the follower to be collinear (cos >= 0.70) before
+# suppressing it. The premise is true for the strongest pairs (finger row cos +0.88..+0.97) but
+# not for the population: measured on the real sessions it costs 24 of 159 suppressions
+# (159 -> 135), and on the labelled benchmark it costs ALL of them (57 -> 0), because a
+# genuinely dragged follower often sits at cos ~0.43. cos is therefore recorded per pair as a
+# diagnostic, not used as a veto. Kept at 0.0 = no gate.
+MIN_COS_TO_SUPPRESS = 0.0
 
 
 def steps_of(payload: list[dict]) -> list[dict[str, tuple[float, float, float]]]:
@@ -105,6 +112,24 @@ def fit_pairs(rows, exclude_mover_frame: bool = True) -> dict[tuple[str, str], d
     return out
 
 
+def _cos_direction(rows, a: str, b: str) -> float:
+    """Mean cosine between the step vectors of a and b while a leads."""
+    num = den = 0.0
+    for row in rows[1:]:
+        if a not in row or b not in row:
+            continue
+        if max(row, key=lambda k: math.hypot(*row[k])) != a:
+            continue
+        ax, ay, _av = row[a]
+        bx, by, _bv = row[b]
+        na, nb = math.hypot(ax, ay), math.hypot(bx, by)
+        if na <= 0 or nb <= 0:
+            continue
+        num += (ax * bx + ay * by) / (na * nb)
+        den += 1
+    return num / den if den else 0.0
+
+
 def detect_events(rows, min_speed: float, min_run: int) -> list[tuple[int, int, set[str]]]:
     """Maximal runs of >= min_run consecutive frames where some contact is fast.
 
@@ -156,15 +181,19 @@ def analyse(path: Path, min_speed: float, min_run: int) -> dict:
             if tid == mover:
                 continue
             fit = pairs.get((mover, tid)) or pairs.get((tid, mover))
-            if fit and fit["r2"] >= MIN_R2_TO_SUPPRESS:
+            cosang = _cos_direction(rows, mover, tid)
+            if (fit and fit["r2"] >= MIN_R2_TO_SUPPRESS
+                    and cosang >= MIN_COS_TO_SUPPRESS):
                 suppressed.append({"tid": tid,
                                    "displacement_mm": round(math.hypot(sx, sy), 2),
                                    "r2": round(fit["r2"], 3),
+                                   "cos": round(cosang, 3),
                                    "slope": round(fit["slope"], 3)})
             else:
                 reported.append({"tid": tid,
                                  "displacement_mm": round(math.hypot(sx, sy), 2),
-                                 "r2": round(fit["r2"], 3) if fit else None})
+                                 "r2": round(fit["r2"], 3) if fit else None,
+                                 "cos": round(cosang, 3)})
         out_events.append({
             "t_start": round(payload[start]["t"], 3),
             "t_end": round(payload[end]["t"], 3),
