@@ -1,0 +1,197 @@
+"""Tests for the measured-evidence and intent-filter scripts (no hardware, no raw data).
+
+These guard the *logic* behind the numbers in MEASURED_BIOMECHANICS.md and
+CROSS_VALIDATION.md using synthetic traces with known ground truth, so the measured
+constants cannot be silently broken by a refactor. The real biometric sessions are
+deliberately not required: they stay out of the repo (MEASURED_BIOMECHANICS.md 0).
+"""
+import math
+import sys
+import unittest
+from pathlib import Path
+
+SCRIPTS = Path(__file__).resolve().parent.parent / "scripts"
+sys.path.insert(0, str(SCRIPTS))
+
+import follower_predictability as fp  # noqa: E402
+import intent_filter  # noqa: E402
+import kinematics  # noqa: E402
+import real_session_evidence as rse  # noqa: E402
+import wpm_ceiling  # noqa: E402
+
+DT = 0.011  # ~91 Hz, the measured frame interval
+
+
+def frames_to_payload(frames):
+    return [{"t": i * DT, "c": dict(c)} for i, c in enumerate(frames)]
+
+
+def rest_only(n=400, jitter=0.0):
+    """A stationary contact: exactly zero movement when jitter == 0."""
+    return frames_to_payload([{"1": (10.0, 10.0, 3.0)} for _ in range(n)])
+
+
+def parallel_pair(n=200, gain=0.65, step=0.2):
+    """Leader moves `step` mm per frame along +x; follower dragged by `gain` of it.
+
+    step=0.2 mm/frame is 18 mm/s at 91 Hz (fine for the correlation maths).
+    Detector tests pass step=0.6 (-> 55 mm/s) to clear the 40 mm/s gate, because
+    the measured real movers run at 130-309 mm/s.
+    """
+    out = []
+    for i in range(n):
+        out.append({"1": (step * i, 0.0, 3.0), "2": (gain * step * i, 0.0, 3.0)})
+    return frames_to_payload(out)
+
+
+def mirrored_pair(n=200, gain=-0.4):
+    """Leader moves along +x; follower is dragged backwards (anti-correlated)."""
+    out = []
+    for i in range(n):
+        out.append({"1": (0.2 * i, 0.0, 3.0), "2": (gain * 0.2 * i, 0.0, 3.0)})
+    return frames_to_payload(out)
+
+
+def independent_pair(n=200, seed=7):
+    """Leader moves along +x; follower is uncorrelated quantisation noise."""
+    state = seed
+    out = []
+    for i in range(n):
+        state = (1103515245 * state + 12345) % (1 << 31)
+        noise = (state / (1 << 31) - 0.5) * 0.4
+        out.append({"1": (0.2 * i, 0.0, 3.0), "2": (noise, noise * 0.5, 3.0)})
+    return frames_to_payload(out)
+
+
+class TestInitArtefactFilter(unittest.TestCase):
+    def test_leading_default_frames_are_dropped(self):
+        payload = frames_to_payload([
+            {"9": [0.0, 0.0, 0.0]},      # reader init
+            {"9": [0.0, 5.0, 0.0]},      # still init (x missing)
+            {"9": [4.0, 5.0, 1.0]},      # first real sample
+            {"9": [5.0, 5.0, 1.0]},
+        ])
+        clean = kinematics._strip_uninit_leads(payload)
+        present = [f["c"].get("9") for f in clean]
+        self.assertEqual(present[0], None)
+        self.assertEqual(present[1], None)
+        self.assertEqual(present[2], [4.0, 5.0, 1.0])
+
+    def test_edge_contact_on_x0_is_kept(self):
+        payload = frames_to_payload([{"8": [0.0, 2.0, 1.0]},
+                                     {"8": [0.0, 3.0, 1.0]}])
+        clean = kinematics._strip_uninit_leads(payload)
+        self.assertEqual(len([f for f in clean if "8" in f["c"]]), 2)
+
+    def test_analyze_does_not_report_phantom_velocity(self):
+        payload = frames_to_payload([
+            {"9": [0.0, 0.0, 0.0]},
+            {"9": [0.0, 135.0, 0.0]},
+            {"9": [223.6, 135.0, 0.0]},
+            {"9": [223.7, 135.0, 0.0]},
+        ])
+        res = kinematics.analyze(payload)
+        self.assertLess(res["9"]["peak_mm_s"], 200.0)
+        self.assertLess(res["9"]["drift_mm"], 1.0)
+
+
+class TestVectorCoupling(unittest.TestCase):
+    def test_parallel_pair_is_cos_plus_one(self):
+        res = rse.vector_coupling(parallel_pair(), min_frames=40)
+        row = next(r for r in res if r["mover"] == "1" and r["follower"] == "2")
+        self.assertGreater(row["cos"], 0.99)
+        self.assertAlmostEqual(row["beta"], 0.65, places=2)
+
+    def test_mirrored_pair_is_cos_minus_one(self):
+        res = rse.vector_coupling(mirrored_pair(), min_frames=40)
+        row = next(r for r in res if r["mover"] == "1" and r["follower"] == "2")
+        self.assertLess(row["cos"], -0.99)
+
+    def test_independent_pair_has_near_zero_correlation(self):
+        res = rse.vector_coupling(independent_pair(), min_frames=40)
+        row = next(r for r in res if r["mover"] == "1" and r["follower"] == "2")
+        self.assertLess(abs(row["cos"]), 0.3)
+
+    def test_predictability_separates_parallel_from_independent(self):
+        par = fp.analyse.__wrapped__ if hasattr(fp.analyse, "__wrapped__") else None
+        rows_p = fp.step_rows(parallel_pair())
+        rows_i = fp.step_rows(independent_pair())
+        rp = fp.pair_predictability(rows_p, "1", "2")
+        ri = fp.pair_predictability(rows_i, "1", "2")
+        self.assertGreater(rp["r2"], 0.9)      # suppressible
+        self.assertLess(ri["r2"], 0.3)         # not suppressible
+        del par
+
+
+class TestPersistenceDetector(unittest.TestCase):
+    def test_rest_only_never_fires(self):
+        rows = intent_filter.steps_of(kinematics._strip_uninit_leads(rest_only()))
+        events = intent_filter.detect_events(rows, intent_filter.MIN_SPEED_MM_S,
+                                            intent_filter.MIN_RUN_FRAMES)
+        self.assertEqual(events, [])
+
+    def test_mover_above_threshold_fires(self):
+        rows = intent_filter.steps_of(kinematics._strip_uninit_leads(
+            parallel_pair(step=0.6)))
+        events = intent_filter.detect_events(rows, intent_filter.MIN_SPEED_MM_S,
+                                            intent_filter.MIN_RUN_FRAMES)
+        self.assertTrue(events)
+
+    def test_brief_spike_below_min_run_does_not_fire(self):
+        """The measured rest behaviour: a short burst must not become an event."""
+        frames = []
+        for i in range(400):
+            x = 10.0 + (0.3 if 100 <= i < 105 else 0.0)
+            frames.append({"1": (x, 10.0, 3.0)})
+        rows = intent_filter.steps_of(kinematics._strip_uninit_leads(
+            frames_to_payload(frames)))
+        events = intent_filter.detect_events(rows, intent_filter.MIN_SPEED_MM_S,
+                                            intent_filter.MIN_RUN_FRAMES)
+        self.assertEqual(events, [])
+
+    def test_intent_filter_suppresses_a_parallel_follower(self):
+        payload = parallel_pair(n=200, gain=0.65, step=0.6)
+        pairs = intent_filter.fit_pairs(intent_filter.steps_of(payload))
+        self.assertIn(("1", "2"), pairs)
+        self.assertGreater(pairs[("1", "2")]["r2"], 0.5)
+
+
+class TestWpmCeiling(unittest.TestCase):
+    def test_250_wpm_two_events_per_syllable_exceeds_the_ceiling(self):
+        ceiling = wpm_ceiling.event_ceiling_hz()
+        need = (250 / 60.0) * 1.5 * 2.0
+        self.assertGreater(need, ceiling,
+                           "250 WPM with 2 events/syllable must exceed the "
+                           "88 ms detector ceiling -- this is the project constraint")
+
+    def test_250_wpm_one_event_per_syllable_fits_under_the_ceiling(self):
+        ceiling = wpm_ceiling.event_ceiling_hz()
+        need = (250 / 60.0) * 1.5 * 1.0
+        self.assertLess(need, ceiling)
+
+    def test_every_target_exceeds_measured_free_motion(self):
+        for target in wpm_ceiling.TARGETS_WPM:
+            need = (target / 60.0) * 1.5 * 1.0
+            self.assertGreater(need, wpm_ceiling.MOVE_EVENT_RATE_HZ)
+
+    def test_rest_run_is_shorter_than_the_detector_window(self):
+        """The 88 ms window exists precisely because rest runs reach 7 frames."""
+        self.assertLess(wpm_ceiling.REST_RUN_MAX_MS, wpm_ceiling.EVENT_MS)
+        self.assertAlmostEqual(wpm_ceiling.EVENT_MS / (1000.0 / wpm_ceiling.HZ), 8.0,
+                               places=0)
+
+
+class TestQuantileHelpers(unittest.TestCase):
+    def test_quantile_bounds(self):
+        vals = [float(i) for i in range(100)]
+        self.assertEqual(rse.quantile(vals, 0.0), 0.0)
+        self.assertEqual(rse.quantile(vals, 0.5), 50.0)
+        self.assertEqual(rse.quantile(vals, 1.0), 99.0)
+
+    def test_max_run(self):
+        self.assertEqual(rse.max_run([False, True, True, False, True]), 2)
+        self.assertEqual(rse.max_run([False, False]), 0)
+
+
+if __name__ == "__main__":
+    unittest.main()
