@@ -28,10 +28,15 @@ class Sample:
 @dataclass
 class Config:
     hz: float = 120.0
+    # Fixture defaults, NOT a hardware recommendation. Measured on the PTH-660
+    # (MEASURED_BIOMECHANICS.md): resting contacts reach speed p99 = 57.4 mm/s and per-frame
+    # step p99 = 0.56 mm, so these values sit INSIDE the resting noise and a detector using
+    # them would false-trigger on a real hand. The measured operating point is
+    # v >= 40 mm/s with 8 consecutive frames (~88 ms) - see SEPARATION_MODEL.md.
     rest_radius: float = 1.2
-    min_peak_speed: float = 20.0
-    min_displacement: float = 1.5
-    min_duration: float = 0.035
+    min_peak_speed: float = 20.0      # fixture only; measured floor is 40
+    min_displacement: float = 1.5    # fixture only; measured rest step p99 is 0.56mm
+    min_duration: float = 0.035      # fixture only; 3 frames, measured floor is 8
     max_duration: float = 0.60
     min_area: float = 2.0
     palm_area: float = 8.0

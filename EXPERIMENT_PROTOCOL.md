@@ -79,15 +79,27 @@ Record video marker or external key for ground truth. The user should not have t
 
 ## Phase D — Candidate thresholds
 
-Do not select a single universal threshold. Sweep per-user:
+Do not select a single universal threshold — and note that **the original sweep grid was
+below the measured noise floor**. Measured on this PTH-660 over three sessions
+(`MEASURED_BIOMECHANICS.md`): resting contacts reach speed p99 = 57.4 mm/s, per-frame step
+p99 = 0.56 mm (max 1.48 mm) and net drift 11.96 mm over 20 s. Sweep per-user, with the grids
+below, which start where the measurement says the interesting part begins:
 
 ```text
-peak_speed:       2, 4, 8, 12, 20, 40 mm/s
-displacement:     1, 2, 3, 5, 8, 12 mm
+peak_speed:       20, 30, 40, 60, 80, 120 mm/s   (below 20 is inside the rest noise)
+persistence:      5, 8, 12 frames                (8 = 88ms, the measured evidence floor)
+displacement:     windowed, 4, 8, 12 mm           (NEVER since touch-down: rest drifts 11.96mm)
 area_rise:        0.25, 0.5, 1.0, 1.5 x baseline
 hold_release:     20, 40, 80, 120, 200 ms
-deadband:         0.5, 1, 2, 3 mm
+deadband:         0.5, 1, 2, 3 mm                 (rest step p99 is 0.56mm, so 0.5 is below it)
 ```
+
+The gate and the persistence window are **not independent knobs**: the measured resting
+run is 13 frames at 20 mm/s, 7 at 40 mm/s and 5 at 60 mm/s, so any setting whose window
+is at or below the resting run at that gate will fire on a resting hand. The current
+operating point is 40 mm/s with 8 frames, which has **one frame of margin** — see
+`SEPARATION_MODEL.md`, which also gives the rule for turning a per-user rest-floor session
+into a gate.
 
 For every setting calculate:
 
