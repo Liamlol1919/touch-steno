@@ -447,6 +447,48 @@ assumption is **341 / 170,5 WPM**, independent of how words are segmented into s
 user rate.** Section 1's motor limits apply on top of all of them, and none has been
 measured on this hand.
 
+## 3.12 A second, independent syllable inventory — and a hard incompatibility
+
+A second agent computed the German syllable inventory **independently and with a different
+method**: `wordfreq` 3.1.1 large German frequency list + **eSpeak-ng 1.52 German IPA**, stress
+stripped, maximum-onset segmentation. The first pass used pyphen **orthographic** labels.
+The two disagree, and the disagreement is itself information:
+
+| Method | Syllable types | log₂ | Weighted entropy | syll/word | 5-letter syll/word |
+|---|---|---|---|---|---|
+| pyphen, orthographic | 11,230 | 13,455 | 9,013 | 1,488 | 1,642 |
+| eSpeak, phonemic (top 50k) | **9,170** | 13,163 | 8,852 | **1,667** | **1,695** |
+| eSpeak, phonemic (top 20k) | 5,370 | 12,391 | 8,694 | — | — |
+
+Both cover ≈99,2 % of estimated token mass. The agent recommends **M = 9,170** as the
+workable German inventory, with the explicit caution that wordfreq frequencies are estimates
+and G2P segmentation is imperfect. **Neither number is a universal German syllable count.**
+
+### The incompatibility this exposes
+
+Exact coding needs `3 events × 32-class = 32,768 ≥ 9,170`. Two events would require
+**96-class** single events (96² = 9,216) and **there is no evidence that a 96-class eyes-free
+single event is reliable** — that is far beyond anything measured.
+
+Now the structural result, which is the important part:
+
+    German needs 1,695 syllables per 5-letter word
+    × 2–3 events per syllable
+    = 3,39–5,09 events per 5-letter word
+
+**The project's own "1–2 strokes per 5-letter word" assumption is therefore incompatible
+with any fixed syllable code.** That assumption came from steno, where a stroke is a
+simultaneous chord of many keys. On a pad where one event is one contact event, a syllable
+code needs three to five times more events per word than the premise allowed.
+
+**Consequence:** any design in this space must either abandon the 1–2 stroke premise,
+adopt a chord-style event where one frame carries a set, or use a word-level code instead of
+a syllable-level one. Thread-Rosette is a **set-per-event** design and therefore sits on the
+right side of this constraint; fixed syllable codes do not.
+
+**WPM ceilings, all arithmetic at 5,7 events/s and all invalid as user rates:** 1 event → 202,
+2 events → 101, 3 events → 67 WPM for the 5-letter average.
+
 ## 4. The measurement that now has top priority
 
 **Fit Fitts' `a` and `b` for this thumb in this array.** 60 timed moves, adjacent and
