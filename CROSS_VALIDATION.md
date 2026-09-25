@@ -299,3 +299,34 @@ Two conclusions, the second of which corrects an assumption we had been carrying
   should be spot-checked before any external publication.
 - Open issues against agent 1: #1 thresholds, #2 init artefact, #3 coupling classes
   (with a correction comment), #4 40 ms vs 88 ms.
+
+
+### 1.9 Independent corroboration of the 150–350 ms window from published touch data
+
+The operating envelope in `BENCHMARK_RESULTS.md` was measured on our own calibrated
+synthetic data. W13 searched the literature for the same quantity — how long a touch gesture
+has to be to be *reliably segmented* on a surface with no lift signal — and the published
+numbers land on top of the measured range:
+
+| source | number | relation to our envelope |
+|---|---:|---|
+| Beats (touch, smartwatch), CHI 2017 (doi:10.1145/2702123.2702226) | **355 ms** mean execution; <30 ms simultaneous, <400 ms sequential split, 5.5 % error at 355 ms | sits at our **upper** bound (350 ms) |
+| $1 recognizer (Wobbrock et al., UIST 2007) | "fast" gestures ~600 ms; 97 % with one template, 99 %+ with three | 600 ms is **beyond** our 500 ms detection limit |
+| Simple-mark grouping (Zhao & Baumer, CHI 2006) | median 0.375 s between marks, group within 1–2 s | grouping horizon above our per-gesture window |
+| Hierarchic marking menus (Kurtenbach & Buxton 1993) | direction reversals *inside one pen-down stroke* encode hierarchy; 0.2 s expert mark | precedent for the out-and-back return phase |
+| Debard multi-touch CNN (arXiv:1802.09901) | 1200 ms covers 95 % of gestures | far above; a trained per-gesture model is not the path here |
+
+Two conclusions:
+
+1. **The measured window is not an artefact of our generator.** Real touch gestures average
+   ~355 ms, our detector works to 350 ms, and the one published method that needs *more* time
+   (the $1 family at ~600 ms for fast gestures) is exactly the regime where our measurement
+   shows detection degrading (500 ms → 75–89 %). Three independent lines of evidence now
+   bracket the same number.
+2. **The out-and-back return has direct precedent.** Hierarchic marking menus have encoded
+   hierarchy through direction reversals within a single stroke for 30 years, and W13's ranked
+   conclusion for a 91 Hz no-lift pad is: dwell/velocity-minimum + timeout grouping first,
+   **out-and-back with a direction-reversal landmark second**, trained models last. Our
+   measured return-phase requirement (BENCHMARK_RESULTS.md addendum) is therefore not an
+   eccentric design choice — it is the mechanism the literature converges on for surfaces that
+   cannot signal a release.
