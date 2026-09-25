@@ -240,3 +240,22 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
 - Consequence: bimanual interference, not drift, is the top open hardware question. W18 has
   the protocol (alternating vs simultaneous two-hand taps, cross-correlation at lag 0/1).
 - 76 tests green.
+
+## 06:54–06:57 — the compass radius: the first layout surface from our own noise
+- Tested whether the 3.6x direction error is BIAS (correctable) or VARIANCE (only trainable):
+  |mean|/sd = 0.02 at every noise level. It is variance. A bias model has nothing to fix -
+  closed option, pinned by a test.
+- Then tested the assumption that a longer accumulation window averages the noise away.
+  REVERSED: at fixed compass radius a longer window means a smaller step per frame, so SNR
+  falls. Accuracy 0.822 at 8 frames -> 0.461 at 40. Accuracy is bought with AMPLITUDE, not
+  duration.
+- COMPASS_SURFACE.md: radius x accuracy x contamination x cycle cost, from the measured
+  2.03mm/frame noise. r=20mm gives 0.822 accuracy; r=30mm gives 0.957 for -18% cycle rate.
+  r<=12mm is not viable (0.576, sector pitch only ~16x the resting step).
+- Both accuracy AND contamination improve with radius; only the return leg (linear in r)
+  opposes it. Every WPM figure is conditional on a 600mm/s return, i.e. on reversal
+  segmentation being the working strategy - so radius and return strategy cannot be chosen
+  independently.
+- Filed as issue #17: the radius choice is a product decision (does the LM absorb the
+  residual error?) and the reach feasibility is a measurement, not an assumption.
+- 79 tests green.
