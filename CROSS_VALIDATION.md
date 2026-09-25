@@ -135,7 +135,36 @@ came from outside our data.
 | our measured mover speeds | peak 133–309 mm/s, mean 16–40 mm/s, sustained runs 19–278 frames | MEASURED_BIOMECHANICS §3 |
 | our measured free-motion event rate | **2.56 events/s** (108 events in 42.3 s, ten fingers down) | MEASURED_INTENT_FILTER |
 
-### 1.4 A concrete layout rule that follows: put the targets on the axes
+### 1.4 The WPM decision, computed rather than asserted
+
+`scripts/wpm_ceiling.py` turns the measured numbers into the required event rate for each
+target. Inputs: detector ceiling 1/88 ms = **11.4 events/s**, measured free-motion rate
+**2.56 events/s**, syllables/word 1.5–2.0, events/syllable 1.0–2.0.
+
+| target | need (best case: 1 ev/syll, 1.5 syll/word) | × detector ceiling | × measured free motion |
+|---|---:|---:|---:|
+| 150 WPM | 3.75 ev/s | 0.33× | **1.46×** |
+| 200 WPM | 5.00 ev/s | 0.44× | **1.95×** |
+| 250 WPM | 6.25 ev/s | 0.55× | **2.44×** |
+| 250 WPM, 1.5 ev/syll | 9.38 ev/s | 0.82× | 3.66× |
+| 250 WPM, 2.0 ev/syll | 12.50 ev/s | **1.10× (over ceiling)** | 4.88× |
+| 250 WPM, 2 syll/word + 2 ev/syll | 16.67 ev/s | **1.47× (over ceiling)** | 6.51× |
+
+Decisions that follow, stated as constraints rather than opinions:
+
+1. **250 WPM is only physically reachable with a one-event-per-syllable encoding.** With a
+    2–3 event syllable it needs 12.5–16.7 events/s and *exceeds* the 88 ms detector
+    ceiling. That is not a tuning problem: no threshold tuning recovers an event rate the
+    detector cannot sample.
+2. **Every target needs a deliberate event rate 1.5–2.4× above what free finger motion
+    produced** in the measured session. That gap is a *training* requirement, and it is
+    the single most important thing to measure next: a rhythm/tempo session with the
+    operator tapping deliberately at increasing rates.
+3. The binding constraint is therefore neither the sensor (11.4/s headroom) nor the
+    channel capacity (~10 reliable bits), but **the user's sustainable deliberate event
+    rate per hand**, and the independence degradation that starts around 3 Hz.
+
+### 1.5 A concrete layout rule that follows: put the targets on the axes
 
 Kurtenbach & Buxton 1993 (verified directly, https://www.billbuxton.com/MMExpert.html,
 InterCHI '93, 482–487) report that **on-axis menu items are selected faster and with fewer
