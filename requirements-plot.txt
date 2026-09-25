@@ -1,3 +1,0 @@
-# Optional dependencies for scripts/plot_models.py
-matplotlib>=3.8
-numpy>=1.26

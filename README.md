@@ -1,74 +1,110 @@
-# Chordtouch Research
+# touch-steno — Kern
 
-Research and implementation notes for high-speed text input on a continuous touch surface, with emphasis on a Wacom PTH-660.
+## Was wir erreichen wollen
 
-## Deliverables
+Eine **Laut→Zonen-Zuweisung** für ein 4-Finger-Touch-Stenografiebrett, die zwei Dinge
+gleichzeitig erfüllt:
 
-- [COMPREHENSIVE_RESEARCH_REPORT.md](COMPREHENSIVE_RESEARCH_REPORT.md) — HCI evidence, models, null-force analysis, architecture and source protocol.
-- [SYSTEM_COMPARISON_MATRIX.md](SYSTEM_COMPARISON_MATRIX.md) — stenography, chord, gesture and tap-sequence systems.
-- [RECOMMENDED_ARCHITECTURES.md](RECOMMENDED_ARCHITECTURES.md) — five implementable architectures and PTH-660 deployment plan.
-- [CODE_REFERENCES.md](CODE_REFERENCES.md) — reusable open-source repositories and integration ideas.
-- [INTEGRATION_TARGETS.md](INTEGRATION_TARGETS.md) — touch-steno owns the input system (PTH-660 capture, segmentation, decoding, English steno profile mapping, local replay, and measurement instruments); it deliberately does not own the `commindv2` or `commind` repositories' implementations. `commindv2` is a `REFERENCE_ONLY` eventual consumer, while `commind` is a `REFERENCE_ONLY` concept canon that was not inspectable, so no claim about its implementation belongs here.
-- [EXPERIMENT_PROTOCOL.md](EXPERIMENT_PROTOCOL.md) — reproducible PTH-660 sensor, intent and ergonomics protocol.
-- [RESEARCH_LOG.md](RESEARCH_LOG.md) and [AGENT2_RESEARCH_LOG.md](AGENT2_RESEARCH_LOG.md) — living project and measurement logs.
-- [DECODER_DESIGN.md](DECODER_DESIGN.md) — state machine, feature contract, enslavement model and Plover bridge.
-- [SYNTHETIC_BASELINE.md](SYNTHETIC_BASELINE.md) and [BENCHMARK_RESULTS.md](BENCHMARK_RESULTS.md) — explicitly synthetic checks and the corrected gesture-length envelope.
-- [MEASURED_BIOMECHANICS.md](MEASURED_BIOMECHANICS.md), [MEASURED_INTENT_FILTER.md](MEASURED_INTENT_FILTER.md) and [CROSS_VALIDATION.md](CROSS_VALIDATION.md) — measured PTH-660 distributions and evidence limits.
-- `scripts/audit_input.py` — safe evdev capability/event audit.
-- `scripts/synthetic_intent_benchmark.py`, `scripts/make_benchmark.py`, `scripts/envelope_sweep.py` and `scripts/wpm_ceiling.py` — deterministic analysis tools; synthetic results are not hardware claims.
-- `scripts/plot_models.py` and `requirements-plot.txt` — optional measured/simulated model figures; install the plotting dependencies before rendering.
-- [DESIGN_DECISION.md](DESIGN_DECISION.md), [nextgen/](nextgen/) and [tests/test_nextgen_steno.py](tests/test_nextgen_steno.py) — clean-room English steno transport and Plover boundary prototype; no German steno.
-- [AGENTIC_META_PLAN.md](AGENTIC_META_PLAN.md) — autonomous product-engineering loop and research branch registry; [AGENTIC_STATE.md](AGENTIC_STATE.md) — append-oriented evidence and decision ledger.
-- [INTEGRATION_TARGETS.md](INTEGRATION_TARGETS.md) — `REFERENCE_ONLY` touch-steno, commindv2, and commind roles, ownership matrix, one-way event boundary, privacy rules, and no-implementation policy.
-- `scripts/session_manifest.py` and `tests/test_session_manifest.py` — shared normalization
-  for complete and legacy paired cue manifests.
-- `scripts/session_runner.py` and [CUED_SESSION_PROTOCOLS.md](CUED_SESSION_PROTOCOLS.md) —
-  hardware-aware, dry-run-capable cued measurement sessions including bimanual coupling.
-- [BIMANUAL_ANALYSIS.md](BIMANUAL_ANALYSIS.md) and `scripts/bimanual_coupling.py` —
-  offline raw-contact timing, episode, and unfiltered pair analysis.
-- [RAW_FRAME_SCHEMA.md](RAW_FRAME_SCHEMA.md) and `scripts/raw_schema.py` — versioned raw-frame
-  JSONL contract with legacy replay compatibility.
-- `scripts/identity_dataset_check.py` — identity-capture gate; `VALID` requires an explicit
-  operator-confirmed finger-to-tracking-ID mapping.
-- [TRAINING_PATH.md](TRAINING_PATH.md) — staged cued-training gates, Plover brief scope and
-  evidence boundaries.
-- `scripts/correction_metrics.py` and `tests/test_correction_metrics.py` — separates
-  cue-to-undo-motion latency from explicitly logged text-repair latency.
-- [CORRECTION_THROUGHPUT.md](CORRECTION_THROUGHPUT.md) and
-  `scripts/correction_throughput.py` — local human repair-interval measurement.
-- [PRIVACY_TELEMETRY.md](PRIVACY_TELEMETRY.md) and `scripts/telemetry_export.py` — opt-in,
-  aggregate-only telemetry export with no raw coordinates or identifiers.
-- `scripts/rest_calibration.py` and `tests/test_rest_calibration.py` — local per-user rest
-  covariance/sweep artifact with source hashes and replay comparison.
-- [PLOVER_BRIEFS.md](PLOVER_BRIEFS.md) and `scripts/plover_dictionary_check.py` — layered
-  Plover JSON outline/translation validation with collision lint.
-- [LANGUAGE_LAYER_METRICS.md](LANGUAGE_LAYER_METRICS.md) and
- `scripts/language_layer_metrics.py` — privacy-minimized local untranslate/undo/strokes-per-word counts.
- `scripts/language_event_recorder.py` — local semantic event producer for future Plover hook adapters.
- `scripts/plover_event_adapter.py` — semantic callback boundary; no Plover import or text inspection.
-- [LANGUAGE_CORPUS_MANIFEST.md](LANGUAGE_CORPUS_MANIFEST.md) and
- `scripts/language_corpus_manifest.py` — consent, held-out split, hash, and retention validation.
- `scripts/language_corpus_retention.py` — non-destructive retention/deletion status check.
-- [LANGUAGE_CAPTURE_RUNBOOK.md](LANGUAGE_CAPTURE_RUNBOOK.md) — operator consent, capture,
-  validation, separation, retention, and deletion procedure.
-- [CANDIDATE_RANKING.md](CANDIDATE_RANKING.md) and `scripts/candidate_ranker.py` —
-  confidence/language ranked candidates without committing text.
-- [LEXICON_DECODING.md](LEXICON_DECODING.md) and `scripts/lexicon_decoder.py` —
-  top-3 candidate search over a lexicon without committing text.
-- [LEXICON_RECOVERY.md](LEXICON_RECOVERY.md) and `scripts/lexicon_recovery.py` —
-  correctly conditioned observed-sector benchmark for reachability and correction actions.
-- `tests/` — standard-library unit tests for decoder invariants, measured constants and benchmark artefacts.
+1. **physisch billig** — jede Bewegung des Fingers kostet so wenig Zeit wie möglich,
+2. **logisch symmetrisch** — die Zuweisung ist so regelmäßig, dass die Lernkurve
+   steil abfällt, statt 39 Einzellauten auswendig zu lernen.
 
-## Important evidence note
+Der Kern ist ein Optimierer, kein Dokumentenschatten. Alles, was früher im Repo lag,
+ist entfernt; die Historie auf GitHub bleibt als Archiv erhalten.
 
-The current documents are a research starting point, not a final PTH-660 performance claim.
-Most published surface/chording results are below 150 WPM. The measured hardware numbers
-and synthetic benchmark results are kept separate. In particular, the 88 ms persistence
-window is an evidence/latency requirement, not a measured event-rate ceiling; deliberate
-throughput must be measured with a cued device session.
+## Topologie
 
-## Repository coordination
+40 Zonen auf einem 224 × 148 mm Pad (Ursprung unten links, y nach oben):
 
-The research remote is `Liamlol1919/touch-steno`. The two agents coordinate shared writes
-through the authenticated GitHub API (`scripts/gh_commit.py`) to avoid stale local pushes.
-Before each publication, fetch and inspect the remote head and open issues.
+| Finger | Zonen | Anordnung |
+|---|---:|---|
+| linker Daumen | 16 | Polarfächer, 4 Ringe × 4 Sektoren |
+| rechter Daumen | 16 | Polarfächer, 4 Ringe × 4 Sektoren |
+| linker Zeigefinger | 4 | 2 × 2 Block |
+| rechter Zeigefinger | 4 | 2 × 2 Block |
+
+Die linke Hälfte ist das **exakte Spiegelbild** der rechten — deshalb ist der
+Symmetrie-Begriff der Zielfunktion überhaupt wohldefiniert: jede Lautklasse sitzt
+beidseits spiegelbildlich, also lernt man die Hand einmal.
+
+39 ARPAbet-Laute (CMUdict) + `SPACE` = 40 Symbole, bijektiv auf die 40 Zonen.
+
+## Die zwei Programme
+
+### `layout_optimizer.py` — die Zuweisung finden
+
+Korpora: die 20 000 häufigsten englischen Wörter (Norvig, Google-Web-1T) gejoint mit
+CMUdict-Aussprachen → 18 015 Wörter, 97,8 % der Token-Masse, 1,652 Silben/Token.
+
+Ziel, vier normalisierte Komponenten (1,0 = Zufallslayout):
+
+| Komponente | Gewicht | Inhalt |
+|---|---:|---|
+| `time` | 0,40 | Fitts-Bewegung auf dem **kinematischen** Pfad + Finger-/Handwechsel + Rückkehr zur Ruhelage |
+| `error` | 0,20 | korpus-abgeleitete Verwechslbarkeit × räumliche Nähe |
+| `learn` | 0,25 | artikulatorische Nähe × Zonendistanz |
+| `sym` | 0,15 | 1 − Spiegel-Score der Lautklassen |
+
+Gesucht mit **Simulated Annealing** (Swap-Nachbarschaft, geometrische Abkühlung,
+Temperatur skalenfrei aus dem Startzustand, 4 Restarts, Best-Improvement-Polish,
+deterministisch per Seed). Δ-Auswertung O(n) pro Zug, verifiziert gegen die
+Vollberechnung auf 1e-15.
+
+**Wichtig:** die Kinematik ist pro Finger ein eigenes Polarsystem. Der Daumen
+zirkumduziert um das CMC, der Zeigefinger flektiert um das MCP; eine Bewegung kostet
+den tatsächlich zurückgelegten Weg, nicht die Luftlinie. Der tangentiale Anteil wird
+mit dem *gemessenen* Tangential-Aufschlag bepreist.
+
+```bash
+python3 layout_optimizer.py --self-test                  # 20 Invarianten, kein Netz nötig
+python3 layout_optimizer.py --out layout.json            # voller Lauf, ~25 s
+python3 layout_optimizer.py --hand-profile messung/rom/hand_profile.json
+python3 layout_optimizer.py --write-profile-template profil.json
+```
+
+### `rom_capture.py` — die Geometrie messen
+
+Das Optimierer-Modell braucht vier Dinge, die man nicht raten kann: Wo der Daumen in
+Ruhe liegt, wie weit er **bequem** reicht (nicht maximal), wie der Fächer läuft und wie
+viel langsamer ein seitlicher Sweep ist als eine radiale Extension.
+
+Das Programm führt eine angeleitete Sequenz mit der rechten Hand durch und schreibt
+`hand_profile.json` im Format, das `--hand-profile` liest. Jeder Sweep läuft **zwei
+Mal**: einmal „so weit wie du bequem willst", einmal „so weit wie physisch möglich".
+Die Lücke dazwischen entscheidet, ob 16 Zonen pro Daumen überhaupt baubar sind.
+
+```bash
+python3 rom_capture.py --device /dev/input/event19 --out-dir messung/rom
+python3 rom_capture.py --manual --out-dir messung/rom      # ohne Tablet
+python3 rom_capture.py --sheet pad.svg                      # Druckbogen zum Messen
+python3 rom_capture.py --self-test                          # synthetische Events
+```
+
+Anleitung pro Schritt: Ferse der Hand **vom** Pad, nur der zu testende Finger
+berührt. Kalibrierung über die drei Pad-Ecken, Kontaktspanne > 30 mm wird als Handfläche
+verworfen.
+
+## Ehrliche Grenzen
+
+- **Keine Messung aus diesem Repo wird verwendet.** Alle Kostenkonstanten sind
+  deklarierte Modellparameter mit Herkunftsetikett (`PROVENANCE` im Code). Fitts'
+  Koeffizienten sind die publizierten Shannon-Werte, alles andere ist Annahme.
+- Die WPM-Zahl ist ein **Modelloutput**, keine Messung. Bei einem Strich pro Laut
+  (4,24 Laute/Wort) begrenzt allein die Strichzahl auf ~175 WPM, auch wenn jede
+  Bewegung gratis wäre.
+- Was **nicht** modelliert ist: 3D-Daumenrotation, Handgelenkabweichung,
+  Kontaktpatch-Dynamik, individuelle Handgröße, Ermüdung, bimanuales Parallelisieren
+  (die Zeitrechnung ist strikt sequenziell).
+- `rom_capture.py` misst Geometrie und Komfort, **keine** Dauerleistung. Ein
+  Bewegungsprotokoll über Sitzungen ist nicht Teil des Ziels.
+- Getestet: beide Programme laufen, die Selbsttests sind grün, der
+  Live-Evdev-Pfad ist **nicht** ausgeführt worden (kein Tablet angeschlossen) —
+  Tracker, Kalibrierung, Aufnahmeschleife und Auswertung sind mit synthetischen
+  Events getestet.
+
+## Werkzeuge, nicht Ergebnisse
+
+`--self-test` prüft Invarianten, keine Zahlen auf Plausibilität. Der Optimierer
+vergleicht gegen vier Baselines (Inventarordnung, umgekehrt, frequenzgreedy, zufällig)
+und verliert gegen keine davon. Fehlerhafte Geometrie wird im Hauptpfad **nicht**
+stillschweigend akzeptiert, sondern vor dem Lauf als Bruchliste ausgegeben.
