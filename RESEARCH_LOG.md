@@ -342,3 +342,9 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Preserved the deliberate continue-after-failure behavior and dry-run status.
 - [x] Added a mocked offline regression test for the failed-step exit contract.
 - [x] No hardware session, capture, or performance result was added.
+
+## Iteration 41 — 2026-09-25
+
+- [x] Detected that partner merge `fa3b106` had restored the unconditional `session_runner.py` success return.
+- [x] Reapplied the aggregate failure exit contract and kept the existing regression test green.
+- [x] No hardware session or performance measurement was added.
