@@ -265,3 +265,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Added strict loader/CLI tests, zero-denominator behavior, semantic sanity checks, and aggregate-only output.
 - [x] Documented the boundary against Plover performance, human correction time, accuracy, and WPM.
 - [ ] A consented real local language-layer log and held-out translation corpus remain outstanding.
+
+## Iteration 30 — 2026-09-25
+
+- [x] Closed issue #7 after the training/brief documentation and privacy-safe runtime metric instrumentation were delivered.
+- [x] Created issue #24 for a consented local language-layer capture and held-out corpus.
+- [x] Kept translation accuracy, correction time, and WPM outside the aggregate event-count tool.
+- [x] No language-layer performance number was fabricated.
