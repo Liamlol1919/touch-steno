@@ -387,14 +387,41 @@ Top-K coverage: 64 → 48,97 %, 128 → 62,94 %, 256 → 75,48 %, 512 → 85,28 
 at 69 % occupancy, giving 2,84 syllables/s. Three events × 32-way gives 32,768 ≥ 11,230 at
 1,89 syllables/s. One event carrying all 11,230 classes in 176 ms is **not established**.
 
-**The negative result, stated by the author:** syllable framing **does not beat one-event
-word codes in raw throughput** — 3,28 events per 5-letter word gives about 52 WPM against a
-342 WPM arithmetic ceiling for one event per word. It may only win on **codebook size and
-learnability**, and only if a 128-way shape pair is genuinely trainable.
+**CORRECTION to a figure the author itself withdrew.** A first pass reported ≈52 WPM for the
+shape-pair scheme. That was wrong: it divided the pair event rate by syllables/word and lost
+the factor of 2. The correct comparison against the stated "1–2 strokes per 5-letter word"
+ceiling (`5.682 × 60 = 341` WPM at one stroke/word, `170.5` at two):
+
+| Scheme | events / 5-letter word | arithmetic WPM |
+|---|---|---|
+| Shape-Pair (2 events) | 1,642 syll/word × 2 = 3,284 | **103,8** |
+| Shape-Pair, general text | 1,488 × 2 = 2,976 | **114,6** |
+| Glyph-Triplet (3 events) | 1,642 × 3 = 4,927 | **69,2** |
+| Glyph-Triplet, general text | 1,488 × 3 = 4,464 | **76,4** |
+
+**The negative result survives the correction but is weaker than stated:** syllable framing
+still does not reach one-event word codes in raw throughput (104–115 WPM against a 341 WPM
+arithmetic ceiling). It may only win on **codebook size and learnability**, and only if a
+128-way shape pair is genuinely trainable. All of these are arithmetic ceilings at the
+certified event rate, **not** user rates — the motor limits in section 1 apply on top.
 
 Scores: Shape-Pair 27/50, Glyph-Triplet 23/50. **Both below Thread-Rosette's 36/50.** The
 syllable framing is recorded because the inventory is real, reusable arithmetic — not because
 the concept won.
+
+## 3.10 Session Motion Roots — killed on the burden it creates
+
+The self-calibrating concept (a personal, session-local motion codebook, MDL/online
+Bayesian, `P(known|z) ≥ 0.99` else silence) is technically sound and scored 28/50, but its
+verdict is **KILL**, and the reason is the one that matters most:
+
+> Because the table resets, this is **not more learnable** than a fixed alphabet: it
+> relocates mnemonic creation, inhibition and testing **into every session.**
+
+The stability arithmetic is sound (5 examples per root gives a 95 % prototype radius of
+0,745 mm against a 3 mm minimum separation, model-predicted held-out error 1,1 %), but the
+learnability axis scored **2/10**. A system that makes the user invent and rehearse fresh
+mnemonics every session has not removed a learning burden; it has made it recurring.
 
 ## 4. The measurement that now has top priority
 
