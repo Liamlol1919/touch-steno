@@ -8,6 +8,10 @@ measurement of one person's thumb on one pad.
 
     python3 scripts/plot_models.py --session ../../session-stand/messung/s12.jsonl \
         --out models
+
+The default job set and ``--only confusion`` require ``--session``. Rendering requires
+the optional dependencies in ``requirements-plot.txt``; evaluator/session failures
+propagate as a non-zero command status and are not reported as written figures.
 """
 from __future__ import annotations
 
@@ -19,10 +23,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-from matplotlib.patches import Circle, Polygon, Wedge  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 W_MM, H_MM = 224.0, 148.0
@@ -33,6 +33,15 @@ REST_JITTER_MM = 0.4
 # Measured bbox of the same hand's natural thumb excursions.
 HAND_ENVELOPE = (24.6, 18.2)
 
+
+
+def load_plotting():
+    """Load the optional plotting stack only when a figure is requested."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Circle, Wedge
+    return plt, Circle, Wedge
 
 def fig_layout(out: Path) -> None:
     """The compass primitive as it is actually drawn on the pad."""
@@ -107,12 +116,14 @@ def fig_layout(out: Path) -> None:
 
 def fig_confusion(session: Path, out: Path) -> None:
     """The measured confusion matrix. Errors land opposite, not scattered."""
-    txt = subprocess.run([sys.executable, str(ROOT / "scripts" / "evaluate_session.py"),
-                          str(session)], capture_output=True, text=True).stdout
-    pairs = re.findall(r"^\s+([NESW]+)->([NESW]+):\s+(\d+)$", txt, re.M)
+    result = subprocess.run([sys.executable, str(ROOT / "scripts" / "evaluate_session.py"),
+                             str(session)], capture_output=True, text=True)
+    if result.returncode != 0:
+        detail = result.stderr.strip() or f"exit status {result.returncode}"
+        raise SystemExit(f"evaluate_session failed: {detail}")
+    pairs = re.findall(r"^\s+([NESW]+)->([NESW]+):\s+(\d+)$", result.stdout, re.M)
     if not pairs:
-        print("keine Confusion-Matrix gefunden - uebersprungen")
-        return
+        raise SystemExit("evaluate_session produced no confusion matrix")
     m = {p[0]: {} for p in pairs}
     for a, b, n in pairs:
         m[a][b] = int(n)
@@ -237,13 +248,20 @@ def fig_reachability(out: Path) -> None:
 
 
 def main() -> int:
-    import numpy as np
-    globals()["np"] = np
     ap = argparse.ArgumentParser()
     ap.add_argument("--session", type=Path, help="measured s12.jsonl")
     ap.add_argument("--out", type=Path, default=ROOT / "models")
     ap.add_argument("--only", choices=["layout", "confusion", "reach"])
     args = ap.parse_args()
+    if args.session is None and args.only not in {"layout", "reach"}:
+        ap.error("--session is required for the confusion figure or the default job set")
+    global np, plt, Circle, Wedge
+    try:
+        import numpy as np
+        plt, Circle, Wedge = load_plotting()
+    except ModuleNotFoundError as exc:
+        ap.error("plot_models.py requires the optional dependencies; "
+                 "install requirements-plot.txt")
     args.out.mkdir(parents=True, exist_ok=True)
     jobs = {
         "layout": lambda: fig_layout(args.out / "01_kompass_primitiv.png"),

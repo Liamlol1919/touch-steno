@@ -15,6 +15,7 @@ Research and implementation notes for high-speed text input on a continuous touc
 - [MEASURED_BIOMECHANICS.md](MEASURED_BIOMECHANICS.md), [MEASURED_INTENT_FILTER.md](MEASURED_INTENT_FILTER.md) and [CROSS_VALIDATION.md](CROSS_VALIDATION.md) — measured PTH-660 distributions and evidence limits.
 - `scripts/audit_input.py` — safe evdev capability/event audit.
 - `scripts/synthetic_intent_benchmark.py`, `scripts/make_benchmark.py`, `scripts/envelope_sweep.py` and `scripts/wpm_ceiling.py` — deterministic analysis tools; synthetic results are not hardware claims.
+- `scripts/plot_models.py` and `requirements-plot.txt` — optional measured/simulated model figures; install the plotting dependencies before rendering.
 - `scripts/session_manifest.py` and `tests/test_session_manifest.py` — shared normalization
   for complete and legacy paired cue manifests.
 - `scripts/session_runner.py` and [CUED_SESSION_PROTOCOLS.md](CUED_SESSION_PROTOCOLS.md) —

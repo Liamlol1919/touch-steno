@@ -327,3 +327,11 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Restored the missing result loop without changing detector constants, JSON output, or measurement semantics.
 - [x] Added a subprocess regression test and verified the real offline benchmark output.
 - [x] No hardware, Plover, consent, correction-time, or WPM result was added.
+
+## Iteration 39 — 2026-09-25
+
+- [x] Made `plot_models.py --help` usable without importing the optional plotting stack.
+- [x] Added explicit `--session` validation for the confusion figure and default job set.
+- [x] Added `requirements-plot.txt` and documented the optional dependency boundary.
+- [x] Added CLI regression coverage; no figure or hardware result was regenerated without dependencies.
+- [x] Propagated `evaluate_session.py` failures from the confusion figure instead of reporting a false successful write.
