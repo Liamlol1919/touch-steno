@@ -109,3 +109,11 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [ ] Issue #17 radius decision still requires cued reach and return-strategy measurements.
 - [x] Corrected the sub-gate-return arithmetic: 0.70 Hz at r=20 mm and 0.48 Hz at r=30 mm;
   earlier one-return-leg figures were withdrawn.
+
+## Iteration 10 — 2026-09-25 07:07–07:15 CEST
+
+- [x] Added `TRAINING_PATH.md` with staged gates from safety to sustained language work.
+- [x] Separated sourced learning curves from PTH-660 performance hypotheses.
+- [x] Scoped a versioned Plover JSON starter-brief deliverable with collision lint and metrics.
+- [x] Marked personal brief count behind the 360 WPM record as NOT FOUND.
+- [ ] Cued PTH-660 training measurements remain outstanding.

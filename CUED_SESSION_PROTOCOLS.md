@@ -42,8 +42,8 @@ rate before quoting any rate-dependent number.
 ## Recording hygiene
 
 - Keep the raw JSONL. The traces are the evidence; the manifest is only the label.
-- For `identity`, run `scripts/identity_dataset_check.py` and require exit 0 before using the
-  capture for anything.
+- For `identity`, run `scripts/identity_dataset_check.py --mapping identity-map.json` and
+  require exit 0 before using the capture for anything.
 - Note the date and the hand. Every coupling and rest number in this repo is single-hand and
   per-session; a claim that outlives one session needs a new capture, not a new argument.
 

@@ -21,6 +21,8 @@ Research and implementation notes for high-speed text input on a continuous touc
   JSONL contract with legacy replay compatibility.
 - `scripts/identity_dataset_check.py` — identity-capture gate; `VALID` requires an explicit
   operator-confirmed finger-to-tracking-ID mapping.
+- [TRAINING_PATH.md](TRAINING_PATH.md) — staged cued-training gates, Plover brief scope and
+  evidence boundaries.
 - `tests/` — standard-library unit tests for decoder invariants, measured constants and benchmark artefacts.
 
 ## Important evidence note

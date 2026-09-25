@@ -14,6 +14,8 @@ These are engineering estimates, not literature guarantees. The required 150–2
 The speed ranges in this table are unmeasured engineering hypotheses. No PTH-660 corrected
 WPM result exists yet; the current synthetic envelope realizes about 1.01–1.48 Hz for
 150–350 ms gestures with a sub-gate return.
+Training progression, acceptance gates and the starter Plover brief deliverable are defined in
+[TRAINING_PATH.md](TRAINING_PATH.md). No speed range in this table is a PTH-660 result.
 
 ## A. Rest-gated tap-sequence + Plover (recommended primary)
 
