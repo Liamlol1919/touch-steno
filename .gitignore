@@ -3,3 +3,5 @@ __pycache__/
 data/
 *.jsonl
 .DS_Store
+references/*
+!references/UPSTREAM_SNAPSHOT.md

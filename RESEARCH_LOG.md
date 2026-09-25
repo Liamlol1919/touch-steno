@@ -8,7 +8,7 @@
 - [x] Vier Pflicht-Deliverables erstellt.
 - [x] Initialer Commit `f7e239d` und Push auf `Liamlol1919/touch-steno`.
 - [x] Code-Integrationsdetails und Palm-Rejection-Belege ergänzt; Push `7d0374d`.
-- [x] Hardware-Audit-Skript und Experiment-Protokoll erstellt.
+- [x] Upstream-Repositories geklont und Commit-SHAs dokumentiert (`references/UPSTREAM_SNAPSHOT.md`).
 - [ ] PTH-660 anschließen und `scripts/audit_input.py` ausführen.
 - [ ] Eventknoten, `ABS_MT_*`-Achsen und Treiberarbitration protokollieren.
 - [ ] Original-PDFs der noch markierten Twiddler/Flat-Glass-Benchmarkwerte prüfen.
