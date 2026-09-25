@@ -645,6 +645,45 @@ class TestIdentityDatasetCheck(unittest.TestCase):
         self.assertFalse(rep["all_valid"])
         self.assertIn("AMBIGUOUS", rep["counts"])
 
+
+class TestRigidFit(unittest.TestCase):
+    """Translation+rotation must be removed from the anchors, and only from them."""
+
+    def test_translation_is_removed(self):
+        import intent_filter as ifl
+        pos = {"1": (0.0, 0.0), "2": (10.0, 0.0), "3": (0.0, 10.0)}
+        delta = {k: (0.4, -0.2) for k in pos}          # pure translation
+        tx, ty, omega, n = ifl.fit_rigid(delta, pos, list(pos))
+        self.assertEqual(n, 3)
+        self.assertAlmostEqual(tx, 0.4, places=6)
+        self.assertAlmostEqual(ty, -0.2, places=6)
+        self.assertAlmostEqual(omega, 0.0, places=9)
+
+    def test_rotation_is_removed(self):
+        import intent_filter as ifl
+        pos = {"1": (-20.0, 0.0), "2": (0.0, 20.0), "3": (-20.0, 20.0)}
+        omega_true = 2e-4                                # rad/mm
+        delta = {k: (-omega_true * pos[k][1], omega_true * pos[k][0]) for k in pos}
+        tx, ty, omega, _n = ifl.fit_rigid(delta, pos, list(pos))
+        self.assertAlmostEqual(omega, omega_true, places=8)
+        # use the shipped subtraction, not a re-derivation of the centring convention:
+        # the first version mixed absolute and centred coordinates and reported a
+        # 0.0038mm residual that was pure bookkeeping.
+        fixed, n_anchor = ifl.apply_rigid(delta, pos, list(pos))
+        self.assertEqual(n_anchor, 3)
+        for k in pos:
+            self.assertLess(math.hypot(*fixed[k]), 1e-6, f"residual at {k}")
+
+    def test_two_anchors_are_enough_and_one_is_not(self):
+        import intent_filter as ifl
+        pos = {"1": (0.0, 0.0), "2": (10.0, 5.0), "3": (40.0, -5.0)}
+        delta = {"1": (0.1, 0.0), "2": (0.1, 0.0), "3": (3.0, -1.0)}  # 3 is the mover
+        _tx, _ty, _om, n2 = ifl.fit_rigid(delta, pos, ["1", "2"])
+        self.assertEqual(n2, 2)
+        _tx, _ty, omega, n1 = ifl.fit_rigid(delta, pos, ["1"])
+        self.assertEqual(n1, 1)
+        self.assertEqual(omega, 0.0, "with one anchor a rotation is not identifiable")
+
 class TestQuantileHelpers(unittest.TestCase):
     def test_quantile_bounds(self):
         vals = [float(i) for i in range(100)]

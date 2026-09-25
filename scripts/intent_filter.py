@@ -112,6 +112,69 @@ def fit_pairs(rows, exclude_mover_frame: bool = True) -> dict[tuple[str, str], d
     return out
 
 
+def fit_rigid(delta: dict[str, tuple[float, float]], pos: dict[str, tuple[float, float]],
+              anchors: list[str]):
+    """Least-squares in-plane rigid fit d_i = t + omega x r_i over anchor contacts.
+
+    Measured motivation: two contacts ~100 mm apart correlate at r = -0.86, which is the
+    signature of an in-plane ROTATION, not a translation. A median/common-mode subtraction
+    leaves it untouched (-0.858 -> -0.844); this fit removes it (-0.858 -> +0.602) and makes
+    the genuine couplings stronger (64->61: +0.958 -> +0.995).
+
+    Only STATIC contacts may be passed as anchors. Fitting on moving contacts is wrong: if
+    every contact moves the same way the fit reads the gesture as a rotation and cancels the
+    signal it is meant to measure. In the real posture the resting fingers provide the
+    frame, which is what makes this well posed.
+    """
+    if len(anchors) < 2:
+        return 0.0, 0.0, 0.0, len(anchors)
+    cx = sum(pos[k][0] for k in anchors) / len(anchors)
+    cy = sum(pos[k][1] for k in anchors) / len(anchors)
+    # d_i = t + omega * (-ry_i, rx_i); with the positions centred, t and omega are
+    # orthogonal, so omega = sum(d . (-ry, rx)) / sum(ry^2 + rx^2). Accumulating a SECOND
+    # numerator here and adding it double-counts and halves the recovered omega - a bug the
+    # rotation test caught.
+    sxx = syy = 0.0
+    num = 0.0
+    for k in anchors:
+        if k not in delta:
+            continue
+        rx, ry = pos[k][0] - cx, pos[k][1] - cy
+        dx, dy = delta[k]
+        sxx += ry * ry
+        syy += rx * rx
+        num += dx * (-ry) + dy * (rx)
+    den = sxx + syy
+    omega = num / den if den > 0 else 0.0
+    tx = sum(delta[k][0] + omega * (pos[k][1] - cy) for k in anchors if k in delta) / len(anchors)
+    ty = sum(delta[k][1] - omega * (pos[k][0] - cx) for k in anchors if k in delta) / len(anchors)
+    return tx, ty, omega, len(anchors)
+
+
+def apply_rigid(delta: dict[str, tuple[float, float]],
+                pos: dict[str, tuple[float, float]], anchors: list[str]):
+    """Subtract the fitted rigid motion from every contact's delta.
+
+    The centring convention lives here, once. A caller (or a test) that re-derives the
+    subtraction with absolute coordinates gets a different - wrong - residual, which is how
+    this was caught: the first version of the test mixed conventions and reported a
+    0.0038mm residual that was pure bookkeeping.
+    """
+    tx, ty, omega, n = fit_rigid(delta, pos, anchors)
+    if n < 2 or omega == 0.0 and tx == 0.0 and ty == 0.0:
+        return dict(delta), n
+    cx = sum(pos[k][0] for k in anchors) / n
+    cy = sum(pos[k][1] for k in anchors) / n
+    out = {}
+    for k, (dx, dy) in delta.items():
+        if k in pos:
+            rx, ry = pos[k][0] - cx, pos[k][1] - cy
+            out[k] = (dx - tx + omega * ry, dy - ty - omega * rx)
+        else:
+            out[k] = (dx, dy)
+    return out, n
+
+
 def _cos_direction(rows, a: str, b: str) -> float:
     """Mean cosine between the step vectors of a and b while a leads."""
     num = den = 0.0
