@@ -303,6 +303,29 @@ class TestStrokeSink(unittest.TestCase):
         t.push("-T")
         self.assertEqual(t.text(), "t")
 
+
+class TestLatencyBudget(unittest.TestCase):
+    def test_pipeline_is_far_under_the_frame_budget(self):
+        """Regression guard: an accidental O(n^2) must fail here, not in live typing."""
+        import latency_budget
+        import make_benchmark as mb
+        import argparse
+        import tempfile
+        a = argparse.Namespace(seed=3, sector_reps=2, tempo=[1, 2, 3],
+                               chord_reps=2, rest_blocks=1)
+        frames, _man = mb.build(a.seed, a.sector_reps, a.tempo, a.chord_reps,
+                                a.rest_blocks)
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "b.jsonl"
+            with kinematics.Recorder(path) as rec:
+                for fr in frames:
+                    rec.frame(fr["t"], {int(k): tuple(v)
+                                        for k, v in fr["c"].items()})
+            rep = latency_budget.analyse(path)
+        budget_us = 1e6 / 91.0
+        self.assertLess(rep["cpu_us_per_frame"], budget_us * 0.25,
+                        "pipeline must stay under 25% of one frame's budget")
+
 class TestWpmCeiling(unittest.TestCase):
     def test_250_wpm_two_events_per_syllable_exceeds_the_ceiling(self):
         ceiling = wpm_ceiling.event_ceiling_hz()
