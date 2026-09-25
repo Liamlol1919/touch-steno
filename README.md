@@ -16,6 +16,7 @@ Research and implementation notes for high-speed text input on a continuous touc
 - `scripts/audit_input.py` — safe evdev capability/event audit.
 - `scripts/synthetic_intent_benchmark.py`, `scripts/make_benchmark.py`, `scripts/envelope_sweep.py` and `scripts/wpm_ceiling.py` — deterministic analysis tools; synthetic results are not hardware claims.
 - `scripts/plot_models.py` and `requirements-plot.txt` — optional measured/simulated model figures; install the plotting dependencies before rendering.
+- [DESIGN_DECISION.md](DESIGN_DECISION.md), [nextgen/](nextgen/) and [tests/test_nextgen_steno.py](tests/test_nextgen_steno.py) — clean-room English steno transport and Plover boundary prototype; no German steno.
 - `scripts/session_manifest.py` and `tests/test_session_manifest.py` — shared normalization
   for complete and legacy paired cue manifests.
 - `scripts/session_runner.py` and [CUED_SESSION_PROTOCOLS.md](CUED_SESSION_PROTOCOLS.md) —
