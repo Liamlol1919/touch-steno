@@ -211,3 +211,11 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Kept the language prior tie-only and preserved candidate provenance in the result.
 - [x] Removed stale withdrawn correction/WPM claims from `LM_RECOVERY.md`.
 - [ ] Correctly conditioned cued candidate capture and downstream re-measurement remain outstanding.
+
+## Iteration 23 — 2026-09-25
+
+- [x] Added `lexicon_recovery.py` with observed-sector-column conditioning.
+- [x] Reused shared sampling/top-3 candidate helpers from `lm_recovery.py`.
+- [x] Reported top-1/top-3 availability, word reachability, selection, ambiguity, unreachable rate, and word-level correction opportunities separately.
+- [x] Added `LEXICON_RECOVERY.md` and behavioral tests; no WPM or hardware result was added.
+- [ ] A real cued PTH-660 candidate capture and human seconds-per-correction measurement remain outstanding.

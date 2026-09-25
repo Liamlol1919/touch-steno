@@ -85,6 +85,34 @@ SECTOR_LETTER = {"E": "e", "NE": "n", "N": "t", "NW": "a",
                  "W": "o", "SW": "i", "S": "c", "SE": "m"}
 
 
+
+def sample_observed(truth_sector: str, confusion: dict, rng: random.Random) -> str:
+    """Sample the sensor observation from P(observed | intended sector)."""
+    row = confusion[truth_sector]
+    total = sum(row.values()) or 1
+    threshold = rng.random() * total
+    cumulative = 0
+    for sector, count in row.items():
+        cumulative += count
+        if threshold <= cumulative:
+            return sector
+    return truth_sector
+
+
+def top_candidates(observed: str, confusion: dict,
+                   letter_of: dict[str, str] | None = None) -> list[dict]:
+    """Return top-3 P(true sector | observed sector) records."""
+    mapping = SECTOR_LETTER if letter_of is None else letter_of
+    column = {truth: row.get(observed, 0) for truth, row in confusion.items()}
+    total = sum(column.values()) or 1
+    candidates = [
+        {"text": mapping[truth], "confidence": count / total,
+         "source": "observed-sector-column", "observed_sector": observed,
+         "true_sector": truth}
+        for truth, count in column.items() if count and truth in mapping
+    ]
+    return sorted(candidates, key=lambda row: (-row["confidence"], row["text"]))[:3]
+
 def sample_from(cands: list[tuple[str, float]], rng: random.Random) -> str:
     r = rng.random()
     acc = 0.0
@@ -114,22 +142,6 @@ def run(trials: int, radius: float, seed: int, words: list[str],
     letter_of = dict(SECTOR_LETTER)
     sector_of = {v: k for k, v in SECTOR_LETTER.items()}
 
-    def sample_observed(truth_sector: str, rng: random.Random) -> str:
-        row = conf[truth_sector]
-        total = sum(row.values()) or 1
-        r = rng.random()
-        acc = 0.0
-        for sec, n in row.items():
-            acc += n / total
-            if r <= acc:
-                return sec
-        return truth_sector
-
-    def candidates_for(obs: str) -> list[tuple[str, float]]:
-        col = {t: conf[t][obs] for t in conf if conf[t].get(obs)}
-        total = sum(col.values()) or 1
-        cands = [(letter_of[t], n / total) for t, n in col.items() if n]
-        return sorted(cands, key=lambda kv: -kv[1])[:3]
 
     pool = [w for w in words if all(c in sector_of for c in w)]
     if not pool:
@@ -145,14 +157,14 @@ def run(trials: int, radius: float, seed: int, words: list[str],
         words_total += 1
         geo_word, lm_word = [], []
         for ch in word:
-            obs = sample_observed(sector_of[ch], rng)
-            cands = candidates_for(obs)
+            obs = sample_observed(sector_of[ch], conf, rng)
+            cands = top_candidates(obs, conf)
             if not cands:
                 geo_word.append(ch)
                 lm_word.append(ch)
                 continue
             geo_word.append(letter_of[obs])       # what the sensor alone says
-            scored = model.score(cands, prev_letter)
+            scored = model.score([(c["text"], c["confidence"]) for c in cands], prev_letter)
             post = cr.posterior(scored)
             if post[0][1] >= model.commit_posterior and cr.margin(scored) >= model.margin_floor:
                 lm_word.append(post[0][0])

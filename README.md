@@ -37,6 +37,8 @@ Research and implementation notes for high-speed text input on a continuous touc
   confidence/language ranked candidates without committing text.
 - [LEXICON_DECODING.md](LEXICON_DECODING.md) and `scripts/lexicon_decoder.py` —
   top-3 candidate search over a lexicon without committing text.
+- [LEXICON_RECOVERY.md](LEXICON_RECOVERY.md) and `scripts/lexicon_recovery.py` —
+  correctly conditioned observed-sector benchmark for reachability and correction actions.
 - `tests/` — standard-library unit tests for decoder invariants, measured constants and benchmark artefacts.
 
 ## Important evidence note

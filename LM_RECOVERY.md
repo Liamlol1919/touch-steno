@@ -163,11 +163,14 @@ signatures, and the decision that seconds-per-correction is unmeasured in the li
 
 ## Implementation status
 
-`scripts/lexicon_decoder.py` now implements the corrected search boundary: it consumes
-bounded top-3 sensor candidates, searches a supplied lexicon word-by-word, preserves
-candidate provenance, and uses a word prior only for exact sensor-score ties. It returns a
-reversible proposal, not committed text. This is an implementation result, not a new
-accuracy or WPM measurement; the existing greedy recovery table remains withdrawn.
+`scripts/lexicon_decoder.py` implements the corrected search boundary: it consumes bounded
+top-3 sensor candidates, searches a supplied lexicon word-by-word, preserves candidate
+provenance, and uses a word prior only for exact sensor-score ties. It returns a reversible
+proposal, not committed text. `scripts/lexicon_recovery.py` now re-measures the conditioned
+synthetic channel from observed-sector columns and reports reachability, selection,
+ambiguity, unreachable cases, and word-level correction opportunities. These are
+implementation/benchmark results, not PTH-660 or WPM results; the greedy recovery table
+remains withdrawn.
 
 ## What would change the picture
 
@@ -175,9 +178,9 @@ Three things, in order of leverage:
 
 1. **A measured correction rate.** The usable-WPM calculation still needs real
    seconds-per-correction observations.
-2. **A conditioned end-to-end re-measurement.** Feed the decoder candidate sets generated
-   from observed sectors, then measure reachable-word selection, ambiguity, correction load,
-   and usable rate. Do not reuse the withdrawn greedy-character table.
+2. **A real cued candidate stream.** Re-run the conditioned benchmark on captured PTH-660
+   candidates, then measure human correction time. Do not reuse the withdrawn greedy-character
+   table.
 3. **A better channel.** An input primitive whose accuracy does not depend on excursion
    radius remains untested (COMPASS_SURFACE addendum, option 3).
 
