@@ -40,6 +40,7 @@ Research and implementation notes for high-speed text input on a continuous touc
 - [LANGUAGE_LAYER_METRICS.md](LANGUAGE_LAYER_METRICS.md) and
  `scripts/language_layer_metrics.py` — privacy-minimized local untranslate/undo/strokes-per-word counts.
  `scripts/language_event_recorder.py` — local semantic event producer for future Plover hook adapters.
+ `scripts/plover_event_adapter.py` — semantic callback boundary; no Plover import or text inspection.
 - [CANDIDATE_RANKING.md](CANDIDATE_RANKING.md) and `scripts/candidate_ranker.py` —
   confidence/language ranked candidates without committing text.
 - [LEXICON_DECODING.md](LEXICON_DECODING.md) and `scripts/lexicon_decoder.py` —

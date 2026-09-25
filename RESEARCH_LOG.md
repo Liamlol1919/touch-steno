@@ -279,3 +279,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Recorder writes only the documented semantic event schema and never accepts raw content or identifiers.
 - [x] Added recorder-to-metrics integration tests and overwrite/word-balance validation.
 - [ ] A real Plover hook adapter and consented local capture remain outstanding in issue #24.
+
+## Iteration 32 — 2026-09-25
+
+- [x] Added `plover_event_adapter.py` as a semantic callback boundary around the local recorder.
+- [x] Adapter ignores Plover object contents and forwards only permitted counter/delta events.
+- [x] Added adapter-to-recorder-to-metrics integration coverage.
+- [ ] A real Plover hook installation and consented capture remain outstanding in issue #24.

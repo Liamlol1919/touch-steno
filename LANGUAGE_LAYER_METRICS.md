@@ -32,6 +32,9 @@ python3 scripts/language_layer_metrics.py events.jsonl \
 `scripts/language_event_recorder.py` is the small local producer boundary. A future Plover
 hook adapter may call `stroke()`, `untranslate()`, `undo()`, and `word(delta)`; the recorder
 does not import Plover and accepts no text, outline, timestamp, coordinate, or identifier.
+`scripts/plover_event_adapter.py` is the semantic callback boundary for a future Plover
+integration. It ignores translation/stroke objects and forwards only the four permitted
+event types; it does not import Plover or claim that a hook is installed.
 
 ## Output and limits
 
