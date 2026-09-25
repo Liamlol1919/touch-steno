@@ -412,6 +412,16 @@ class TestEnvelopeAndMetricContract(unittest.TestCase):
         self.assertTrue(all(e < 5 for e in centred), f"got {centred}")
 
 
+    def test_no_thumb_radius_survives_chained_gestures(self):
+        """Compaction: at r <= 25mm the repositioning error exceeds the sector half-width."""
+        import compass_geometry as cg
+        for r in (8, 10, 12, 15, 20, 25):
+            row = cg.analyse(r, cg.DEFAULT_WINDOW_MS, cg.DEFAULT_SPEED_MM_S)
+            self.assertFalse(row["within_half_width"],
+                             f"r={r}mm unexpectedly survives chained gestures")
+        self.assertTrue(cg.analyse(40, cg.DEFAULT_WINDOW_MS,
+                                   cg.DEFAULT_SPEED_MM_S)["within_half_width"])
+
 class TestQuantileHelpers(unittest.TestCase):
     def test_quantile_bounds(self):
         vals = [float(i) for i in range(100)]
