@@ -365,6 +365,37 @@ This is the same conclusion the earlier telemetry work reached from the other di
 it is stronger: not "consent before upload" but "do not retain the raw signal at all unless
 a specific experiment requires it."
 
+## 3.9 The German syllable inventory, computed — and the negative result
+
+The last outstanding second-wave agent produced the only **computed** corpus inventory in the
+project. Labels are corpus-derived orthographic segmentation (FrequencyWords 2018 50k,
+weighted, pyphen), **not a universal phoneme inventory**.
+
+| | |
+|---|---|
+| German syllable types | **11,230** |
+| Syllables over 151,705,378 tokens | 225,708,928 |
+| Empirical entropy | **9,013 bits / syllable** |
+| Mean syllables per word | 1,488 overall; **1,642** among 5-letter words |
+| Exact codebook | `ceil(log₂ 11230)` = **14 bits/syllable** |
+
+Top-K coverage: 64 → 48,97 %, 128 → 62,94 %, 256 → 75,48 %, 512 → 85,28 %,
+1024 → 92,38 %, 2048 → 96,78 %, 4096 → 99,05 %, 11,230 → 100 %.
+(English cross-check: 24,331 types, H = 9,245 bits, 1,217 syll/word — German was selected.)
+
+**The arithmetic:** 2 events × 128-way shape class (7 bits) = 14 bits and 16,384 pairs ≥ 11,230
+at 69 % occupancy, giving 2,84 syllables/s. Three events × 32-way gives 32,768 ≥ 11,230 at
+1,89 syllables/s. One event carrying all 11,230 classes in 176 ms is **not established**.
+
+**The negative result, stated by the author:** syllable framing **does not beat one-event
+word codes in raw throughput** — 3,28 events per 5-letter word gives about 52 WPM against a
+342 WPM arithmetic ceiling for one event per word. It may only win on **codebook size and
+learnability**, and only if a 128-way shape pair is genuinely trainable.
+
+Scores: Shape-Pair 27/50, Glyph-Triplet 23/50. **Both below Thread-Rosette's 36/50.** The
+syllable framing is recorded because the inventory is real, reusable arithmetic — not because
+the concept won.
+
 ## 4. The measurement that now has top priority
 
 **Fit Fitts' `a` and `b` for this thumb in this array.** 60 timed moves, adjacent and
