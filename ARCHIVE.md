@@ -82,7 +82,28 @@ person, one session, one thumb**. `n = 63`. No error bars are claimed for them.
 4. **One operator is one datum.** `n = 63` from one thumb is a measurement, not a statistic.
 5. **Raw traces are biometric.** `messung/` stays local and is in `.gitignore`.
 
+## Sprint deliverables (2026-09-25)
+
+Added after this index was first written. These supersede the framing in most Tier 3 and
+Tier 4 files.
+
+| File | What it settles |
+|---|---|
+| `BINDING_CONSTRAINT.md` | **The record to read first.** Every candidate generated, every critic verdict, every correction, the measured gate numbers, the corpus arithmetic, and the eleven-section execution log |
+| `VERTICAL_SLICE.md` | the one concept the evidence leaves open — unvalidated, with its acceptance test and a fixed verdict in advance |
+| `DESIGN_DECISION_FINAL.md` | the three finalists and why none survived |
+| `DESIGN_DECISION.md` | the earlier kill of the direction-quantisation frame |
+| `FIVE_HOURS_REPORT.md` | the honest accounting of that day |
+| `scripts/geometry_probe.py` | measures U and the ellipse dynamic range |
+| `scripts/field_separability.py` | held-out separability of a permutation-invariant field descriptor |
+| `scripts/field_gesture_probe.py` | the control experiment that decides the design space |
+
+**Cross-repository:** `commindv2` PR #1 makes `input_zones.json` the single steno layout
+authority. Before it, a bare `WacomTouchReader()` silently received a different keyboard
+than the app, and no test could detect it because both layouts were self-consistent.
+
 ## Archive tag
 
-The state at the start of the design sprint is tagged `pre-sprint-2026-09-25`. The decision
-record produced during the sprint is `DESIGN_DECISION.md` at the repository root.
+The state at the start of the design sprint is tagged `pre-sprint-2026-09-25`. The
+decision record produced during the sprint is `BINDING_CONSTRAINT.md` at the repository
+root, with `VERTICAL_SLICE.md` as the surviving candidate.
