@@ -160,13 +160,14 @@ runtime authority. Raw contacts never leave touch-steno. commindv2 must not open
 evdev device or run a second decoder. The archived `input_zones.json` is historical evidence,
 never an implicit layout authority or compatibility shortcut.
 
-The closed design proposal is recorded in `INTEGRATION_CONTRACT_V1.md`. It defines a
-`DESIGN`-only, process-local `hello` plus ordered `key`/`nack`/`reset` records, an epoch,
-contiguous sequence, opaque event identity, pinned profile/layout fingerprint, strict
-privacy allowlist, and fail-closed duplicate, gap, stale-layout, restart, and replay
-rejection. It supersedes the earlier loose event sketch only as a proposal; it is not
-runtime behavior. Freezing the concrete profile/fingerprint and authorizing an isolated
-offline implementation require a separate explicit decision.
+The closed design proposal is recorded in `INTEGRATION_CONTRACT_V1.md` and is now paired
+with the bounded offline validator in `nextgen/contract_v1.py` plus conformance tests. It
+defines a `DESIGN`-only, process-local `hello` plus ordered `key`/`nack`/`reset` records,
+an epoch, contiguous sequence, opaque event identity, pinned profile/layout fingerprint,
+strict privacy allowlist, and fail-closed duplicate, gap, stale-layout, restart, and replay
+rejection. The validator is implemented offline; it is not runtime behavior. Freezing the
+concrete profile/fingerprint and authorizing an isolated runtime integration remain separate
+decisions.
 
 ## 3B. Innovation branch registry
 

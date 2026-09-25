@@ -1,16 +1,14 @@
 # Agentic State Ledger
 
 **Loop:** 10× autonomous product-engineering meta-plan  
-**Current phase:** 1 — Contract and archive  
+**Current phase:** 2 — Contract conformance
 **Evidence class of current product slice:** `IMPLEMENTED`
-**Active candidate:** Clean English steno transport prototype  
-**Next design artifact:** `INTEGRATION_CONTRACT_V1.md` — closed `DESIGN` proposal, not runtime behavior
-**Last promoted candidate:** English steno transport in `nextgen/`  
-**Last rejected candidate:** Legacy sector-fitting as the product core  
-**Open falsification test:** Real PTH-660 anatomy, identity, and false-commit study  
-**Next executable action:** After a separate implementation decision, freeze the concrete
-profile/layout fingerprint and build isolated offline contract fixtures plus a pure
-consumer state machine; do not connect, vendor, or modify any external repository
+**Active candidate:** Clean English steno transport prototype
+**Last promoted candidate:** English steno transport plus offline contract validator in `nextgen/`
+**Last rejected candidate:** Legacy sector-fitting as the product core
+**Open falsification test:** Real PTH-660 anatomy, identity, and false-commit study
+**Next executable action:** Run the three registered innovation-branch research gates; do not
+connect, vendor, or modify any external repository
 
 ## Decisions
 
@@ -26,14 +24,15 @@ The current `nextgen/` code proves a ten-bit transport, one-bit correction contr
 
 ## Contract decision
 
-`INTEGRATION_CONTRACT_V1.md` is the next design artifact and supersedes the earlier loose
-event sketch only as a proposal. It closes a process-local `hello` plus ordered
-`key`/`nack`/`reset` records with a fresh stream epoch, exact contract version, pinned
-source/profile/layout fingerprint, contiguous sequence, opaque event ID, canonical
-side-specific English steno keys, strict privacy allowlist, and fail-closed duplicate,
-gap, stale-layout, restart, and replay rejection. The current `nextgen/` codec is
-semantically compatible but does not implement the envelope. No runtime integration or
-external-repository behavior is claimed.
+`INTEGRATION_CONTRACT_V1.md` is paired with the implemented offline validator in
+`nextgen/contract_v1.py` and its conformance tests. The contract closes a process-local
+`hello` plus ordered `key`/`nack`/`reset` records with a fresh stream epoch, exact contract
+version, pinned source/profile/layout fingerprint, contiguous sequence, opaque event ID,
+canonical side-specific English steno keys, strict privacy allowlist, and fail-closed
+duplicate, gap, stale-layout, restart, and replay rejection. The validator is pure and
+bounded; it does not connect to a device, socket, Plover, or external repository. The
+prototype and contract validator are `IMPLEMENTED` offline; runtime integration remains
+unimplemented.
 
 ## Innovation branch decisions
 
