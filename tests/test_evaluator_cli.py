@@ -24,6 +24,22 @@ class TestEvaluatorCli(unittest.TestCase):
         self.assertIn("axis 1.0", result.stdout)
         self.assertIn("diagonal 1.0", result.stdout)
 
+    def test_intent_filter_text_report_is_reachable(self):
+        with tempfile.TemporaryDirectory() as td:
+            session = Path(td) / "session.jsonl"
+            subprocess.run(
+                [sys.executable, str(SCRIPTS / "make_benchmark.py"),
+                 "--out", str(session), "--force"],
+                check=True, capture_output=True, text=True,
+            )
+            result = subprocess.run(
+                [sys.executable, str(SCRIPTS / "intent_filter.py"), str(session)],
+                check=True, capture_output=True, text=True,
+            )
+        self.assertIn("## session.jsonl", result.stdout)
+        self.assertIn("events:", result.stdout)
+        self.assertIn("|t_start_s|", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

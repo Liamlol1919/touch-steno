@@ -289,6 +289,7 @@ def main() -> int:
     if args.json:
         print(json.dumps(results, indent=2))
         return 0
+    for r in results:
         n_sup = sum(len(e["suppressed_as_dragged"]) for e in r["events"])
         n_rep = sum(len(e["unexplained_contacts"]) for e in r["events"])
         print(f"\n## {r['session']}  frames={r['frames']}  "

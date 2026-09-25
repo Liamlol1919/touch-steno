@@ -320,3 +320,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Imported `intent_filter` for the public `evaluate()` path.
 - [x] Added loader-return and manifest/motion integration tests.
 - [x] Preserved the explicit distinction between detected motion and typed text repair.
+
+## Iteration 38 — 2026-09-25
+
+- [x] Fixed the documented non-JSON `intent_filter.py` CLI path, whose table report was unreachable after the JSON early return.
+- [x] Restored the missing result loop without changing detector constants, JSON output, or measurement semantics.
+- [x] Added a subprocess regression test and verified the real offline benchmark output.
+- [x] No hardware, Plover, consent, correction-time, or WPM result was added.
