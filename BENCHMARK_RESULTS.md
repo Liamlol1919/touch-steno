@@ -39,56 +39,51 @@ withdrawn.** It came from counting *events per block* rather than matching each 
 to its own event; at high rates consecutive gestures merge into one event, so the count-based
 metric under-reports.
 
-`scripts/envelope_sweep.py` re-measures it by matching per gesture, with at least 8 cued
-gestures per cell:
+`scripts/envelope_sweep.py` now matches each detector event to at most one cue and reports
+the rate actually realized by the generator. The corrected grid has at least 8 cues per
+cell and exposes the distinction between requested and realized rate:
 
-| gesture length | detection rate at 1–6 Hz |
-|---|---|
-| **100 ms** | **0 % at every rate** |
-| 150–350 ms | **100 % at every rate from 1 to 6 Hz** |
-| 500 ms | 62 % at 1 Hz, falling to 36 % at 6 Hz |
+| gesture length | requested rates | realized rate range | detection rate | direction accuracy |
+|---|---:|---:|---:|---:|
+| **100 ms** | 1–6 Hz | 1.01–1.58 Hz | **0 %** | n/a |
+| 150 ms | 1–6 Hz | 1.01–1.48 Hz | **100 %** | 100 % |
+| 200 ms | 1–6 Hz | 1.01–1.37 Hz | **100 %** | 100 % |
+| 250 ms | 1–6 Hz | 1.01–1.29 Hz | **100 %** | 100 % |
+| 350 ms | 1–6 Hz | 1.01–1.14 Hz | **100 %** | 100 % |
+| 500 ms | 1–6 Hz | 0.96–0.97 Hz | 75–89 % | 100 % of detected |
 
-So the robust findings are: a 100 ms gesture is never detected; 150–350 ms is detected
-reliably all the way to 6 Hz; 500 ms is unreliable. There is **no measured 3 Hz ceiling**.
-The earlier "88 ms detection *and* 88 ms segmentation" argument remains plausible as a
-mechanism, but it is not what the data shows, so it is not claimed.
+So the corrected synthetic sweep supports a gesture-length/detection envelope, not a
+universal 3 Hz or 5.5 events/s ceiling. The sub-gate return phase makes the requested rate
+unrealizable for these long gestures: the realized rate is reported explicitly rather than
+silently treating the request as a measurement.
 
-### 1. Detection and segmentation both cost 88 ms, and they compete
+### 1. What the corrected sweep establishes: gesture length dominates
 
-The persistence window that makes the detector false-trigger-free (8 frames ≈ 88 ms) is
-*also* the minimum quiet gap needed to tell two consecutive gestures apart. On a mechanical
-keyboard a key release gives that gap for free. **On a 0-force surface there is no release** —
-the only segmentation cue is the motion itself.
+The corrected per-gesture sweep found 100% detection for 150–350 ms gestures and 100%
+direction accuracy in the synthetic cells. A 100 ms gesture was never detected; 500 ms
+gestures lost 11–25% of cues even at the realized rate. The useful result is therefore a
+gesture-length operating envelope, not a universal 3 Hz or 5.5 events/s ceiling.
 
-The benchmark shows the consequence exactly: tracking is near-perfect up to 3 Hz and collapses
-to 0.32 at 4 Hz, because at that rate the 250 ms gestures run back-to-back with no quiet
-window and the detector merges them.
+The 88 ms persistence window remains a latency and evidence requirement: each candidate
+needs eight consecutive supra-threshold frames. It does **not** by itself establish an
+event-rate maximum, because the rate also depends on gesture length, inter-gesture
+segmentation, and the operator's deliberate rhythm. A return/reversal phase remains
+sensible for held-sector gestures because the sweep shows that long holds can lose
+events, but the old 3 Hz explanation is withdrawn.
 
-Derived envelope:
+The 250 WPM target is not established by this synthetic sweep. It requires a deliberate
+event-rate measurement on the device; a 360 WPM mechanical-steno record demonstrates
+human steno throughput, not PTH-660 touch-surface throughput.
 
-- minimum detectable gesture ≈ 88 ms (8 supra-threshold frames)
-- minimum inter-gesture gap ≈ 88 ms (same window, used for segmentation)
-- ⇒ **theoretical event ceiling ≈ 5.5 Hz**, measured reliable ≈ **3 Hz** with realistic
-  250 ms gestures
-- at 1.5 syllables/word that is ≈ **180 WPM equivalent at 3 Hz** — which is exactly the
-  professional stenography certification bar, and comfortably above every published touch
-  system (16.8–55 WPM, CROSS_VALIDATION 1.8).
 
-Design requirement that follows: **a vector gesture must contain its own return phase**
-(out-and-back, or a deliberate reversal) so consecutive syllables always produce a quiet
-window. A "hold in the sector" gesture cannot be segmented on a surface that cannot release.
+### 2. Direction accuracy is now measured, but still synthetic
 
-### 2. Direction decoding is not the weak link
+The earlier 0.19–0.50 envelope result came from comparing a block label with a block label,
+not the decoded direction. The metric was fixed to decode the event vector, and the
+integrated corrected grid now reports 100% direction accuracy for detected synthetic cues.
+That is useful pipeline evidence, not a hardware claim: sample sizes are small, the
+generator uses a common-centre return, and the cued real session remains required.
 
-100 % sector accuracy on calibrated data, axes and diagonals equal. The earlier "35 % of
-strokes sit within 10° of a sector fence" is a statement about *unstructured* motion, not
-about cued gestures: a cued stroke lands where the operator aimed. The fence problem is
-therefore a property of free typing, and the axis-alignment rule (CROSS_VALIDATION 1.7)
-matters less for cued input than for exploratory text.
-
-n = 32 is small, and equal axis/diagonal accuracy does **not** contradict the published axis
-advantage — it simply is not powered to detect it. Re-run with `--sector-reps 20` before
-quoting any axis/diagonal difference.
 
 ### 3. Chord detection is the genuinely weak part
 
@@ -118,9 +113,10 @@ pipeline audit, and was still wrong.
 ## Honest limits of these numbers
 
 - Synthetic data, calibrated to *this* hand and device. It validates the pipeline's logic and
-  the latency envelope; it does **not** predict real typing accuracy.
-- The tempo result depends on the generator's 250 ms gesture length. A different length moves
-  the collapse point; the envelope formula above is the transferable part.
+  the gesture-length envelope; it does **not** predict real typing accuracy.
+- The sweep's upper tested cue rate is 6 Hz, not a measured maximum. Real throughput must be
+  measured with a cued tempo session and reported per gesture, not inferred from the 88 ms
+  persistence window.
 - Chord detection is known-broken here and is reported as such rather than tuned until the
   number looks better.
 
@@ -161,20 +157,22 @@ rates, and the reason long gestures become unreliable (below).
 
 ### Corrected operating envelope
 
-`scripts/envelope_sweep.py`, ≥8 cued gestures per cell, decoded sector compared to truth:
+`scripts/envelope_sweep.py`, ≥8 cued gestures per cell, decoded sector compared to truth;
+the requested grid is shown separately from the rate actually realized by the sub-gate
+return:
 
-| gesture length | detection rate | direction accuracy | idle false events |
-|---|---|---|---|
-| **100 ms** | **0 % at 1–6 Hz** | – | 0 |
-| **150–350 ms** | **100 % at 1–6 Hz** | **100 %** | 0 |
-| **500 ms** | 75–89 % | 100 % of detected | 0 |
+| gesture length | realized cue rate | detection rate | direction accuracy | idle false events |
+|---|---:|---:|---:|---:|
+| **100 ms** | 1.01–1.58 Hz | **0 %** | – | 0 |
+| **150–350 ms** | 1.01–1.48 Hz | **100 %** | **100 %** | 0 |
+| **500 ms** | 0.96–0.97 Hz | 75–89 % | 100 % of detected | 0 |
 
-Final statement of the envelope, superseding §0 and §1:
+Final statement of the sub-gate-return envelope, superseding §0 and §1:
 
 - minimum detectable gesture: **above 100 ms**, not the nominal 88 ms
-- working range: **150–350 ms**, valid to **6 Hz**
+- working range in this generator: **150–350 ms**, at the **realized** rate above
 - **there is no measured 3 Hz ceiling** and no measured 5.5 events/s ceiling
-- long gestures (500 ms) lose events, not accuracy
+- long gestures (500 ms) lose events, not direction accuracy
 - a **sub-gate return to a common centre is mandatory** for direction to be classifiable
 
 ### Three metric bugs, all in the evaluation harness
@@ -190,9 +188,8 @@ the pipeline audit:
 
 The pattern is the finding: the *harness* is the weakest link in this project, and it has now
 produced three wrong headlines in a row. It needs its own tests, and the rule for the rest of
-this work is: **a number is not a finding until the metric that produced it has a test.**
+## Addendum 2 (06:26) — synthetic out-and-back cycle budget
 
-## Addendum 2 (06:26) — the speed ceiling, derived from measurements rather than argued
 
 Two intermediate claims were wrong and are corrected first.
 
@@ -223,20 +220,21 @@ With the measured minimum out-stroke of 150 ms and a 20 mm return:
 | 250 ms | 33 ms | 283 ms | 3.53 | 141 |
 | 350 ms | 33 ms | 383 ms | 2.61 | 104 |
 
-For comparison: 150 WPM needs a 267 ms cycle, 250 WPM a 160 ms cycle.
+**Consequence for this synthetic out-and-back model: 250 WPM is not reachable with the
+current gesture/return assumptions.** A 160 ms cycle cannot contain a 150 ms out-stroke plus
+any return. The modelled ceiling is **~218 WPM in the most favourable corner** (150 ms
+out-stroke, 600 mm/s return) and **100–160 WPM for realistic gesture lengths**. This is
+not a PTH-660 user result; the cued real session must measure the same cycle budget.
 
-**Consequence: 250 WPM is not reachable with an out-and-back gesture on this device.** A
-160 ms cycle cannot contain a 150 ms out-stroke plus any return at all. The measured ceiling
-is **~218 WPM in the most favourable corner** (150 ms out-stroke, 600 mm/s return) and
-**100–160 WPM for realistic gesture lengths**, which sits:
+The result sits:
 
 - far **above** every published touch/chording system (16.8–55 WPM, CROSS_VALIDATION 1.8.1)
 - at or **below** the professional stenography band (180–225 WPM certification), and
 - consistent with it, because professional steno has a *key release* to segment on.
 
-So the honest claim is: **this architecture is a plausible path into the 100–200 WPM band,
-not a path to 250 WPM.** The 360 WPM record is reachable only with a device that can signal a
-release, which is the physical difference the whole project has been circling.
+The honest claim is therefore: **this synthetic strategy is a plausible path into the
+100–200 WPM band, not evidence that a PTH-660 user reaches 250 WPM.** The 360 WPM record
+requires a device/surface with a release or an independently validated segmentation method.
 
 ### What would lift the ceiling
 

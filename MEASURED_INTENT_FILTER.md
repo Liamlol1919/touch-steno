@@ -45,11 +45,11 @@ Two things to read from this:
    the filter suppresses 175 follower contacts with r² between 0.55 and 0.93. In
    `test-daumen` (thumbs driven) it suppresses **zero**, exactly as the r² = 0.10–0.25
    measurement predicted. The filter's behaviour is the measurement, not a heuristic.
-2. **The free-motion event rate is 2.56 events/s**, not the 11.4 events/s the latency
-   budget allows. In an unstructured session with ten fingers resting, the measured
-   detector finds ~2.6 distinct supra-threshold events per second. If every event were one
-   syllable, that is ~150 syllables/min ≈ **85–110 WPM**; a syllable architecture needing
-   1.5–2 events per syllable would land lower.
+2. **The free-motion event rate is 2.56 events/s.** In an unstructured session with ten
+   fingers resting, the measured detector finds ~2.6 distinct supra-threshold events per
+   second. If every event were one syllable, that is ~150 syllables/min ≈ **85–110 WPM**;
+   a syllable architecture needing 1.5–2 events per syllable would land lower. This is a
+   day-0 baseline, not a ceiling.
 
 That second number is the most important one in this document, and it is measured rather
 than argued: **the bottleneck for 150–250 WPM is not the 88 ms detector latency, it is how

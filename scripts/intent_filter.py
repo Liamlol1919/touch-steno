@@ -215,9 +215,9 @@ def detect_reversal_events(rows, min_speed: float, min_run: int,
     them. A reversal is a segmentation landmark that needs no lift signal, and it lets the
     return leg be fast - which matters, because a sub-gate return costs 0.67s for a 20mm arc.
 
-    An event starts after `min_run` supra-threshold frames and closes at the first frame where
-    the instantaneous direction turns by more than `turn_deg` from the event's accumulated
-    direction. The event's vector is the OUT leg only, so the return cancels nothing.
+An event starts after `min_run` supra-threshold frames and watches for the first later frame
+whose direction turns by more than `turn_deg` from the accumulated direction. The returned
+event ends on the preceding out-leg frame, so the return vector never enters the stroke.
     """
     events: list[dict] = []
     run: list[set[str]] = []
@@ -251,7 +251,7 @@ def detect_reversal_events(rows, min_speed: float, min_run: int,
                 continue
             cosang = (mx * rx + my * ry) / (mmag * math.hypot(rx, ry))
             if math.degrees(math.acos(max(-1.0, min(1.0, cosang)))) > turn_deg:
-                events.append({"start": start, "end": j, "mover": mover,
+                events.append({"start": start, "end": j - 1, "mover": mover,
                                "dx_mm": round(mx, 3), "dy_mm": round(my, 3),
                                "displacement_mm": round(mmag, 2),
                                "turn_deg": round(math.degrees(

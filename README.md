@@ -9,17 +9,24 @@ Research and implementation notes for high-speed text input on a continuous touc
 - [RECOMMENDED_ARCHITECTURES.md](RECOMMENDED_ARCHITECTURES.md) — five implementable architectures and PTH-660 deployment plan.
 - [CODE_REFERENCES.md](CODE_REFERENCES.md) — reusable open-source repositories and integration ideas.
 - [EXPERIMENT_PROTOCOL.md](EXPERIMENT_PROTOCOL.md) — reproducible PTH-660 sensor, intent and ergonomics protocol.
-- [RESEARCH_LOG.md](RESEARCH_LOG.md) — iteration TODO and GitHub progress log.
-- [SYNTHETIC_BASELINE.md](SYNTHETIC_BASELINE.md) — reproducible synthetic zero-force detector sanity check.
+- [RESEARCH_LOG.md](RESEARCH_LOG.md) and [AGENT2_RESEARCH_LOG.md](AGENT2_RESEARCH_LOG.md) — living project and measurement logs.
 - [DECODER_DESIGN.md](DECODER_DESIGN.md) — state machine, feature contract, enslavement model and Plover bridge.
+- [SYNTHETIC_BASELINE.md](SYNTHETIC_BASELINE.md) and [BENCHMARK_RESULTS.md](BENCHMARK_RESULTS.md) — explicitly synthetic checks and the corrected gesture-length envelope.
+- [MEASURED_BIOMECHANICS.md](MEASURED_BIOMECHANICS.md), [MEASURED_INTENT_FILTER.md](MEASURED_INTENT_FILTER.md) and [CROSS_VALIDATION.md](CROSS_VALIDATION.md) — measured PTH-660 distributions and evidence limits.
 - `scripts/audit_input.py` — safe evdev capability/event audit.
-- `scripts/synthetic_intent_benchmark.py` — deterministic tap/drift/rest/palm/ring synthetic test.
-- `tests/` — standard-library unit tests.
+- `scripts/synthetic_intent_benchmark.py`, `scripts/make_benchmark.py`, `scripts/envelope_sweep.py` and `scripts/wpm_ceiling.py` — deterministic analysis tools; synthetic results are not hardware claims.
+- `tests/` — standard-library unit tests for decoder invariants, measured constants and benchmark artefacts.
 
 ## Important evidence note
 
-The current document is a research starting point, not a final performance claim. Most published surface/chording results are below 150 WPM. All benchmark values need to be checked against the original paper and normalized for corrected speed, training and task language.
+The current documents are a research starting point, not a final PTH-660 performance claim.
+Most published surface/chording results are below 150 WPM. The measured hardware numbers
+and synthetic benchmark results are kept separate. In particular, the 88 ms persistence
+window is an evidence/latency requirement, not a measured event-rate ceiling; deliberate
+throughput must be measured with a cued device session.
 
-## Local source repository
+## Repository coordination
 
-The user-supplied `Liamlol1919/touch-steno` repository was checked on 2026-09-25 and is currently public but empty (GitHub reports “This repository is empty”). It is used as the research remote; source-code analysis of that repository is therefore pending until it contains a commit.
+The research remote is `Liamlol1919/touch-steno`. The two agents coordinate shared writes
+through the authenticated GitHub API (`scripts/gh_commit.py`) to avoid stale local pushes.
+Before each publication, fetch and inspect the remote head and open issues.

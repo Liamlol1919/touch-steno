@@ -1,21 +1,14 @@
 #!/usr/bin/env python3
 """Operating envelope: detection accuracy and event rate over gesture length x cue rate.
 
-Two design numbers in this project are currently single points: the 88 ms detection window
-and the "3 Hz reliable" tempo result. Both are really functions of two variables - how long
-the operator's gesture is, and how fast they repeat it - and the useful artifact is the
-surface between them, not two isolated dots.
+The useful artifact is a surface between gesture length and cue rate, not a single
+"3 Hz" number. Each cell reports the requested rate, the rate actually realized by
+the generator, and one-to-one cue/event matching. A detector event that spans two
+cues therefore counts as one detection and one merged/missed cue, rather than proving
+that every cue was recovered.
 
-For each (gesture length, cue rate) pair this generates a small labelled session, runs the
-full pipeline, and reports:
-  rate_ratio    detected events/s divided by cued events/s (segmentation quality)
-  sector_acc    direction accuracy on the cued sectors
-  idle_fp       false events during the rest block (false-trigger cost)
-  merged        fraction of cued gestures that produced no separate event (the failure mode
-                at high rates: back-to-back motion merges because there is no quiet window)
-
-Everything is synthetic but calibrated to the measured PTH-660 statistics, so this maps the
-*algorithmic* envelope. Real numbers need the cued session on the device.
+Everything is synthetic but calibrated to the measured PTH-660 statistics, so this maps
+the algorithmic envelope. Real numbers need the cued session on the device.
 
 Usage:
     python3 scripts/envelope_sweep.py
@@ -112,61 +105,73 @@ def label_at(manifest, t):
     return None
 
 
+def realized_rate_hz(cues: list[dict]) -> float | None:
+    """Return the observed rate of cue starts, or None for fewer than two cues."""
+    if len(cues) < 2:
+        return None
+    elapsed = cues[-1]["t_start"] - cues[0]["t_start"]
+    return (len(cues) - 1) / elapsed if elapsed > 0 else None
+
+
+def match_cues_to_events(cues: list[dict], events: list[dict]) -> tuple[list[tuple[dict, dict]], int]:
+    """Greedily match each detector event to at most one overlapping cue.
+
+    The event with the largest temporal overlap wins a cue. This is deliberately
+    conservative: one long event cannot certify several back-to-back gestures.
+    """
+    unmatched = set(range(len(cues)))
+    matches: list[tuple[dict, dict]] = []
+    merged = 0
+    for event in sorted(events, key=lambda e: (e["t_start"], e["t_end"])):
+        candidates = []
+        for i in unmatched:
+            cue = cues[i]
+            overlap = min(event["t_end"], cue["t_end"]) - max(event["t_start"], cue["t_start"])
+            if overlap > 0:
+                candidates.append((overlap, -abs(event["t_start"] - cue["t_start"]), i))
+        if not candidates:
+            continue
+        _overlap, _distance, cue_index = max(candidates)
+        cue = cues[cue_index]
+        matches.append((cue, event))
+        unmatched.remove(cue_index)
+    merged = sum(
+        1 for i in unmatched
+        if any(min(e["t_end"], cues[i]["t_end"]) > max(e["t_start"], cues[i]["t_start"])
+               for e in events)
+    )
+    return matches, merged
+
+
 def measure(frames, manifest, tmp: Path) -> dict:
     raw = tmp / "s.jsonl"
     with kinematics.Recorder(raw, force=True) as rec:
         for fr in frames:
             rec.frame(fr["t"], {int(k): tuple(v) for k, v in fr["c"].items()})
     events = intent_filter.analyse(raw, intent_filter.MIN_SPEED_MM_S,
-                                   intent_filter.MIN_RUN_FRAMES)
-    mapping = {}
-    for s in stroke_decoder.SECTORS:
-        for band, _l in stroke_decoder.BANDS:
-            for k in range(4):
-                tag = f"chord{k}" if k else "single"
-                mapping[f"{s}|{band}|{tag}"] = s
-    decoded = stroke_decoder.analyse(raw, mapping)
+                                   intent_filter.MIN_RUN_FRAMES)["events"]
 
-    # Match each cued gesture to an event whose window overlaps it. Counting events per
-    # block conflates "detected" with "merged"; matching per gesture does not.
-    evs = events["events"]
-    cued_all = [r for r in manifest if r.get("sector")]
-    matched, correct = [], 0
-    for g in cued_all:
-        hit = next((e for e in evs
-                    if e["t_start"] < g["t_end"] and e["t_end"] > g["t_start"]), None)
-        if hit is None:
-            continue
-        matched.append(g)
-        # Compare the DECODED sector against the truth. The previous version compared the
-        # event's block label to the gesture's label, which is trivially true and produced a
-        # meaningless "accuracy" - the third metric bug in this project, all in the harness.
-        sec = stroke_decoder.sector_of(hit["mover_dx_mm"] or 0.0,
-                                       hit["mover_dy_mm"] or 0.0)
-        if sec == g["sector"]:
-            correct += 1
-    detected = len(matched)
-    sector_ev = [e for e in evs
-                 if (label_at(manifest, e["t_start"]) or {}).get("label", "")
-                 .startswith("sector_")]
-    rest_ev = [e for e in events["events"]
+    cues = [r for r in manifest if r.get("sector")]
+    matches, merged = match_cues_to_events(cues, events)
+    correct = sum(
+        1 for cue, event in matches
+        if stroke_decoder.sector_of(event.get("mover_dx_mm") or 0.0,
+                                    event.get("mover_dy_mm") or 0.0) == cue["sector"]
+    )
+    rest_ev = [e for e in events
                if (label_at(manifest, e["t_start"]) or {}).get("label", "")
                .startswith("rest_")]
-    cued = [r for r in manifest if r.get("sector")]
-    span = manifest[-1]["t_end"] - manifest[0]["t_end"] if manifest else 0
-    hits = 0
-    for st in decoded["strokes"]:
-        lab = label_at(manifest, st["t_start"])
-        if lab and lab.get("sector") == st["sector"]:
-            hits += 1
+    span = manifest[-1]["t_end"] - manifest[0]["t_start"] if manifest else 0
     return {
-        "cued_gestures": len(cued_all),
-        "detected": detected,
-        "missed": len(cued_all) - detected,
-        "rate_ratio": round(detected / len(cued_all), 2) if cued_all else None,
-        "sector_acc": round(correct / detected, 3) if detected else None,
+        "cued_gestures": len(cues),
+        "detected": len(matches),
+        "missed": len(cues) - len(matches),
+        "merged": merged,
+        "rate_ratio": round(len(matches) / len(cues), 2) if cues else None,
+        "sector_acc": round(correct / len(matches), 3) if matches else None,
         "idle_fp": len(rest_ev),
         "span_s": round(span, 2),
+        "realized_rate_hz": round(realized_rate_hz(cues) or 0.0, 2) if cues else None,
     }
 
 
@@ -187,7 +192,7 @@ def main() -> int:
                 frames, man = build(L / 1000.0, r, args.seed)
                 m = measure(frames, man, tmp)
                 m["length_ms"] = L
-                m["rate_hz"] = r
+                m["requested_rate_hz"] = r
                 m["over_window"] = L / 1000.0 > DETECTOR_WINDOW_S
                 rows.append(m)
     if args.json:
@@ -195,14 +200,14 @@ def main() -> int:
                           "rows": rows}, indent=2))
         return 0
     print(f"detector window {DETECTOR_WINDOW_S*1000:.0f} ms; "
-          f"rows are length_ms x rate_hz\n")
-    print("|len_ms|rate|detected/cued|rate_ratio|sector_acc|idle_fp|")
-    print("|---:|---:|---:|---:|---:|---:|")
+          f"rows are length_ms x requested_rate_hz\n")
+    print("|len_ms|requested|realized|detected/cued|merged|rate_ratio|sector_acc|idle_fp|")
+    print("|---:|---:|---:|---:|---:|---:|---:|---:|")
     for m in rows:
-        print(f"|{m['length_ms']}|{m['rate_hz']}|{m['detected']}/{m['cued_gestures']}|"
+        print(f"|{m['length_ms']}|{m['requested_rate_hz']}|{m['realized_rate_hz']}|"
+              f"{m['detected']}/{m['cued_gestures']}|{m['merged']}|"
               f"{m['rate_ratio']}|{m['sector_acc']}|{m['idle_fp']}|")
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

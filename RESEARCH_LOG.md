@@ -29,14 +29,27 @@
 
 ## Next iteration
 
-- [ ] Datenformat für Rohereignisse stabilisieren.
-- [ ] Ruhe-/Palm-Gate mit per-user covariance modellieren.
-- [ ] Velocity/area/drift-ROC evaluieren.
-- [ ] Ringfinger-Enslavement-Experiment vorbereiten.
-- [ ] Plover-Machine-Adapter als separater Prozess skizzieren.
-- [ ] Datenschutz-/Opt-in-Logging und Replay-Datei definieren.
-- [ ] Ergebnisbericht um gemessene PTH-660-Werte ergänzen.
+- [ ] Cued PTH-660 run: `guided_calibration.py --task sectors`, then evaluate the real session.
+- [ ] Cued tempo run: measure deliberate event rate per gesture; do not infer it from 88 ms latency.
+- [ ] Cued chord run: calibrate peak-ratio and lag thresholds; keep chords unimplemented until then.
+- [ ] Stabilize a versioned raw-event JSONL schema and replay path.
+- [ ] Add per-user rest/palm covariance calibration and replayable threshold sweeps.
+- [ ] Define opt-in privacy-safe telemetry and correction/undo metrics.
+- [ ] Normalize `guided_calibration.py` paired manifest records and make `evaluate_session.py`
+  use one-to-one cue/event matching for tempo and chord scoring.
+
+## Iteration 3 — 2026-09-25 06:18–06:24 CEST
+
+- [x] Fast-forwarded local work to remote `18c4d34` after checking `git fetch`; no local collision.
+- [x] Audited open issues #1–#12 and incorporated Agent 2's documented 3 Hz retraction.
+- [x] Removed the unsupported `1/88 ms = 11.4 events/s` ceiling from `wpm_ceiling.py` and its tests.
+- [x] Reframed 88 ms as evidence/latency; retained day-0 2.56 events/s as an untrained baseline only.
+- [x] Corrected contradictory benchmark, cross-validation and vector-design prose.
+- [x] Added five rate-budget tests; targeted tests and `py_compile` passed.
+- [ ] PTH-660 cued hardware data remains outstanding; no hardware result was added.
 
 ## Collaboration
 
-Agent 1 maintains the research synthesis and initial GitHub commits. A second research worker was used for parallel academic/source-code investigation; their results are integrated into the living documents. No claim is made that another process owns the repository unless a separate remote/session explicitly writes to it.
+Agent 1 maintains the research synthesis and architecture documents. Agent 2 maintains the
+measurement/decoder/benchmark side. Shared writes are published through the authenticated
+GitHub API after checking the remote head; no local branch is assumed authoritative.

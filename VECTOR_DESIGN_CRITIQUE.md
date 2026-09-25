@@ -86,12 +86,13 @@ duration or speed alone; it can only be distinguished by *amplitude* (how far it
 displacement over that window*, not as the instantaneous direction of the first frames.
 The design keeps its 8-way compass; it loses 48 ms of latency.
 
-Is that fatal for 250 WPM? No — and this is worth stating because the latency number
-looks alarming out of context. At 88 ms the ceiling is 11.4 events/s. A steno-ish syllable
-is 1.5–2 events, so 5.7–7.6 events/s = 5.7–7.6 syllables/s ≈ **340–450 WPM** of pure
-event budget. The binding constraint is recognition reliability and training, not the
-event rate. Spending 48 ms extra to get a measurable, false-trigger-free detector is the
-right trade.
+Is that fatal for 250 WPM? Not determinable from the persistence window alone. The 88 ms
+window sets detection latency and requires sustained supra-threshold evidence; it is not
+an event-rate ceiling. The corrected synthetic sweep found 150–350 ms gestures detectable
+with 100% direction accuracy at realized cue rates of 1.01–1.48 Hz; the sub-gate return,
+not the requested 1–6 Hz grid, determines that realized rate. 100 ms gestures were not
+detected and 500 ms gestures became less reliable. Real touch throughput, segmentation
+and training remain to be measured with a cued session.
 
 ## 4. The dominance filter works on the finger row and fails on the thumbs
 
@@ -222,11 +223,12 @@ Using the measured per-channel reliability from §2 and §4:
 | both hands, one stroke | 2025 nominal | ≈ 10.4 measured-reliable |
 
 So the honest number is ~10 reliable bits per stroke if both hands act at once, and
-~5.2 if only one hand does. Both are far beyond what text needs (a German or English
-syllable needs ~8–10 bits context-free, far less with a language model), and both are
-already within a factor of two of the *event-rate* ceiling from §3. The interesting
-consequence: **cutting the thumb from 16 zones to 8 costs 1 bit, and buys a detector that
-actually fires correctly.** The 7056 figure was never the scarce resource.
+~5.2 if only one hand does. Both exceed the context-free information needed for many
+text syllables, but the state count is not evidence of usable throughput. Gesture length,
+segmentation, finger independence, language coverage and correction cost must be measured
+separately. The useful consequence remains: **cutting the thumb from 16 zones to 8 costs
+1 bit, and buys a detector that actually fires correctly.** The 7056 figure was never the
+scarce resource.
 
 ## 6. The "6 fingers as a stable anchor" assumption, restated honestly
 

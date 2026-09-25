@@ -14,6 +14,7 @@ SCRIPTS = Path(__file__).resolve().parent.parent / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 import follower_predictability as fp  # noqa: E402
+import envelope_sweep  # noqa: E402
 import intent_filter  # noqa: E402
 import kinematics  # noqa: E402
 import real_session_evidence as rse  # noqa: E402
@@ -326,29 +327,42 @@ class TestLatencyBudget(unittest.TestCase):
         self.assertLess(rep["cpu_us_per_frame"], budget_us * 0.25,
                         "pipeline must stay under 25% of one frame's budget")
 
-class TestWpmCeiling(unittest.TestCase):
-    def test_250_wpm_two_events_per_syllable_exceeds_the_ceiling(self):
-        ceiling = wpm_ceiling.event_ceiling_hz()
-        need = (250 / 60.0) * 1.5 * 2.0
-        self.assertGreater(need, ceiling,
-                           "250 WPM with 2 events/syllable must exceed the "
-                           "88 ms detector ceiling -- this is the project constraint")
+class TestEnvelopeAccounting(unittest.TestCase):
+    def test_one_event_cannot_match_two_back_to_back_cues(self):
+        cues = [{"t_start": 0.0, "t_end": 0.2}, {"t_start": 0.2, "t_end": 0.4}]
+        events = [{"t_start": 0.0, "t_end": 0.4}]
+        matches, merged = envelope_sweep.match_cues_to_events(cues, events)
+        self.assertEqual(len(matches), 1)
+        self.assertEqual(merged, 1)
 
-    def test_250_wpm_one_event_per_syllable_fits_under_the_ceiling(self):
-        ceiling = wpm_ceiling.event_ceiling_hz()
-        need = (250 / 60.0) * 1.5 * 1.0
-        self.assertLess(need, ceiling)
+    def test_realized_rate_uses_observed_cue_starts(self):
+        cues = [{"t_start": 0.0}, {"t_start": 0.5}, {"t_start": 1.0}]
+        self.assertAlmostEqual(envelope_sweep.realized_rate_hz(cues), 2.0)
 
-    def test_every_target_exceeds_measured_free_motion(self):
-        for target in wpm_ceiling.TARGETS_WPM:
-            need = (target / 60.0) * 1.5 * 1.0
-            self.assertGreater(need, wpm_ceiling.MOVE_EVENT_RATE_HZ)
+
+class TestWpmRateBudget(unittest.TestCase):
+    def test_150_wpm_one_event_per_syllable_requires_3_75_hz(self):
+        self.assertAlmostEqual(
+            wpm_ceiling.required_event_rate_hz(150, 1.5, 1.0), 3.75)
+
+    def test_250_wpm_one_event_per_syllable_requires_6_25_hz(self):
+        self.assertAlmostEqual(
+            wpm_ceiling.required_event_rate_hz(250, 1.5, 1.0), 6.25)
+
+    def test_two_events_per_syllable_doubles_the_rate(self):
+        one = wpm_ceiling.required_event_rate_hz(250, 1.5, 1.0)
+        two = wpm_ceiling.required_event_rate_hz(250, 1.5, 2.0)
+        self.assertAlmostEqual(two, one * 2.0)
+
+    def test_event_rate_maps_back_to_target_wpm(self):
+        rate = wpm_ceiling.required_event_rate_hz(200, 1.5, 1.0)
+        self.assertAlmostEqual(wpm_ceiling.wpm_for(rate, 1.5, 1.0), 200)
 
     def test_rest_run_is_shorter_than_the_detector_window(self):
-        """The 88 ms window exists precisely because rest runs reach 7 frames."""
+        """The 88 ms window exists because rest runs reach seven frames."""
         self.assertLess(wpm_ceiling.REST_RUN_MAX_MS, wpm_ceiling.EVENT_MS)
-        self.assertAlmostEqual(wpm_ceiling.EVENT_MS / (1000.0 / wpm_ceiling.HZ), 8.0,
-                               places=0)
+        self.assertAlmostEqual(wpm_ceiling.EVENT_MS / (1000.0 / wpm_ceiling.HZ),
+                               8.0, places=0)
 
 
 class TestEnvelopeAndMetricContract(unittest.TestCase):
