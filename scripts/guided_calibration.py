@@ -108,6 +108,21 @@ def build_tasks(args) -> list[dict]:
     elif args.task == "noise":
         tasks.append({"label": "noise_rest", "cue": "REST - DO NOT MOVE",
                       "seconds": args.rest_seconds, "rest": True})
+    elif args.task == "correction":
+        # Correction throughput at a cued event rate. W19 found NO published number for
+        # whether a 3-5 events/s input can be corrected after the fact without the undo
+        # path becoming the bottleneck - so it has to be measured. The protocol alternates
+        # a sector stroke with a deliberate undo cue, so the operator's corrections/min and
+        # the latency from cue to repaired text can both be read off the stream.
+        for rep in range(args.reps):
+            for name in SECTORS_8:
+                tasks.append({"label": f"corr_sector_{name}",
+                              "cue": f"STROKE {name} (then wait for the undo cue)",
+                              "seconds": args.sector_seconds, "sector": name,
+                              "correction_block": True})
+            tasks.append({"label": "corr_undo", "cue": "UNDO (retract the last stroke)",
+                          "seconds": args.correction_seconds, "undo": True,
+                          "correction_block": True})
     elif args.task == "identity":
         # Finger-identity dataset: labelled (contact-id, anatomical label) pairs. This is
         # the prerequisite for portable calibration, because cross-session transfer on
@@ -206,7 +221,7 @@ def main() -> int:
                     help="directory containing wacom_touch.py (default: probe this "
                          "repo's src/ and sibling commind* checkouts)")
     ap.add_argument("--task", choices=("tempo", "sectors", "chord", "noise",
-                                   "identity"))
+                                   "identity", "correction"))
     ap.add_argument("--out", default="messung/calibration.jsonl")
     ap.add_argument("--device", default=None)
     ap.add_argument("--force", action="store_true")
@@ -219,6 +234,7 @@ def main() -> int:
     ap.add_argument("--reps", type=int, default=4)
     ap.add_argument("--rest-seconds", type=float, default=60.0)
     ap.add_argument("--identity-seconds", type=float, default=2.0)
+    ap.add_argument("--correction-seconds", type=float, default=1.5)
     args = ap.parse_args()
     if args.merge:
         return merge(args)
