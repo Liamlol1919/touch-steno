@@ -1,0 +1,172 @@
+# Cross-Validation — literature numbers vs our PTH-660 measurements
+
+**Author:** Agent 2. **Date:** 2026-09-25 05:33 CEST.
+**Purpose:** put the independently-sourced literature numbers (worker research, W1/W2/W4/W6)
+next to the numbers we measured on the actual tablet (`MEASURED_BIOMECHANICS.md`,
+`VECTOR_DESIGN_CRITIQUE.md`) and mark where they agree, where they disagree, and where only
+we have data at all.
+
+Sources referenced by short name; full URLs live in the corresponding `W*.md` files.
+
+## 1. Where literature and measurement agree
+
+### 1.1 Enslavement magnitude
+
+| source | quantity | value | our measurement | agreement |
+|---|---|---|---|---|
+| Zatsiorsky, Li & Latash 2000, *Exp Brain Res* 131:187–195 (force, isometric) | slave finger force during single-finger MVC | up to **67.5 %** of its own MVC | **β = 0.55–0.74** for long-finger neighbours (position, on glass) | same order; our values sit just above the isometric figure, which is expected because a light touch on glass needs less force and therefore less stabilization |
+| Häger-Ross & Schieber 2000, *J Neurosci* 20(22):8542–8550 | finger **individuation index** (1 = perfect) | thumb 0.983–0.991, index 0.974–0.982, middle 0.935–0.937, little 0.943–0.945, **ring 0.898–0.907** | index and thumb are our least-coupled / best-predictable movers; ring is the worst | **confirmed**, and it independently justifies the user's decision to make thumb + index the active set and the ring a rest anchor |
+| Häger-Ross & Schieber 2000 | **stationarity index** (how much a finger moves when *others* move) | thumb 0.994–0.996, index 0.967–0.973, middle 0.925–0.941, **ring 0.905–0.908** | resting contacts drift up to **11.5 mm / 20 s** on our glass | same ordering, our absolute drift is the new part |
+| Park et al. 2017, *Front Hum Neurosci* 11:318 | enslaving index ranking, flexion | I, M < L < **R** (ring worst) | same | confirmed |
+
+The literature and our glass measurements agree on the ordering and on the magnitude. That
+is the strongest external validation in this repo so far: **the design's choice of
+thumb + index as the active channels is the one the motor-control literature
+independently supports.**
+
+### 1.2 Speed limit on independence
+
+Häger-Ross & Schieber measured that finger individuation and stationarity **degrade
+significantly when movement is externally paced at 3 Hz** versus self-paced ~2 Hz
+(II: F = 46.7, p < 0.001; SI: F = 49.9, p < 0.001). Their subjects naturally chose
+~2 Hz (range 0.7–3.3 Hz).
+
+Consequence for the speed target: at 250 WPM a syllable/chord every ~200–400 ms is
+≈ 2.5–5 events per second per hand. The literature says finger *independence* already
+degrades at 3 Hz in a simple cyclic task. Our 88 ms event floor (§2 below) corresponds to
+11.4 events/s, i.e. **well past the frequency at which independent finger control is
+already measurably degrading.** This is not an argument against the target — the two-thumb
+design deliberately does not ask the long fingers to alternate — but it *is* an argument
+against spending design effort on a ten-finger layout, and against assuming the
+finger-independence literature transfers to 5–10 Hz chording.
+
+### 1.3 Direction resolution: literature caps breadth at 8
+
+W6 (marking-menu literature): expert error stays under 10 % for **breadth 8, depth 2**, and
+becomes error-prone beyond that; the M3 finger-gesture study reached 64 commands at ~3 %
+error / 0.7 s and 512 commands at 8.85 % / 1.0 s. The A-Coord pen study found **4 levels
+→ 9.4 % errors, 8 levels → 18.2 %** ("twice as many errors").
+
+Our independent derivation from the tablet's own noise (VECTOR_DESIGN_CRITIQUE §2) lands
+in the same place: a 16-way thumb grid is 1.5–2.8 reliable bits at 3σ, an 8-way grid is
+2.9–3.0. **Two independent routes — published psychophysics and our sensor noise — agree
+that 8 is the honest per-level maximum and 16 is a stretch.**
+
+## 2. Where only we have data
+
+The single most useful thing in this repo is the gap: the literature has **no** measurement
+of what a *resting* finger does on a flat touch surface in mm and mm/s. W1 searched
+explicitly for it and returned NOT FOUND (only clinical tremor bounds, not
+resting-on-surface behaviour). Our contribution:
+
+| quantity | our value | literature |
+|---|---|---|
+| resting per-frame step p99 (worst of 17 contacts) | **0.56 mm** | NOT FOUND |
+| resting per-frame speed p99 / max | **57 / 190 mm/s** | NOT FOUND |
+| resting net drift over 20 s | **11.5 mm** | NOT FOUND |
+| threshold + persistence that separates rest from drive | **v ≥ 40–60 mm/s for 8 consecutive frames** | NOT FOUND |
+| coupling *predictability* per contact pair (r, r²) | **0.10–0.92** across pairs | NOT FOUND (literature has force correlations, not position-vector regressions) |
+| reader init artefact magnitude | **260 mm phantom drift, 19972 mm/s phantom peak** | driver-specific, none |
+
+This matters because the whole "0-force" literature reasons about *force* and *dwell*,
+while a capacitive pad like the PTH-660 exposes only *position and area*. Our numbers are
+the missing bridge from one domain to the other.
+
+## 3. Where literature and measurement disagree — or appear to
+
+### 3.1 "The 65 % coupling" is not one number
+
+Both the design chat and several summaries quote "65 % enslavement" as if it were a
+constant. Measured, it is a **distribution over contact pairs**, spanning β = 0.01 to
+0.74, and its *structure* is what matters:
+
+- long-finger neighbours: β 0.63–0.74, r² 0.62–0.92 → subtractable;
+- cross-hand (whole-body): r² 0.72–0.74 → subtractable, and it is a *nuisance* signal;
+- thumb↔thumb: β 0.49–0.63, **r² 0.10–0.25** → resists subtraction;
+- thumb↔finger rows: β 0.01–0.04 → already below the rest noise floor.
+
+A single global "65 %" constant would therefore *over*-suppress the cross-group pairs and
+*under*-suppress the thumbs. It has to become a per-pair calibration.
+
+### 3.2 The 2 mm / 80 mm/s thresholds from the design chat
+
+The chat proposes >2 mm displacement and >80 mm/s velocity. Measured: resting contacts
+already reach 1.48 mm steps and 190 mm/s spikes, and drift 11.5 mm over 20 s. So:
+
+- **80 mm/s** is above the resting p99 (57) but *below* the resting max (190) → it is
+  not a safe gate by itself; it needs the persistence condition.
+- **2 mm** is above the resting per-frame step max (1.48) but *far below* the resting
+  20-second drift (11.5) → it only works as a *windowed* displacement, never since
+  touch-down.
+
+The numbers are not wrong so much as *unqualified*: they are single-frame gates and the
+resting distribution is heavy-tailed. Our v ≥ 40–60 mm/s ∧ 8-frame rule is the version
+that holds across all three sessions.
+
+### 3.3 Thumb ROM is not the constraint; timing is
+
+W6 found generous thumb range of motion (CMC radial abduction 62.9°, palmar abduction
+61.2°, MCP flexion 60°, IP flexion 88°; circumduction components 27°/67°/10°). So the
+physical excursion comfortably fits 8 radial directions, even 16 in principle. The binding
+constraints are elsewhere and all three are measured or literature-backed:
+
+1. **noise vs zone width** (our measurement: 16 zones = 1.5–2.8 bits at 3σ),
+2. **persistence latency** (our measurement: 8 frames ≈ 88 ms to avoid resting triggers),
+3. **simultaneity** (W6, Buxton/ToCHI2H review: "simultaneous independent timing for the
+   two hands could not be achieved even when parallel control was encouraged by training").
+
+Point 3 deserves emphasis because it targets the heart of the design: the 7056-state
+figure requires *simultaneous, independent* left- and right-thumb selection, and the HCI
+record says independent bimanual timing is the hard part, not the easy part. Bimanual
+gains in the literature come from **coupled or asymmetric** roles, not from two hands
+choosing independently at the same instant.
+
+That is a stronger objection to the 7056 architecture than the noise argument, and it
+came from outside our data.
+
+## 4. The speed target, restated with everything we now know
+
+| evidence | value | source |
+|---|---|---|
+| best measured surface/mobile typing, large sample | **36–38 WPM** (two-thumb 38, one-finger 29; 2.3 % uncorrected error; autocorrect +9) | 37,370-participant mobile study (W6) |
+| best measured touch/chording system in our literature set | 44.6 WPM (TOAST), 47 WPM (Twiddler experts after ~25 h) | W2, W6 |
+| best measured 10-finger passive tap system with IMU | 70.6 WPM after 2.5 h / 5 days | TypeAnywhere (W2) |
+| our event budget at the measured 88 ms floor | ≈ 11.4 events/s ≈ 5.7–7.6 syllables/s ≈ 340–450 WPM **theoretical, error-free** | derived, VECTOR_DESIGN_CRITIQUE §3 |
+| our measured mover speeds | peak 133–309 mm/s, mean 16–40 mm/s, sustained runs 19–278 frames | MEASURED_BIOMECHANICS §3 |
+
+Reading these together: the *sensing* side has enough headroom for 150+ WPM. The
+*decoding and human* side is where every published system actually lands, at 36–70 WPM.
+Agent 1's report already refused to quote 150–250 WPM as an evidenced property
+(`COMPREHENSIVE_RESEARCH_REPORT.md:13`); this document now agrees with that from the
+hardware side as well, and identifies why: not sensor bandwidth, but simultaneity,
+individuation at high frequency, and per-stroke reliability.
+
+## 5. What this changes in the plan
+
+1. **Keep** thumb + index as the active set — now backed by Häger-Ross & Schieber, not
+   just by intuition.
+2. **Ship 8-way, not 16-way** per thumb in the first build, with the measured
+   3σ-margin argument and the marking-menu literature agreeing.
+3. **Budget 88 ms**, and stop quoting 40 ms until a slow-stroke session shows the
+   confusion matrix can hold (VECTOR_DESIGN_CRITIQUE §8 test 1).
+4. **Make the coupling model per-pair and signed**; judge it by r², not by a global
+   constant, and give the whole-body component its own term.
+5. **Do not depend on simultaneous independent two-thumb selection** for the first
+   architecture. Sequential or coupled thumb roles reach the same state count with a
+   mechanism the literature says humans can actually execute.
+6. **Reuse the one real advantage we have**: the coupling/persistence model is per-user,
+   per-hand and cheap to recalibrate. Published systems have no access to it; a
+   re-calibration protocol is a legitimate product feature, not an implementation detail.
+
+## 6. Provenance
+
+- Our measurements: `MEASURED_BIOMECHANICS.md`, `VECTOR_DESIGN_CRITIQUE.md`,
+  reproducible via `scripts/kinematics.py`, `scripts/real_session_evidence.py`,
+  `scripts/follower_predictability.py`.
+- Literature: `W1_ACADEMIC_ENSLAVEMENT.md`, `W2_STENO_HARDWARE.md`,
+  `W3_OPEN_SOURCE.md`, `W4_ZERO_FORCE_ALGORITHMS.md`,
+  `W6_THUMB_BIMANUAL_VIABILITY.md`. Two primary sources were fetched and verified
+  directly during this work (PMC6773164, PMID 10766271); the rest are worker-sourced and
+  should be spot-checked before any external publication.
+- Open issues against agent 1: #1 thresholds, #2 init artefact, #3 coupling classes
+  (with a correction comment), #4 40 ms vs 88 ms.
