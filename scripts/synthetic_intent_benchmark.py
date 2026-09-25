@@ -35,7 +35,8 @@ class Config:
     max_duration: float = 0.60
     min_area: float = 2.0
     palm_area: float = 8.0
-    coupled_speed_ratio: float = 0.45
+    coupled_speed_ratio: float = 1.0
+    coupling_window: float = 0.04
 
 
 @dataclass
@@ -117,6 +118,29 @@ def trace(kind: str, cfg: Config, rng: random.Random) -> Iterable[Sample]:
         raise ValueError(kind)
 
 
+def suppress_coupled(detections: list[Detection], cfg: Config) -> list[Detection]:
+    """Keep one event from a synchronized burst as a simple coupling guard.
+
+    This is deliberately conservative and testable, not a proof of anatomy.
+    A real decoder must learn the coupling direction per user and must not
+    suppress intentional multi-finger chords without a separate chord policy.
+    """
+    kept: list[Detection] = []
+    for detection in sorted(detections, key=lambda d: (d.t, d.finger)):
+        previous = next(
+            (d for d in kept
+             if d.finger != detection.finger
+             and abs(d.t - detection.t) <= cfg.coupling_window),
+            None,
+        )
+        if previous is None:
+            kept.append(detection)
+        elif detection.score > previous.score:
+            kept.remove(previous)
+            kept.append(detection)
+    return kept
+
+
 def detect(samples: Iterable[Sample], cfg: Config) -> list[Detection]:
     tracks: dict[str, Track] = {}
     detections: list[Detection] = []
@@ -141,7 +165,7 @@ def detect(samples: Iterable[Sample], cfg: Config) -> list[Detection]:
             tr.triggered = True
             detections.append(Detection(s.finger, s.t, "intent", tr.peak_speed, s.label))
         tr.last_t, tr.last_x, tr.last_y = s.t, s.x, s.y
-    return detections
+    return suppress_coupled(detections, cfg)
 
 
 def score(expected: list[str], detections: list[Detection], kinds: tuple[str, ...]) -> dict:

@@ -302,7 +302,22 @@ Finger-Enslavement ist ein physiologisches Multi-Finger-Kraftproblem; die releva
 
 Für die Touch-Oberfläche bedeutet das: Die Matrix eines kapazitiven Decoders sollte zunächst **Index/Middle plus Daumen** priorisieren, Ringfinger-Kontakte als „dependent“ unterdrücken und eine aktive Bewegung des Nutzers als Evidence-Höhung verwenden. Individuelle Enslavement-Matrizen aus Kontaktflächen zu schätzen ist derzeit eine **Hypothese**, kein evidenzbasierter Algorithmus.
 
-## 12. Realistische Zielhierarchie
+## 13. Kritische Zwischenprüfung: Enslavement-Suppression vs. echte Chords
+
+Ein erster synthetischer Test zeigte ein reales Architekturproblem: Ein Guard, der bei synchronisierten Multi-Kontakten nur ein Ereignis ausgibt, kann Ringfinger-Kopplung unterdrücken, aber auch echtes Zwei-Finger-Chording löschen. Deshalb ist die Reihenfolge im Produktivdecoder:
+
+```text
+raw contacts
+  -> palm/rest gate
+  -> per-finger event candidates
+  -> classify movement as dependent vs intentional chord
+  -> chord grammar / Plover stroke
+  -> commit or suppress
+```
+
+Die Abhängigkeitsentscheidung darf nicht allein aus `t_kontakt_A ≈ t_kontakt_B` abgeleitet werden. Erforderlich sind mindestens: Bewegungsvektor-Kovarianz, Kontaktfläche, anatomische ID/Confidence, Dauer/Phasenlage und ein Chord-Lexikon. Der synthetische Guard ist nur ein Testfixture und kein Ersatz für dieses Modell.
+
+## 14. Realistische Zielhierarchie
 
 | Ziel | Status | Bedingung |
 |---:|---|---|

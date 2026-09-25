@@ -8,7 +8,7 @@
 - one-finger directional drift;
 - resting hand with Gaussian sensor noise;
 - large-area palm contact;
-- a master/index movement with a smaller, coupled ring-finger displacement.
+- a master/index movement with a synchronized ring-finger displacement; a conservative burst guard keeps the first/highest-scoring event and suppresses the dependent contact.
 
 The baseline detector requires:
 
@@ -18,6 +18,8 @@ max_displacement >= max(rest_radius, min_displacement)
 min_area <= contact_area < palm_area
 min_duration <= event_age <= max_duration
 ```
+
+The burst guard is intentionally conservative: it prevents a synchronized ring contact from becoming a second character in the fixture, but it would also suppress a genuine two-finger chord unless a separate chord policy runs before it. The real system must distinguish **dependent motion** from **intentional simultaneous chord** using a learned coupling matrix and a chord grammar; this synthetic heuristic is not sufficient.
 
 The current defaults are arbitrary test fixtures, not literature-derived universal thresholds. They must be replaced by a per-user sweep after `scripts/audit_input.py` has captured a real PTH-660 stream.
 
