@@ -1,10 +1,10 @@
 # Post-Failure Branch Decision
 
-**Decision status:** `FROZEN — TSF FALSIFIER FAILED; FRESH POST-FAILURE DECISION REQUIRED`
+**Decision status:** `FROZEN — RCI SELECTED AS THE SINGLE FRESH DESIGN-ONLY BRANCH; SOS HELD`
 **Decision date:** 2026-09-25
-**Single next branch:** None pending a fresh post-failure branch decision
-**Prerequisite status:** Test 0 is complete and frozen; the first TSF synthetic falsifier has executed
-**Implementation status:** The bounded TSF prototype was implemented for research only and is now held/rejected after its frozen falsifier; no hardware or product claim
+**Single next branch:** Rest-Censored Innovation (RCI), `DESIGN / UNIMPLEMENTED`
+**Prerequisite status:** Test 0 is complete and frozen; the first TSF synthetic falsifier has executed and failed
+**Implementation status:** RCI is specified but unimplemented; TSF remains held/rejected; no hardware or product claim
 
 ## Decision
 
@@ -28,9 +28,19 @@ mutation with `ValueError`. All 9 comparator tests pass, as does the full 286-te
 suite with 1 skipped and 0 failed. The bounded TSF prototype was subsequently implemented as a
 research-only step and subjected to its first separately frozen synthetic falsifier. That
 falsifier has now failed, so this document's former implementation authorization is superseded.
-There is no hardware, human, performance, or product claim and no TSF promotion. RCI and SOS
-remain later comparators. Dwell, topology, and raw-field branches remain on hold pending an
-independent arming/observability or raw-interface prerequisite.
+There is no hardware, human, performance, or product claim and no TSF promotion.
+
+The fresh post-failure selection is **RCI only**. `RCI_FALSIFIER_DECISION.md` freezes an
+identity-free set-rest innovation primitive: explicit rest capture, a pooled empirical
+set-rest measure, immutable robust residual location/scale, a scalar energy-distance
+innovation curve, a bounded excursion with return/settle lifecycle, and one serialized
+candidate or abstention. It contains no slot/TID, per-contact baseline, adjacent matching,
+selected writer, or TSF residual flow. RCI is `DESIGN / UNIMPLEMENTED`; no implementation,
+manifest, result, or performance is claimed.
+
+Spatiotemporal Occupancy Sketch (SOS) remains **HOLD / UNIMPLEMENTED** and receives no
+parallel implementation or automatic advancement. Dwell, topology, and raw-field branches
+remain on hold pending their independent arming/observability or raw-interface prerequisite.
 
 ## Why `SYNTH-BRANCH-1` is structurally audited and non-promotional
 
@@ -177,6 +187,28 @@ A future implementation must freeze the transform policy, matching cost and ambi
 window duration/cardinality, residual features, classifier, and controls. No such choices or
 performance numbers are established by this document.
 
+## Fresh RCI selection
+
+RCI is the one fresh post-failure branch, not a repair or rename of TSF. TSF's frozen
+synthetic falsifier remains authoritative: positive accuracy `0.0`, best `rigid_motion`
+control `0.3333333333333333`, observed margin `-0.3333333333333333`, paired
+session-clustered lower 95% bound `-0.6666666666666666`, `kill_gate_passed=false`, and
+`claim=none`. TSF must not be tuned, revived, or used as evidence for RCI.
+
+RCI instead locks an explicit pooled empirical rest measure before observation. Its semantic
+observation is the bounded evolution of one scalar, permutation-invariant energy-distance
+discrepancy from that immutable rest measure, ending only after a declared return and eight
+settle frames. It uses no adjacent correspondence, selected writer, per-contact baseline,
+or TSF feature path. The complete primitive, state machine, observation exclusions,
+independent train/calibration/test generator families, matched count/nuisance/null bank,
+controls, metrics, hard vetoes, and exact `RCI-SYNTHETIC-FALSIFIER-1` gates are frozen in
+`RCI_FALSIFIER_DECISION.md`.
+
+That decision is `DESIGN` only. The next executable action is to implement only RCI and
+freeze its falsifier manifest before test inspection. There is no RCI performance, hardware,
+human, latency, WPM, correction, text-accuracy, privacy-by-retention, or product claim. SOS
+remains held and receives no implementation in this branch.
+
 ## TSF state and observation model
 
 ```text
@@ -305,16 +337,15 @@ correction throughput, WPM, text accuracy, or product readiness.
 | Position | Branch | Decision |
 |---|---|---|
 | Completed prerequisite | **Comparator repair / Test 0** | Implemented, tested, and frozen as a synthetic evidence-boundary repair. Canonical manifest validation and mutation refusal are active; 9 comparator tests and the full 286-test suite pass (1 skipped, 0 failed). Exact results are frozen separately. |
-| Executed research branch | **Temporal Set-Flow (TSF)** | The bounded prototype was implemented and tested, then rejected/held by its frozen synthetic falsifier. Preserve its design rationale and exact failure; do not tune or advance it. |
-| Fresh decision required | **Post-failure branch selection** | Compare preserved, non-promotional branches under a new explicit decision. No branch is selected by this update. |
-| Later comparators | **Rest-Censored Innovation (RCI)** | Remains unimplemented and does not advance automatically. It requires a fresh selection decision and matched slow-motion, palm, and rest-drift falsification. |
-| Later comparators | **Spatiotemporal Occupancy Sketch (SOS)** | Remains unimplemented and does not advance automatically. It requires a fresh selection decision and evidence that temporal locality beats static occupancy and occupancy-difference controls. |
+| Executed and rejected research branch | **Temporal Set-Flow (TSF)** | The bounded prototype was implemented and tested, then rejected/held by its frozen synthetic falsifier. Preserve its design rationale and exact failure; do not tune or advance it. |
+| Single fresh design-only branch | **Rest-Censored Innovation (RCI)** | Selected after the TSF failure and frozen in `RCI_FALSIFIER_DECISION.md`. It is `UNIMPLEMENTED`; implement only this branch next and freeze `RCI-SYNTHETIC-FALSIFIER-1` before inspecting test results. |
+| Held later comparator | **Spatiotemporal Occupancy Sketch (SOS)** | `HOLD / UNIMPLEMENTED`; no parallel implementation, automatic advancement, performance credit, or hardware claim. |
 | Hold / prerequisite | **Dwell** | No independent validated arming primitive; hold. |
 | Hold / prerequisite | **Topology** | First require stable graph structure under rest jitter; otherwise stop. |
 | Prerequisite hold | **Raw field** | First require a read-only capability audit proving timestamped dense target-device data; no inferred interface. |
 
-This ordering is frozen. It is not authority to implement the later comparators or hold
-branches, and it makes no hardware claim.
+This ordering is frozen. It authorizes implementation of RCI only after this decision, not
+hardware work, and it makes no RCI performance or product claim.
 
 ## Executed TSF falsifier — historical decision update
 
@@ -349,7 +380,11 @@ positive-accuracy minimum `0.8`, the required margin `0.1`, and the requirement 
 paired margin's lower 95% bound be positive. The current TSF research prototype is therefore
 **held/rejected**. `TSF_FALSIFIER_RESULTS.md` contains the complete exact record and limitations.
 
+The preserved TSF failure is the reason for the fresh selection, not evidence for RCI.
+`RCI_FALSIFIER_DECISION.md` now records RCI as the sole design-only branch and SOS on hold.
+No TSF retuning, SOS implementation, automatic promotion, hardware claim, or product claim
+follows from either branch.
+
 This is synthetic-only rejection evidence, not hardware, human, WPM, correction,
-text-accuracy, privacy-by-retention, or product evidence. The next executable action is a fresh
-post-failure branch decision, not TSF tuning. RCI and SOS remain later unimplemented
-comparators and receive no automatic promotion or implementation authorization.
+text-accuracy, privacy-by-retention, or product evidence. The next executable action is the
+already-recorded RCI-only implementation, not TSF tuning. SOS remains held/unimplemented.

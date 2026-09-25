@@ -1,14 +1,14 @@
 # Agentic State Ledger
 
 **Loop:** 10× autonomous product-engineering meta-plan  
-**Current phase:** 4 — TSF synthetic falsifier failed; fresh post-failure branch decision required
+**Current phase:** 4 — TSF synthetic falsifier failed; RCI is the single fresh design-only branch
 **Evidence class of current product slice:** `IMPLEMENTED`
 **Active candidate:** Clean English steno transport plus offline contract validator
 **Promoted offline research branch:** None; no branch is promoted to product or hardware
-**Single next research branch:** None pending a fresh post-failure branch decision
-**Rejected/control/hold branches:** TSF prototype rejected/held after its frozen synthetic falsifier; Current Contact Field implementation rejected; Elastic Word control/fallback; FCPT selectable-thumb primitive rejected; RCI/SOS later comparators; dwell/topology/raw-field hold/prerequisite
-**Open falsification test:** None; the first frozen TSF synthetic falsifier failed its positive-accuracy and temporal-information-margin gates
-**Next executable action:** Make a fresh post-failure branch decision; do not tune or advance the rejected/held TSF prototype and make no hardware or product claim
+**Single next research branch:** Rest-Censored Innovation (RCI), `DESIGN / UNIMPLEMENTED`; SOS remains `HOLD / UNIMPLEMENTED`
+**Rejected/control/hold branches:** TSF prototype rejected/held after its frozen synthetic falsifier; Current Contact Field implementation rejected; Elastic Word control/fallback; FCPT selectable-thumb primitive rejected; SOS later comparator held; dwell/topology/raw-field hold/prerequisite
+**Open falsification test:** None executed; `RCI-SYNTHETIC-FALSIFIER-1` is specified in design but not implemented, manifest-frozen, or run
+**Next executable action:** Implement only the frozen RCI design in `RCI_FALSIFIER_DECISION.md`; do not tune or advance TSF, do not implement SOS, and make no hardware or product claim
 
 ## Decisions
 
@@ -45,7 +45,8 @@ unimplemented.
 - **Contact-field:** **CURRENT IMPLEMENTATION REJECTED.** The frozen run reports macro recall `0.585`, coverage `0.8`, wrong-commit `0.28`, conditional accepted error `0.35`, null upper95 `0.013347160654775625`, and nuisance recall `0.9625/0.7625/0.3375/0.0`. Wrong-commit/error and nuisance failures are valid rejection evidence. Null safety is not credited because `expected_output is None` forced abstention, and class-count parity leaked labels. The audit does not prove every redesign impossible.
 - **Word-as-event / Elastic Word:** **SYNTHETIC CONTROL/FALLBACK / HOLD; NON-PROMOTIONAL.** The exact run reports macro recall `1.0`, lower95 `0.9983118898757506`, coverage `0.8888888888888888`, error rates `0.0`, null upper95 `0.013347160654775625`, and all-stratum recall `1.0`. It is not safety/generalization/severe-nuisance evidence: nulls were forced, splits shared generators, calibration was unused, one exemplar trained each class, and severe insertion was a `0.0001`-unit near-duplicate. Anonymous path construction remains absent.
 - **Temporal Set-Flow (TSF):** **BOUNDED PROTOTYPE IMPLEMENTED, RESEARCH-ONLY; FALSIFIER REJECTED/HELD.** It remains identity-free and structurally tested, but the frozen synthetic run reports positive accuracy `0.0` over 12 test examples (3-cluster, 256-replicate accuracy interval `[0.0, 0.0]`), null false-commit rate `0.0` (interval `[0.0, 0.0]`), calibration threshold `0.0834054855946207`, and `test_used_for_selection=false`. The best control was `rigid_motion` at `0.3333333333333333`; the observed TSF margin was `-0.3333333333333333`, with paired clustered margin interval `[-0.6666666666666666, 0.0]`. `kill_gate_passed=false`, so claim remains `none`. `TSF_FALSIFIER_RESULTS.md` is authoritative; no hardware, human, performance, or product claim follows.
-- **RCI and SOS:** remain unimplemented later comparators and do not advance automatically. A fresh post-failure branch decision is required before selecting any next branch. **Dwell, topology, and raw-field:** hold/prerequisite for independent arming, graph stability, and target-interface observability respectively.
+- **Rest-Censored Innovation (RCI):** **SINGLE FRESH DESIGN-ONLY BRANCH; UNIMPLEMENTED.** RCI recognizes a bounded scalar energy-distance excursion of timestamped unordered point sets from an explicitly captured, pooled empirical set-rest measure that becomes immutable at lock. It uses no slot/TID, per-contact baseline, adjacent matching, selected writer, rigid/non-rigid residual flow, or TSF path. `RCI_FALSIFIER_DECISION.md` freezes the primitive, strict lifecycle, independent generator families, matched count/nuisance/null bank, controls, metrics, hard vetoes, and exact `RCI-SYNTHETIC-FALSIFIER-1` gates. This decision claims no RCI performance and authorizes no hardware, human, product, WPM, correction, latency, or text-accuracy result.
+- **Spatiotemporal Occupancy Sketch (SOS):** **HOLD / UNIMPLEMENTED.** It is not a second branch, receives no implementation or automatic advancement from the RCI selection, and has no performance claim.
 - **FCPT:** **CURRENT SELECTABLE-THUMB PRIMITIVE REJECTED; ARITHMETIC HELD.** The frozen run has 27 modeled-cost settings and `recognition_metrics=null`; modeled cost is not recognition or hardware evidence.
 
 Test 0 is implemented, tested, and frozen. `SCIENTIFIC_COMPARATOR_TEST0_RESULTS.md` records canonical `FROZEN_MANIFEST_SHA256` `922524b495753bd2f4394380b850f4d788c4b38b9af4ea057e57414fe601a25f` (raw file SHA-256 `eccee106fab4b7aa19a48d0f160c4ea4a933e74b794b996da39a980747aa77c4`), runtime validation through read-only `load_frozen_manifest()`, mutation refusal with `ValueError`, the 9-test integrity pass, and the full-suite result of 286 tests with 1 skipped and 0 failed. Its nearest-centroid control achieved positive accuracy `1.0`, null false-commit rate `0.0`, calibration threshold `0.15827817469940747`, a passing null gate, and positive-accuracy interval `[1.0, 1.0]` from a 4-cluster, 256-replicate session bootstrap. The always-positive control failed with null false-commit rate `1.0`; shuffled-label, count-only, and path-length-only controls were at or below chance; point-order permutation invariance and decision-before-truth serialization were true. The frozen decisions are serialized without labels, expected output, null flags, split/session/class metadata
@@ -55,6 +56,14 @@ digest is `a95f0d18832362b314417c557d615be4802cc869010617113fb75100090ffe7e`;
 all 11 TSF tests passed, but the executed result failed the positive-accuracy and paired
 temporal-information-margin gates. This historical failure is not repaired by retuning or by
 structural-test success.
+
+`RCI_FALSIFIER_DECISION.md` is the frozen authority for the single fresh post-TSF branch.
+It is `DESIGN` only: RCI has no implementation, executable manifest, tests, or measured
+result. Its first manifest must preserve decision serialization before truth join,
+calibration-only entry/acceptance selection, all-train exemplar use, independently
+implemented train/calibration/test generators, matched cardinality, count-only chance,
+session-clustered uncertainty, immutable set rest, and the rule that any hard-gate failure
+forces `claim=none`.
 
 No branch is promoted to product. Synthetic comparator results are not hardware, human, WPM, correction, or text-accuracy evidence.
 

@@ -83,7 +83,4 @@ clusters. It is not hardware, human, anatomy, fatigue, privacy-by-retention, WPM
 text-accuracy, Plover, network, product, or external-repository evidence. Passing structural
 tests establishes implementation properties only; it cannot replace the failed falsifier.
 
-The next executable action is a fresh post-failure branch decision, not TSF threshold or
-parameter tuning. RCI and SOS remain unimplemented later comparators and receive no automatic
-promotion or authorization from this failed run. Any later branch requires its own frozen
-hypothesis, comparator, and falsifier decision.
+The next executable action after this historical result was a fresh post-failure branch decision, not TSF threshold or parameter tuning. That decision is now recorded in `RCI_FALSIFIER_DECISION.md`: RCI is the single fresh design-only branch, and SOS remains held/unimplemented. Neither receives automatic promotion or authorization from this failed run.
