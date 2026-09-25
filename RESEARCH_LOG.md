@@ -100,3 +100,12 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Kept shipped magnitude-only suppression unchanged pending cued two-hand evidence.
 - [x] Added sharp/broad/low-magnitude policy tests and documented the opt-in boundary.
 - [ ] Issue #16 cued alternating-vs-simultaneous session remains necessary for adoption.
+
+## Iteration 9 — 2026-09-25 07:04–07:10 CEST
+
+- [x] Made compass return speed/strategy an explicit conditional model input.
+- [x] Kept the 600 mm/s default for compatibility; added sub-gate-return output and tests.
+- [x] Prevented radius WPM figures from being read independently of return strategy.
+- [ ] Issue #17 radius decision still requires cued reach and return-strategy measurements.
+- [x] Corrected the sub-gate-return arithmetic: 0.70 Hz at r=20 mm and 0.48 Hz at r=30 mm;
+  earlier one-return-leg figures were withdrawn.

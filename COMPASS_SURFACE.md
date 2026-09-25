@@ -4,6 +4,9 @@
 `scripts/compass_surface.py`. Inputs are measured, not literature: per-frame noise fitted to
 the 35 % on-fence rate observed on real motion (`LAYOUT_ASSIGNMENT.md`), the 8-frame evidence
 floor (`SEPARATION_MODEL.md`), and the mandatory return leg.
+The return speed is an explicit model input. Use `--return-speed 600` for the conditional
+fast-reversal table below, or `--return-speed 30` for the sub-gate-return case. Do not compare
+their WPM columns as if they measured the same decoder.
 
 ## The two effects, and they point the same way
 
@@ -49,8 +52,8 @@ The WPM column assumes a **600 mm/s return**, which is far above the 40 mm/s det
 That return is only separable by reversal segmentation (`intent_filter.detect_reversal_events`),
 and that path is currently the weaker of the two strategies
 (`MEASURED_INTENT_FILTER.md` / `out_and_back_eval.py`). With a sub-gate return the cycle is
-`1/(t_out + 2r/30)`, which at r = 20 mm is 1.5 Hz and at r = 30 mm is 1.2 Hz — and the
-speed ceiling collapses accordingly.
+`1/(t_out + 2r/30)`: approximately **0.70 Hz at r = 20 mm** and **0.48 Hz at r = 30 mm**.
+The earlier 1.5/1.2 Hz figures counted only one return leg; they were withdrawn.
 
 So the surface above is **conditional on the reversal path working**. The cued session
 (`--task sectors` at several radii, plus `--task tempo`) is what decides both the radius and

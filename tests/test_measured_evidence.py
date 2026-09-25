@@ -719,6 +719,14 @@ class TestCompassSurface(unittest.TestCase):
                         "larger target spacing means less repositioning contamination")
         self.assertGreater(small["cycle_limit_hz"], large["cycle_limit_hz"],
                            "the return leg is the only cost, and it grows with radius")
+    def test_return_speed_is_explicit_in_rate_model(self):
+        import compass_surface as cs
+        fast = cs.row(20.0, trials=200, seed=5, return_speed_mm_s=600.0)
+        subgate = cs.row(20.0, trials=200, seed=5, return_speed_mm_s=30.0)
+        self.assertEqual(fast["return_strategy"], "fast_reversal")
+        self.assertEqual(subgate["return_strategy"], "sub_gate_return")
+        self.assertLess(subgate["cycle_limit_hz"], fast["cycle_limit_hz"])
+        self.assertEqual(subgate["rate_basis"], "conditional_cycle_model")
 
     def test_radius_below_15mm_is_not_viable(self):
         import compass_surface as cs

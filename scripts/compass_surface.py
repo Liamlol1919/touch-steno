@@ -56,19 +56,26 @@ def accuracy(radius_mm: float, trials: int, seed: int) -> float:
     return ok / trials
 
 
-def row(radius_mm: float, trials: int, seed: int) -> dict:
+def row(radius_mm: float, trials: int, seed: int,
+        return_speed_mm_s: float = RETURN_MM_S) -> dict:
+    if radius_mm <= 0 or return_speed_mm_s <= 0:
+        raise ValueError("radius and return speed must be positive")
     geo = cg.analyse(radius_mm, cg.DEFAULT_WINDOW_MS, cg.DEFAULT_SPEED_MM_S)
-    ret_ms = 2.0 * radius_mm / RETURN_MM_S * 1000.0
+    ret_ms = 2.0 * radius_mm / return_speed_mm_s * 1000.0
     cycle_ms = WINDOW * DT * 1000.0 + ret_ms
+    strategy = "fast_reversal" if return_speed_mm_s >= 40.0 else "sub_gate_return"
     return {
         "radius_mm": radius_mm,
         "accuracy": round(accuracy(radius_mm, trials, seed), 3),
         "sector_pitch_mm": geo["sector_pitch_mm"],
         "contamination": geo["contamination"],
         "contamination_error_deg": geo["residual_error_deg"],
+        "return_speed_mm_s": return_speed_mm_s,
+        "return_strategy": strategy,
         "return_ms": round(ret_ms, 1),
         "cycle_limit_hz": round(1000.0 / cycle_ms, 2),
         "wpm_equiv_1p5_syll": round((1000.0 / cycle_ms) / 1.5 * 60.0, 0),
+        "rate_basis": "conditional_cycle_model",
     }
 
 
@@ -78,16 +85,21 @@ def main() -> int:
                     default=[8, 10, 12, 15, 20, 25, 30, 35, 40, 50])
     ap.add_argument("--trials", type=int, default=4000)
     ap.add_argument("--seed", type=int, default=11)
+    ap.add_argument("--return-speed", type=float, default=RETURN_MM_S,
+                    help="return speed in mm/s; 30 is sub-gate, 600 is reversal")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
-    rows = [row(r, args.trials, args.seed) for r in args.radii]
+    rows = [row(r, args.trials, args.seed, args.return_speed)
+            for r in args.radii]
     if args.json:
         print(json.dumps({"sigma_mm_per_frame": SIGMA, "window_frames": WINDOW,
-                          "return_mm_s": RETURN_MM_S, "rows": rows}, indent=2))
+                          "return_speed_mm_s": args.return_speed,
+                          "rate_basis": "conditional_cycle_model", "rows": rows},
+                         indent=2))
         return 0
     print(f"compass surface: sigma {SIGMA} mm/frame (fitted to the measured 35% on-fence")
     print(f"rate), window {WINDOW} frames ({WINDOW*DT*1000:.0f} ms), return "
-          f"{RETURN_MM_S:.0f} mm/s\n")
+          f"{args.return_speed:.0f} mm/s; rate/WPM values are conditional on this return")
     print("|r_mm|accuracy|sector_pitch_mm|contamination|contam_err_deg|return_ms|"
           "cycle_hz|WPM_equiv|")
     print("|---:|---:|---:|---:|---:|---:|---:|---:|")
@@ -97,11 +109,8 @@ def main() -> int:
               f"{r['return_ms']:.0f}|{r['cycle_limit_hz']:.2f}|"
               f"{r['wpm_equiv_1p5_syll']:.0f}|")
     best = max(rows, key=lambda r: r["accuracy"] - 0.01 * r["cycle_limit_hz"])
-    print(f"\naccuracy saturates around r={max(rows, key=lambda r: r['accuracy']-0.01*r['cycle_limit_hz'])['radius_mm']:.0f}mm;")
-    print("the cycle cost grows linearly with r because the return leg does.")
-    print("This surface is derived from the measured noise, not from literature - the")
-    print("cued sector session is what decides the operating point.")
-    del best
+    print(f"\naccuracy/cycle compromise around r={best['radius_mm']:.0f}mm;")
+    print("the cued sector/tempo session decides radius and return together.")
     return 0
 
 
