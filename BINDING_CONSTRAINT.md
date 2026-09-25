@@ -769,3 +769,32 @@ abandoned for English as well, but the overshoot is 4,19 against 2 rather than 5
 **Caveats carried with the numbers:** eSpeak G2P and this onset table are an approximation,
 not a linguistic universal; the corpus is frequency-weighted English, and a different
 register or a German corpus changes every figure. Nothing here is a measured user rate.
+
+### 10.1 Orthographic comparison, and a corrected exponential
+
+The English inventory now has a second, independent method for direct comparison with the
+German figures: **pyphen 0.18.1 `en_US`**, unique non-empty orthographic hyphenation pieces
+(92 838 pieces split, 26 838 distinct at the top 50k):
+
+| Method | top 20k types | top 50k types |
+|---|---|---|
+| English phonemic (eSpeak) | 7 577 | **12 870** |
+| English orthographic (pyphen) | 12 384 | **26 838** |
+| German phonemic (eSpeak) | 5 370 | 9 170 |
+| German orthographic (pyphen) | — | 11 230 |
+
+Orthographic segmentation yields roughly **twice** the distinct pieces of phonemic
+segmentation in both languages. That is a property of the method, not of the language, and
+it is exactly why the two must never be mixed: an orthographic piece count is not a
+syllable count.
+
+**Correction.** A follow-up message stated `2^10.024 ≈ 1024.9`. That is wrong:
+`2^10.0243309 = 1041.42`, and `log₂(1041.4) = 10.024309`, which matches the German entropy
+to five decimals. The earlier German figure of 1 041 was correct and the 1 025 was not.
+For the record: `2^9.476 = 712.30` (English word unigram), `2^9.085 = 543.21` (English
+syllable entropy), `2^8.852 = 461.98` (German syllable entropy).
+
+**The structural conclusion is unchanged by the method:** English needs
+`1.396494 × e` events per 5-letter word — **4.189** at 3 events per syllable, 5.586 at 4,
+6.982 at 5. All exceed the 1–2 premise. English's lower syllable count makes the overshoot
+smaller than German's, not absent.
