@@ -83,3 +83,13 @@ measured PTH-660 throughput.
 - [x] Added fail-closed handling for unknown schema/version values.
 - [x] Added recorder round-trip, legacy compatibility and schema documentation.
 - [ ] Raw sessions still require a privacy review and real-device capture.
+
+## Iteration 7 — 2026-09-25 06:50–06:57 CEST
+
+- [x] Identity validator now requires explicit operator-confirmed finger-to-tracking-ID mapping.
+- [x] Unique lift without mapping returns `UNVERIFIED`; wrong mapping returns `CONTAMINATED`.
+- [x] Added attribution, ambiguity, shallow-lift and mapping tests.
+- [ ] A real identity capture with confirmed mapping is still required.
+
+The cue label is not anatomical attribution. Issue #9 remains open until a confirmed
+mapping is collected and the resulting identity model is evaluated across sessions.

@@ -618,12 +618,16 @@ class TestIdentityDatasetCheck(unittest.TestCase):
         path.with_suffix(".manifest.jsonl").write_text(
             "\n".join(json.dumps(r) for r in manifest), encoding="utf-8")
         return path
+    @staticmethod
+    def _mapping():
+        return {"f0": "1", "f1": "2", "f2": "3"}
+
 
     def test_clean_capture_is_all_valid(self):
         import tempfile
         import identity_dataset_check as idc
         with tempfile.TemporaryDirectory() as td:
-            rep = idc.check(self._capture(td))
+            rep = idc.check(self._capture(td), self._mapping())
         self.assertTrue(rep["all_valid"])
         self.assertEqual(rep["counts"].get("VALID"), rep["cues"])
 
@@ -632,7 +636,7 @@ class TestIdentityDatasetCheck(unittest.TestCase):
         import tempfile
         import identity_dataset_check as idc
         with tempfile.TemporaryDirectory() as td:
-            rep = idc.check(self._capture(td, lift_frames=3))
+            rep = idc.check(self._capture(td, lift_frames=3), self._mapping())
         self.assertFalse(rep["all_valid"])
         self.assertIn("MISSING", rep["counts"])
 
@@ -641,10 +645,26 @@ class TestIdentityDatasetCheck(unittest.TestCase):
         import tempfile
         import identity_dataset_check as idc
         with tempfile.TemporaryDirectory() as td:
-            rep = idc.check(self._capture(td, lift_two=True))
+            rep = idc.check(self._capture(td, lift_two=True), self._mapping())
         self.assertFalse(rep["all_valid"])
         self.assertIn("AMBIGUOUS", rep["counts"])
 
+
+    def test_unique_lift_without_mapping_is_unverified(self):
+        import tempfile
+        import identity_dataset_check as idc
+        with tempfile.TemporaryDirectory() as td:
+            rep = idc.check(self._capture(td))
+        self.assertFalse(rep["all_valid"])
+        self.assertEqual(rep["counts"].get("UNVERIFIED"), rep["cues"])
+
+    def test_wrong_explicit_mapping_is_contaminated(self):
+        import tempfile
+        import identity_dataset_check as idc
+        with tempfile.TemporaryDirectory() as td:
+            rep = idc.check(self._capture(td), {"f0": "2", "f1": "2", "f2": "3"})
+        self.assertFalse(rep["all_valid"])
+        self.assertIn("CONTAMINATED", rep["counts"])
 
 class TestRigidFit(unittest.TestCase):
     """Translation+rotation must be removed from the anchors, and only from them."""
@@ -764,7 +784,6 @@ class TestCouplingTimingSignature(unittest.TestCase):
         prof = {0: 0.5, 1: 0.4, 2: 0.3}
         self.assertIsNone(fp.half_width_frames(prof),
                           "a profile that never halves has no half-width")
-
 class TestQuantileHelpers(unittest.TestCase):
     def test_quantile_bounds(self):
         vals = [float(i) for i in range(100)]

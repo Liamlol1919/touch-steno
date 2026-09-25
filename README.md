@@ -19,6 +19,8 @@ Research and implementation notes for high-speed text input on a continuous touc
   for complete and legacy paired cue manifests.
 - [RAW_FRAME_SCHEMA.md](RAW_FRAME_SCHEMA.md) and `scripts/raw_schema.py` — versioned raw-frame
   JSONL contract with legacy replay compatibility.
+- `scripts/identity_dataset_check.py` — identity-capture gate; `VALID` requires an explicit
+  operator-confirmed finger-to-tracking-ID mapping.
 - `tests/` — standard-library unit tests for decoder invariants, measured constants and benchmark artefacts.
 
 ## Important evidence note
