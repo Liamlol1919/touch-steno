@@ -168,6 +168,60 @@ def group_summary(sessions: list[dict], min_frames: int) -> dict:
     return out
 
 
+def vector_coupling(payload: list[dict], min_frames: int = 40) -> list[dict]:
+    """Direction-resolved coupling: is the follower dragged *parallel* or *mirrored*?
+
+    beta = mean|step_b| / mean|step_a| over frames where a is the mover.
+    cos  = mean cos(angle between step_a and step_b)  -> +1 parallel, -1 mirrored.
+    s    = least-squares slope of step_b ~ s * step_a (2-D, both components).
+    A parallel coupling (cos~+0.9, s~0.6) is correctable by vector subtraction
+    (residual = step_b - s*step_a collapses); a mirrored one (cos<0) is not.
+    """
+    prev: dict[str, tuple[float, float, float]] = {}
+    rows: list[dict[str, tuple[float, float]]] = []
+    for fr in payload:
+        t = float(fr["t"])
+        row: dict[str, tuple[float, float]] = {}
+        for tid, (x, y, _m) in fr["c"].items():
+            x, y = float(x), float(y)
+            old = prev.get(tid)
+            if old is not None and t - old[2] > 0:
+                row[tid] = (x - old[0], y - old[1])
+            prev[tid] = (x, y, t)
+        rows.append(row)
+    acc: dict[tuple[str, str], dict[str, float]] = {}
+    for row in rows[1:]:
+        if not row:
+            continue
+        a = max(row, key=lambda k: math.hypot(*row[k]))
+        ax, ay = row[a]
+        na = math.hypot(ax, ay)
+        if na <= 0:
+            continue
+        for b, (bx, by) in row.items():
+            if b == a:
+                continue
+            nb = math.hypot(bx, by)
+            if nb <= 0.01:      # below the resting noise floor
+                continue
+            e = acc.setdefault((a, b), {"n": 0.0, "cos": 0.0, "s": 0.0,
+                                        "mag": 0.0, "na": 0.0})
+            e["n"] += 1
+            e["cos"] += (ax * bx + ay * by) / (na * nb)
+            e["s"] += (ax * bx + ay * by) / (ax * ax + ay * ay)
+            e["mag"] += nb
+            e["na"] += na
+    out = []
+    for (a, b), e in acc.items():
+        if e["n"] < min_frames:
+            continue
+        out.append({"mover": a, "follower": b, "n_frames": int(e["n"]),
+                    "beta": e["mag"] / e["na"], "cos": e["cos"] / e["n"],
+                    "slope": e["s"] / e["n"]})
+    out.sort(key=lambda r: -r["beta"])
+    return out
+
+
 def separation_table(sessions: list[dict], min_frames: int) -> list[dict]:
     """Worst-case REST vs best-case MOVER per velocity threshold / persistence.
 
@@ -223,9 +277,10 @@ def main() -> int:
     sessions = [analyse(p, args.mover_path, args.rest_path) for p in args.sessions]
     summary = group_summary(sessions, args.min_frames)
     table = separation_table(sessions, args.min_frames)
+    vec = [r for p in args.sessions for r in vector_coupling(load(p))]
     if args.json:
         print(json.dumps({"sessions": sessions, "summary": summary,
-                          "separation": table}, indent=2))
+                          "separation": table, "vector_coupling": vec}, indent=2))
         return 0
     for s in sessions:
         t = s["timing"]
@@ -249,6 +304,11 @@ def main() -> int:
     print("\n## separation: rule (velocity, persistence) vs measured runs")
     print(md_table(table, "\n|velocity_mm_s|persistence_frames|rest_worst_run|"
                           "rest_fires|mover_best_run|mover_fires|"))
+    print("\n## vector coupling: parallel (cos>0, correctable) vs mirrored "
+          "(cos<0, not correctable)")
+    print(md_table([{k: (round(v, 3) if isinstance(v, float) else v)
+                     for k, v in r.items()} for r in vec[:15]],
+                   "\n|mover|follower|n_frames|beta|cos|slope|"))
     return 0
 
 
