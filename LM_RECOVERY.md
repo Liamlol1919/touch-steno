@@ -50,17 +50,41 @@ user's time per correction.)
    comfort envelope (COMPASS_SURFACE). Below that, correctness is bought with the user's
    attention, and attention is the resource the steno design was supposed to *save*.
 
-## The number nobody has
+## The number nobody has — and what can replace it
 
-Every WPM figure in the table is multiplied by an assumed seconds-per-correction. W19 searched
-the literature for that number and returned **NOT FOUND**: there is no published measurement
-of correction throughput at this event rate, for steno or for LM-assisted input.
+W19 and W22 both searched the literature for seconds-per-correction and both returned
+**NOT FOUND**. W22 went further and found that the field actively avoids pricing it:
 
-So the project's decisive input is currently an assumption, and it sits on the critical path:
+- typing-test standards compute `Net WPM = Gross WPM − (uncorrected errors / minutes)`
+  (https://www.speedtypingonline.com/typing-equations) — i.e. they **deduct one second of
+  output per uncorrected error**. That is a *convention*, not a measurement, and it is the
+  closest thing the field has to a correction cost.
+- KLM/GOMS prices a mental re-plan at M = 1.35 s but does not tie it to correction.
+- No source found measures per-correction seconds in steno, in general fast typing, or in
+  touch-IME correction.
 
-- at 0.3 s/correction, 15 mm is viable (34.5 WPM) and 12 mm is marginal (22.9);
-- at 1.0 s/correction, 12 mm is dead and 15 mm yields 21.6 WPM;
-- at 2.0 s/correction, even 15 mm collapses to 3.3 WPM.
+So the assumption can be **bounded** rather than merely acknowledged:
+
+| basis | seconds/correction | status |
+|---|---:|---|
+| typing-test convention (1 s per uncorrected error) | **1.0** | shared convention, not measured here |
+| sensitivity band used in the table above | 0.3 / 1.0 / 2.0 | our own bracket |
+| correction frequencies available | 0.5–0.75 uncorrected errors/min at 39–49 GWPM; 0.161 backspace proportion | measured, from other studies |
+
+Using the field's own convention as the anchor rather than a number we invented, the 15 mm
+row lands at **21.6 WPM** and the 12 mm row at **0 WPM**. The design conclusion does not
+change — 12 mm still does not survive a 1 s correction — but the estimate now has a source
+and a defensible spread instead of an invented parameter.
+
+W22 also flagged several numbers that are frequently substituted for a correction latency
+(prediction-check dwell 0.45 s, T9 inspection 0.50 s, reading fixation 0.20–0.25 s, key press
+0.26 s, decode 59 ms). **None was measured as a human correction on a surface with no
+visible keys**, and combining them would be guessing. They are recorded here only to prevent a
+silent substitution later.
+
+The direct measurement remains worth doing and is now precisely specified: a stopwatch, a
+word list, and a typist. Type N words at the target rate, repair the retractions, and time
+both. Ten minutes yields the distribution the whole table is missing.
 
 The architecture conclusion depends entirely on where in that range reality falls, and we
 cannot currently say. This is now the highest-value measurement in the project, and unlike
