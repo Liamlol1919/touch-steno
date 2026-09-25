@@ -133,6 +133,30 @@ came from outside our data.
 | best measured 10-finger passive tap system with IMU | 70.6 WPM after 2.5 h / 5 days | TypeAnywhere (W2) |
 | our event budget at the measured 88 ms floor | ≈ 11.4 events/s ≈ 5.7–7.6 syllables/s ≈ 340–450 WPM **theoretical, error-free** | derived, VECTOR_DESIGN_CRITIQUE §3 |
 | our measured mover speeds | peak 133–309 mm/s, mean 16–40 mm/s, sustained runs 19–278 frames | MEASURED_BIOMECHANICS §3 |
+| our measured free-motion event rate | **2.56 events/s** (108 events in 42.3 s, ten fingers down) | MEASURED_INTENT_FILTER |
+
+### 1.4 A concrete layout rule that follows: put the targets on the axes
+
+Kurtenbach & Buxton 1993 (verified directly, https://www.billbuxton.com/MMExpert.html,
+InterCHI '93, 482–487) report that **on-axis menu items are selected faster and with fewer
+errors than off-axis items**: axis level had a significant effect on response time
+(F(2,22) = 104.84, p < 0.001) and on error rate (F(2,22) = 36.2, p < 0.001), with
+pen > mouse (F(1,11) = 19.7, p < 0.001 for time; F(1,11) = 6.41, p < 0.05 for errors).
+
+For an 8-way thumb compass this is actionable and currently missing from the design notes:
+
+- **align the 8 sectors to the cardinal and intercardinal axes** (N, NE, E, SE, S, SW, W,
+  NW), not to a rotated 22.5° offset grid — the axes are the reliable half;
+- expect the **four diagonals to carry most of the error budget**, and either give them
+  more LM prior weight, or restrict the high-frequency set to the four axes and use the
+  diagonals as modifiers;
+- a 16-way grid would place every target at a 11.25° offset where the axis advantage is
+  largely gone, which is a second, independent reason to prefer 8.
+
+Measured counterpart: our own movers cluster in arbitrary directions, so the *decoder*
+should be tested on a confusion matrix split by sector (axes vs diagonals), not only on an
+overall diagonal. That split belongs in the slow-stroke session of
+`VECTOR_DESIGN_CRITIQUE.md` §8.
 
 Reading these together: the *sensing* side has enough headroom for 150+ WPM. The
 *decoding and human* side is where every published system actually lands, at 36–70 WPM.
