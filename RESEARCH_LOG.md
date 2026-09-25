@@ -124,3 +124,11 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Restated the realized synthetic envelope and synthetic-only direction result.
 - [x] Kept human 360 WPM as an anchor, not a PTH-660 throughput claim.
 - [x] Full suite remains green; no new hardware evidence was added.
+
+## Iteration 12 — 2026-09-25 07:16–07:24 CEST
+
+- [x] Added `correction_metrics.py` for replayable corr_undo analysis.
+- [x] Kept cue-to-undo-motion latency separate from text-repair latency.
+- [x] Text repair metrics require an explicit timestamped repair log; absence is explicit.
+- [x] Added correction metric tests and updated the cued protocol/README.
+- [ ] A real cued correction capture and text-sink repair log remain outstanding.

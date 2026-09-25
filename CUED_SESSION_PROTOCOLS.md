@@ -9,7 +9,7 @@ open question has a specific measurement attached to it.
 |---|---|---|---|
 | `sectors` | `--task sectors` | 8-sector confusion matrix, axes vs diagonals, split by gesture length | **highest value** |
 | `tempo` | `--task tempo` | can a trained user reach 3–5 events/s deliberately? (free motion gives 0.9–2.6) | **highest value** |
-| `correction` | `--task correction` | corrections/min and repair latency at the target event rate | **the one number that decides the speed ceiling** (W19: NOT FOUND in the literature) |
+| `correction` | `--task correction` | cue-to-undo-motion latency; text-repair latency only with an explicit repair log | **highest unresolved speed number** (W19: NOT FOUND in literature) |
 | `chord` | `--task chord` | is a real two-finger chord separable from a mirrored drag? | chord criterion is unvalidated |
 | `noise` | `--task noise` | per-user rest floor → the per-user gate (SEPARATION_MODEL) | cheap, 60 s |
 | `identity` | `--task identity` | labelled (contact-id, anatomical label) pairs for portable calibration | validate with `identity_dataset_check.py` |
@@ -20,7 +20,7 @@ open question has a specific measurement attached to it.
    table in `SEPARATION_MODEL.md`. Everything else is safer once this is known.
 2. **`sectors`** (~2 min for 4 repetitions) — the accuracy number the whole report is missing.
 3. **`tempo`** (~2 min) — the training question behind the speed target.
-4. **`correction`** (~3 min) — the open number from W19.
+4. **`correction`** (~3 min) — the open number from W19; run `scripts/correction_metrics.py`.
 5. **`chord`**, **`identity`** — only after the above, because they are the most expensive
    interpretation per minute of capture.
 

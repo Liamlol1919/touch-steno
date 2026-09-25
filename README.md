@@ -23,6 +23,8 @@ Research and implementation notes for high-speed text input on a continuous touc
   operator-confirmed finger-to-tracking-ID mapping.
 - [TRAINING_PATH.md](TRAINING_PATH.md) — staged cued-training gates, Plover brief scope and
   evidence boundaries.
+- `scripts/correction_metrics.py` and `tests/test_correction_metrics.py` — separates
+  cue-to-undo-motion latency from explicitly logged text-repair latency.
 - `tests/` — standard-library unit tests for decoder invariants, measured constants and benchmark artefacts.
 
 ## Important evidence note
