@@ -324,3 +324,25 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
   at 0.65, so a near-certain unigram cannot be overruled. That is right for a steno decoder,
   which would otherwise turn clear signals into wrong ones, and it is now pinned.
 - 110 tests green. Filed the decisive-open-number issue.
+
+## 08:12–08:20 — a retraction, and a better finding underneath it
+- W22 (correction time) confirmed W19: no source measures seconds-per-correction, and the
+  field avoids pricing it (typing standards deduct 1 s of output per uncorrected error by
+  convention; KLM prices a mental re-plan at 1.35 s but not correction). Anchored the model
+  to the field's own convention instead of my invented parameter.
+- Built scripts/correction_timing.py: the measurement is now executable with a stopwatch and
+  a word list, no tablet. Records per-word time AND the miss rate (errors the typist never
+  notices), which is the part that usually gets collapsed.
+- Then I tried to improve the retraction policy and found the experiment was conditioning on
+  the answer: the candidate set came from the row of the INTENDED sector, so the language
+  model was handed the truth. With P(true|observed) the recovery collapses from 88.8% to
+  ~0, and an ORACLE prefix does not help either - so it is neither model quality nor error
+  propagation.
+- RETRACTED the whole recovery table, the retraction policy, the correction load and every
+  WPM figure, in LM_RECOVERY.md and in issue #20. Second confidently-wrong headline in two
+  days, both from evaluation code.
+- The corrected finding is stronger than the wrong one: the true symbol is in the top-3
+  candidates 96.8% of the time at 12mm, and the target word is reachable in a 20k lexicon
+  85% of the time (96% at 15mm, 99.8% at 20mm). The information is in the channel; the
+  decoder never searched for it. Next build: keep top-3, run a word-level lexicon-constrained
+  search. Filed as the follow-up task.
