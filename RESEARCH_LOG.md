@@ -33,7 +33,7 @@
 - [ ] Cued tempo run: measure deliberate event rate per gesture; do not infer it from 88 ms latency.
 - [ ] Cued chord run: calibrate peak-ratio and lag thresholds; keep chords unimplemented until then.
 - [x] Stabilize a versioned raw-event JSONL schema and legacy replay path.
-- [ ] Add per-user rest/palm covariance calibration and replayable threshold sweeps.
+- [x] Add per-user rest/palm covariance calibration and replayable threshold sweeps.
 - [x] Define correction/undo metrics with explicit motion-versus-text provenance.
 - [x] Define opt-in privacy-safe aggregate telemetry for raw sessions.
 - [x] Normalize `guided_calibration.py` paired manifest records and make `evaluate_session.py`
@@ -152,3 +152,11 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Raw JSONL remains a separate restricted artifact; no raw export switch was added.
 - [ ] Local privacy review and real consented capture remain outstanding.
 - [x] CLI now requires explicit `--consent`; raw/aggregate boundary is enforced by code.
+
+## Iteration 15 — 2026-09-25 07:39–07:48 CEST
+
+- [x] Added `rest_calibration.py` sidecar with source hashes, rest covariance, full sweep rows,
+  deterministic candidate selection and replay comparison.
+- [x] Production `intent_filter.py` defaults remain unchanged.
+- [x] Added calibration artifact tests and documented the local-only workflow.
+- [ ] Real per-user rest/palm captures are still required before adopting a custom point.

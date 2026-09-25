@@ -27,6 +27,8 @@ Research and implementation notes for high-speed text input on a continuous touc
   cue-to-undo-motion latency from explicitly logged text-repair latency.
 - [PRIVACY_TELEMETRY.md](PRIVACY_TELEMETRY.md) and `scripts/telemetry_export.py` — opt-in,
   aggregate-only telemetry export with no raw coordinates or identifiers.
+- `scripts/rest_calibration.py` and `tests/test_rest_calibration.py` — local per-user rest
+  covariance/sweep artifact with source hashes and replay comparison.
 - `tests/` — standard-library unit tests for decoder invariants, measured constants and benchmark artefacts.
 
 ## Important evidence note

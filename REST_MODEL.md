@@ -97,3 +97,18 @@ and the real end-to-end number still has to be measured with the guided tempo se
   probably dominate it and is the natural next implementation.
 - MOVER coverage at W=19 is 18/20, not 20/20. The two missed contacts should be identified
   before this becomes the production detector.
+
+## Per-user calibration artifact
+
+`scripts/rest_calibration.py` creates a local sidecar from explicit rest and mover sources:
+
+```bash
+python3 scripts/rest_calibration.py --rest rest.jsonl --mover mover.jsonl \
+  --user-label local --out calibration.json
+```
+
+The artifact records source SHA-256 hashes, rest-position covariance, every window/threshold
+sweep row, the deterministic selected candidate, and the unchanged production defaults
+(`40 mm/s`, 8 frames). `replay_sweep()` recomputes the sweep and compares source hashes. This
+is calibration evidence, not an automatic change to `intent_filter.py`; a user-specific
+operating point must be reviewed before deployment.
