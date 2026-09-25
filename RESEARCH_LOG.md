@@ -142,3 +142,4 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Fixed evaluator text mode to expose axis/diagonal keys present in its result contract.
 - [x] Added CLI regression coverage for human-readable evaluation output.
 - [ ] Real correction capture with a Plover/text repair log remains outstanding.
+- [x] Added stable `cue_id` fields to guided tasks and repair-log association.

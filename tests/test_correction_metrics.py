@@ -12,8 +12,8 @@ import correction_metrics  # noqa: E402
 
 class TestCorrectionMetrics(unittest.TestCase):
     def setUp(self):
-        self.manifest = [{"label": "corr_undo", "t_start": 1.0, "t_end": 2.0,
-                          "correction_block": True}]
+        self.manifest = [{"label": "corr_undo", "cue_id": "correction-0000",
+                          "t_start": 1.0, "t_end": 2.0, "correction_block": True}]
         self.events = [{"t_start": 1.3}]
 
     def test_motion_without_repair_log_is_not_text_repair(self):
@@ -29,7 +29,7 @@ class TestCorrectionMetrics(unittest.TestCase):
         report = correction_metrics.summarize_corrections(
             self.manifest, self.events,
             [{"t": 1.5, "type": "text_repair", "action": "undo",
-              "clock": "monotonic"}])
+              "cue_id": "correction-0000", "clock": "monotonic"}])
         cue = report["detail"][0]
         self.assertEqual(cue["motion_status"], "DETECTED")
         self.assertEqual(cue["repair_status"], "OBSERVED")
@@ -46,7 +46,8 @@ class TestCorrectionMetrics(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             path = Path(td) / "repair.jsonl"
             path.write_text(json.dumps({"t": 1.5, "type": "other",
-                                        "action": "undo", "clock": "monotonic"}) + "\n",
+                                        "action": "undo", "cue_id": "correction-0000",
+                                        "clock": "monotonic"}) + "\n",
                             encoding="utf-8")
             with self.assertRaises(SystemExit):
                 correction_metrics.load_repair_events(path)

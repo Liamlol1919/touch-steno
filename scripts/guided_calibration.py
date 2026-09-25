@@ -132,6 +132,8 @@ def build_tasks(args) -> list[dict]:
                 tasks.append({"label": f"identity_{f}",
                               "cue": f"LIFT + REPLACE {f.upper()}",
                               "seconds": args.identity_seconds, "finger": f})
+    for index, task in enumerate(tasks):
+        task.setdefault("cue_id", f"{args.task}-{index:04d}")
     return tasks
 
 

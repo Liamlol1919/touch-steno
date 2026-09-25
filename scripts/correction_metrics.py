@@ -26,13 +26,22 @@ def summarize_corrections(manifest: list[dict], events: list[dict],
     correction_records = [r for r in manifest if r.get("correction_block")]
     exposure_s = sum(max(0.0, float(r["t_end"]) - float(r["t_start"]))
                       for r in correction_records)
-    repairs_by_cue: dict[tuple[float, float], float] = {}
+    repairs_by_cue: dict[str, float] = {}
     if repair_events is not None:
-        for cue in undo_cues:
+        undo_ids = {r.get("cue_id") for r in undo_cues}
+        for record in repair_events:
+            cue_id = record.get("cue_id")
+            if cue_id not in undo_ids:
+                continue
             candidates = [float(r["t"]) for r in repair_events
-                          if float(cue["t_start"]) <= float(r["t"]) < float(cue["t_end"])]
+                          if r.get("cue_id") == cue_id
+                          and float(next(c["t_start"] for c in undo_cues
+                                         if c.get("cue_id") == cue_id))
+                          <= float(r["t"])
+                          < float(next(c["t_end"] for c in undo_cues
+                                       if c.get("cue_id") == cue_id))]
             if candidates:
-                repairs_by_cue[(float(cue["t_start"]), float(cue["t_end"]))] = min(candidates)
+                repairs_by_cue[cue_id] = min(candidates)
 
     detail = []
     for cue in undo_cues:
@@ -40,12 +49,13 @@ def summarize_corrections(manifest: list[dict], events: list[dict],
         motion = next((e for e in events if t0 <= float(e["t_start"]) < t1), None)
         motion_latency_ms = ((float(motion["t_start"]) - t0) * 1000.0
                              if motion is not None else None)
-        repair_t = repairs_by_cue.get((t0, t1))
+        repair_t = repairs_by_cue.get(cue.get("cue_id"))
         motion_status = "DETECTED" if motion is not None else "MISSING"
         repair_status = ("NOT_LOGGED" if repair_events is None else
                          "OBSERVED" if repair_t is not None else "MISSING")
         detail.append({
-            "label": cue.get("label"), "t_start": t0, "t_end": t1,
+            "label": cue.get("label"), "cue_id": cue.get("cue_id"),
+            "t_start": t0, "t_end": t1,
             "cue_to_detected_undo_motion_ms": round(motion_latency_ms, 1)
             if motion_latency_ms is not None else None,
             "text_repair_latency_ms": round((repair_t - t0) * 1000.0, 1)
@@ -85,9 +95,10 @@ def load_repair_events(path: Path | None) -> list[dict] | None:
             raise SystemExit("repair log t must be finite")
         if record.get("type") != "text_repair" or record.get("action") != "undo":
             raise SystemExit("repair log requires type=text_repair action=undo")
+        if not isinstance(record.get("cue_id"), str) or not record["cue_id"]:
+            raise SystemExit("repair log requires a non-empty cue_id")
         if record.get("clock") != "monotonic":
             raise SystemExit("repair log requires clock=monotonic")
-    return records
 
 
 

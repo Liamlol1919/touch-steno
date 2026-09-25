@@ -25,8 +25,9 @@ open question has a specific measurement attached to it.
    interpretation per minute of capture.
 
 `correction_metrics.py --repair-log` accepts only JSONL records with numeric `t`,
-`type="text_repair"`, `action="undo"` and `clock="monotonic"`. A final transcript file or
-sensor timestamp is not treated as proof of text repair.
+`type="text_repair"`, `action="undo"`, `cue_id` matching the manifest, and
+`clock="monotonic"`. A final transcript file or sensor timestamp is not treated as proof
+of text repair.
 
 ## Scoring, and the trap to avoid
 
