@@ -495,6 +495,42 @@ class TestEnvelopeAndMetricContract(unittest.TestCase):
                 self.assertLess(hits["whole"] / n, 0.5,
                                 f"whole-event estimate should collapse at turn {turn}")
 
+
+class TestSeparationModel(unittest.TestCase):
+    """The model must predict the measured resting behaviour, not restate it."""
+
+    def test_angular_noise_stays_inside_the_sector(self):
+        import separation_model as sm
+        self.assertLess(sm.angular_noise_deg(sm.REST_STEP_P99), 180.0 / 8 / 3)
+        self.assertLess(sm.angular_noise_deg(1.479), 180.0 / 8 / 2,
+                        "even the worst observed frame must stay inside half a sector")
+
+    def test_sector_margin_is_zero_on_a_boundary(self):
+        import separation_model as sm
+        self.assertAlmostEqual(sm.sector_margin_deg(22.5), 0.0, places=6)
+        self.assertAlmostEqual(sm.sector_margin_deg(0.0), 22.5, places=6)
+        self.assertAlmostEqual(sm.sector_margin_deg(11.25), 11.25, places=6)
+
+    def test_operating_point_margin_against_measured_runs(self):
+        """The chosen (40, 8) setting has exactly one frame of margin. Pin that."""
+        import separation_model as sm
+        import real_session_evidence as rse
+        import kinematics
+        from pathlib import Path
+        sessions = [Path.home() / "Projekte/commindv2/messung" / n
+                    for n in ("test.jsonl", "test-daumen.jsonl", "test-zeige.jsonl")]
+        if not all(p.exists() for p in sessions):
+            self.skipTest("measured sessions not available")
+        worst = 0
+        for p in sessions:
+            runs = sm.rest_run_lengths(p)
+            if 40.0 in runs:
+                worst = max(worst, runs[40.0]["worst_run"])
+        self.assertLess(worst, sm.K_FRAMES,
+                        "the operating point must not fire on measured rest")
+        self.assertGreaterEqual(sm.K_FRAMES - worst, 1,
+                                "margin is at least one frame by construction")
+
 class TestQuantileHelpers(unittest.TestCase):
     def test_quantile_bounds(self):
         vals = [float(i) for i in range(100)]
