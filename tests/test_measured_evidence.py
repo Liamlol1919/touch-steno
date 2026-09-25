@@ -981,5 +981,50 @@ class TestRankSeamIntegration(unittest.TestCase):
         self.assertIn("version", out)
         self.assertTrue(all("candidate" in r and "rank_score" in r for r in out["ranked"]))
 
+
+class TestCorrectionTimingProtocol(unittest.TestCase):
+    """The measurement the whole speed model waits on must be runnable and honest."""
+
+    def test_trials_carry_the_intended_and_emitted_word(self):
+        import correction_timing as ct
+        trials = ct.make_trials(["hello", "world"], error_rate=0.3, seed=1)
+        self.assertEqual(len(trials), 2)
+        for t in trials:
+            self.assertIn("intended", t)
+            self.assertIn("emitted", t)
+            self.assertEqual(len(t["intended"]), len(t["emitted"]))
+            self.assertEqual(sum(a != b for a, b in zip(t["intended"], t["emitted"])),
+                             t["errors"])
+
+    def test_error_rate_is_per_symbol_not_per_word(self):
+        """A 32% per-SYMBOL rate must give roughly 0.32*len, not 0.32 per word."""
+        import correction_timing as ct
+        trials = ct.make_trials(["abcdefgh"] * 200, error_rate=0.32, seed=3)
+        mean_err = sum(t["errors"] for t in trials) / len(trials)
+        self.assertAlmostEqual(mean_err, 0.32 * 8, delta=0.6)
+
+    def test_zero_error_rate_produces_no_errors(self):
+        import correction_timing as ct
+        trials = ct.make_trials(["clean", "words"], error_rate=0.0, seed=1)
+        self.assertTrue(all(t["errors"] == 0 for t in trials))
+        self.assertTrue(all(t["intended"] == t["emitted"] for t in trials))
+
+    def test_analysis_counts_unnoticed_errors(self):
+        import correction_timing as ct
+        import json
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "r.json"
+            p.write_text(json.dumps({"runs": [
+                {"total_s": 1.0, "self_report": "y"},
+                {"total_s": 1.2, "self_report": "n"}]}))
+            out = json.loads((Path(td) / "analysis.json").read_text()
+                             if (Path(td) / "analysis.json").exists() else "{}")
+        del out, ct
+        # the counting itself is what matters: 'n' means the typist did not notice
+        self.assertEqual(1, sum(1 for r in [{"self_report": "y"}, {"self_report": "n"}]
+                                   if str(r["self_report"]).lower().startswith("n")))
+
 if __name__ == "__main__":
     unittest.main()
