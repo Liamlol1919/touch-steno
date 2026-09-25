@@ -307,3 +307,9 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Documented the semantic Plover adapter boundary without claiming a plugin is installed.
 - [x] Kept translation accuracy, event counts, correction time, and WPM explicitly separate.
 - [ ] Actual consented capture and operator deletion remain outstanding in issue #24.
+
+## Iteration 36 — 2026-09-25
+
+- [x] Closed issue #14 after the unsupported speed-ceiling headline was explicitly corrected in benchmark documentation.
+- [x] Kept the 100–218 WPM range labelled arithmetic/unmeasured and the realized-rate requirement explicit.
+- [x] No new rate, WPM, or hardware result was added.
