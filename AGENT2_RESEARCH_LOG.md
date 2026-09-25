@@ -105,3 +105,24 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
 - 42 tests, each envelope claim and each previously-wrong metric now pinned.
 - Rule adopted and recorded: a number is not a finding until the metric that produced it has
   a test. The harness, not the pipeline, was the weak link.
+
+## 06:22–06:24 — reversal segmentation vs sub-gate return
+- W13 (gesture segmentation without lift-off) independently brackets the measured window:
+  Beats reports 355ms mean touch execution, our envelope works to 350ms, and the $1 family
+  needs ~600ms for fast gestures, exactly where our measurement degrades. Marking menus have
+  encoded hierarchy through in-stroke direction reversals since 1993.
+- `intent_filter.detect_reversal_events`: an event closes on a direction reversal, which needs
+  no lift signal. Compared against the sub-gate-return strategy on the same task:
+  - A sub-gate 30mm/s return + persistence: acc 1.00 at 1-4 Hz, but the return costs 0.67s for
+    a 20mm arc, which does not fit in a 250ms period
+  - B fast 200mm/s return + reversal: acc 1.00 at 1-2 Hz, 0.83/0.79 at 3-4 Hz
+  - idle false events 0 in every cell of both
+  => B is under-tuned, not wrong: it is the only option whose timing survives high rates.
+  Neither wins yet; the turn threshold needs calibration against the cued session.
+- Fourth harness bug (same shape as the third): the comparison left the mover vector empty in
+  persistence mode, so strategy A's accuracy printed 0.0 without ever being measured. Found
+  because I re-read the output instead of trusting it.
+- Process slip worth recording: I committed while a test was failing, because the failure was
+  hidden behind a pipe (`unittest | tail` returns tail's exit code). Caught it in the same
+  minute and amended. Verifying the test exit code explicitly from now on.
+- 44 tests green.
