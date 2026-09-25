@@ -300,3 +300,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Retention checks never delete files or emit corpus paths/content.
 - [x] Added future-date, overdue, deleted, and invalid-manifest tests.
 - [ ] Actual consented capture, operator deletion, and deletion record remain outstanding in issue #24.
+
+## Iteration 35 — 2026-09-25
+
+- [x] Added `LANGUAGE_CAPTURE_RUNBOOK.md` for consented local capture, validation, separation, retention, and deletion.
+- [x] Documented the semantic Plover adapter boundary without claiming a plugin is installed.
+- [x] Kept translation accuracy, event counts, correction time, and WPM explicitly separate.
+- [ ] Actual consented capture and operator deletion remain outstanding in issue #24.
