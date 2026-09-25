@@ -38,56 +38,42 @@ withdrawn.** It came from counting *events per block* rather than matching each 
 to its own event; at high rates consecutive gestures merge into one event, so the count-based
 metric under-reports.
 
-`scripts/envelope_sweep.py` re-measures it by matching per gesture, with at least 8 cued
-gestures per cell:
+`scripts/envelope_sweep.py` now matches each detector event to at most one cue and reports
+the rate actually realized by the generator. The corrected grid has at least 8 cues per
+cell and exposes the distinction between requested and realized rate:
 
-| gesture length | detection rate at 1–6 Hz |
-|---|---|
-| **100 ms** | **0 % at every rate** |
-| 150–350 ms | **100 % at every rate from 1 to 6 Hz** |
-| 500 ms | 62 % at 1 Hz, falling to 36 % at 6 Hz |
+| gesture length | requested rates | realized rate range | detection rate | direction accuracy |
+|---|---:|---:|---:|---:|
+| **100 ms** | 1–6 Hz | 1.01–1.58 Hz | **0 %** | n/a |
+| 150 ms | 1–6 Hz | 1.01–1.48 Hz | **100 %** | 100 % |
+| 200 ms | 1–6 Hz | 1.01–1.37 Hz | **100 %** | 100 % |
+| 250 ms | 1–6 Hz | 1.01–1.29 Hz | **100 %** | 100 % |
+| 350 ms | 1–6 Hz | 1.01–1.14 Hz | **100 %** | 100 % |
+| 500 ms | 1–6 Hz | 0.96–0.97 Hz | 75–89 % | 100 % of detected |
 
-So the robust findings are: a 100 ms gesture is never detected; 150–350 ms is detected
-reliably all the way to 6 Hz; 500 ms is unreliable. There is **no measured 3 Hz ceiling**.
-The earlier "88 ms detection *and* 88 ms segmentation" argument remains plausible as a
-mechanism, but it is not what the data shows, so it is not claimed.
+So the corrected synthetic sweep supports a gesture-length/detection envelope, not a
+universal 3 Hz or 5.5 events/s ceiling. The sub-gate return makes the requested rate
+unrealizable for these long gestures: the realized rate is reported explicitly rather
+than silently treating the request as a measurement.
 
-### 1. Detection and segmentation both cost 88 ms, and they compete
+### 1. Detection and segmentation remain coupled
 
-The persistence window that makes the detector false-trigger-free (8 frames ≈ 88 ms) is
-*also* the minimum quiet gap needed to tell two consecutive gestures apart. On a mechanical
-keyboard a key release gives that gap for free. **On a 0-force surface there is no release** —
-the only segmentation cue is the motion itself.
+The persistence window is an 88 ms evidence/latency requirement. A return/reversal phase
+is still a sensible gesture contract for held-sector designs, and long gestures can lose
+events. The corrected envelope does **not** establish a universal inter-gesture gap or
+rate ceiling; only the cued return/tempo session can decide the segmentation policy.
 
-The benchmark shows the consequence exactly: tracking is near-perfect up to 3 Hz and collapses
-to 0.32 at 4 Hz, because at that rate the 250 ms gestures run back-to-back with no quiet
-window and the detector merges them.
+The 250 WPM target is not established by this synthetic sweep. It requires deliberate
+event-rate measurement on the device; a 360 WPM mechanical-steno record demonstrates
+human steno throughput, not PTH-660 touch-surface throughput.
 
-Derived envelope:
+### 2. Direction accuracy is now measured, but still synthetic
 
-- minimum detectable gesture ≈ 88 ms (8 supra-threshold frames)
-- minimum inter-gesture gap ≈ 88 ms (same window, used for segmentation)
-- ⇒ **theoretical event ceiling ≈ 5.5 Hz**, measured reliable ≈ **3 Hz** with realistic
-  250 ms gestures
-- at 1.5 syllables/word that is ≈ **180 WPM equivalent at 3 Hz** — which is exactly the
-  professional stenography certification bar, and comfortably above every published touch
-  system (16.8–55 WPM, CROSS_VALIDATION 1.8).
+The first benchmark reported 1.00 sector accuracy on 32 synthetic cues. After fixing the
+metric to decode the event vector and adding a common-centre return, the corrected grid
+reports 100% direction accuracy for detected synthetic cues. This is useful pipeline
+evidence, not a hardware claim: the cued real session remains required.
 
-Design requirement that follows: **a vector gesture must contain its own return phase**
-(out-and-back, or a deliberate reversal) so consecutive syllables always produce a quiet
-window. A "hold in the sector" gesture cannot be segmented on a surface that cannot release.
-
-### 2. Direction decoding is not the weak link
-
-100 % sector accuracy on calibrated data, axes and diagonals equal. The earlier "35 % of
-strokes sit within 10° of a sector fence" is a statement about *unstructured* motion, not
-about cued gestures: a cued stroke lands where the operator aimed. The fence problem is
-therefore a property of free typing, and the axis-alignment rule (CROSS_VALIDATION 1.7)
-matters less for cued input than for exploratory text.
-
-n = 32 is small, and equal axis/diagonal accuracy does **not** contradict the published axis
-advantage — it simply is not powered to detect it. Re-run with `--sector-reps 20` before
-quoting any axis/diagonal difference.
 
 ### 3. Chord detection is the genuinely weak part
 

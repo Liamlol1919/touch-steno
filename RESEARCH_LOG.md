@@ -117,3 +117,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Scoped a versioned Plover JSON starter-brief deliverable with collision lint and metrics.
 - [x] Marked personal brief count behind the 360 WPM record as NOT FOUND.
 - [ ] Cued PTH-660 training measurements remain outstanding.
+
+## Iteration 11 — 2026-09-25 07:12–07:20 CEST
+
+- [x] Removed reintroduced 11.4-Hz/5.5-Hz/150+-WPM-headroom prose from cross-validation.
+- [x] Restated the realized synthetic envelope and synthetic-only direction result.
+- [x] Kept human 360 WPM as an anchor, not a PTH-660 throughput claim.
+- [x] Full suite remains green; no new hardware evidence was added.
