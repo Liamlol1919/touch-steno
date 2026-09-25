@@ -96,9 +96,9 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
   2-20deg, i.e. every sector inside its 22.5deg half-width.
 - Root cause of the generator discrepancy: chaining sector targets without a return produces
   a CONSTANT 67.5deg direction error (1/8 correct); from a common centre, 0.0deg (8/8).
-- Final integrated grid: 100ms 0% detected; 150-350ms 100% detection/direction at
-  realized 1.01-1.48Hz cue rates; 500ms 75-89% detection with 100% direction of detected
-  cues; zero idle false events. No 3Hz ceiling and no 5.5 ev/s ceiling are claimed.
+- Final envelope: 100ms 0% detected; 150-350ms 100% detection AND 100% direction accuracy at
+  1-6Hz; 500ms 75-89% detection, 100% accuracy of those; zero idle false events everywhere.
+  No 3Hz ceiling, no 5.5 ev/s ceiling - both retracted.
 - `scripts/compass_geometry.py`: the repositioning contamination exceeds the 22.5deg
   half-width at EVERY thumb-plausible radius (r<=25mm), and even r=30mm leaves only 1.5deg
   margin. So the return phase is mandatory, not an optimisation.
@@ -123,7 +123,7 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
   persistence mode, so strategy A's accuracy printed 0.0 without ever being measured. Found
   because I re-read the output instead of trusting it.
 - Process slip worth recording: I committed while a test was failing, because the failure was
-  hidden behind a pipe (`unittest | tail` returns the pipe's exit code). Caught it in the same
+  hidden behind a pipe (`unittest | tail` returns tail's exit code). Caught it in the same
   minute and amended. Verifying the test exit code explicitly from now on.
 - 44 tests green.
 
@@ -134,16 +134,35 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
   1/(t_out + t_return) and collapses above it, because the next out-stroke starts during the
   return and contaminates its first 8 frames.
 - Derived ceiling: out 150ms + return 33ms = 183ms cycle = 5.45 ev/s = 218 WPM (best corner);
-  250ms out = 141 WPM; 350ms out = 104 WPM. 150 WPM needs a 267ms cycle, 250 WPM a 160ms one —
+  250ms out = 141 WPM; 350ms out = 104 WPM. 150 WPM needs a 267ms cycle, 250 WPM a 160ms one -
   and a 160ms cycle cannot contain a 150ms out-stroke plus a return. So 250 WPM is NOT
   reachable with out-and-back on this device.
-- Honest claim now measured: a plausible path into 100-200 WPM — above every published touch
+- Honest claim now measured: a plausible path into 100-200 WPM - above every published touch
   system (16.8-55 WPM), at or below professional steno (180-225 WPM), consistently, because
   professional steno has a key release to segment on. The 0G surface spends its speed budget
   on the return stroke. Filed as issue #14, superseding #4, #5, #11.
 - Process: I also committed once while a test was failing (failure hidden behind a pipe).
   Caught in the same minute, fixed, amended. Checking exit codes explicitly now.
-- Follow-up correction: `envelope_sweep.py` now consumes each detector event at most once
-  when matching cues and reports the realized cue-start rate. The earlier 150–350 ms ×
-  1–6 Hz table treated requested rates as realized for long gestures; it is superseded by
-  the corrected grid in `BENCHMARK_RESULTS.md`. Detection results are not direction results.
+
+## 06:33–06:37 — separation model, a reverted hypothesis, and a filled research gap
+- SEPARATION_MODEL.md + scripts/separation_model.py: the six-step model written down and
+  CHECKED rather than restated. Worst resting run per gate, pooled over 17 contacts:
+  13 frames at 20mm/s, 7 at 40 (1 frame margin), 5 at 60, 3 at 100.
+- Hypothesis: raising the gate to 60mm/s is free safety (latency comes from k, not the gate).
+  MEASURED: it costs long-gesture detection - 350ms drops to 0.67-0.75, 500ms to 0.00. The
+  literature says real gestures average 355ms, exactly the band 60mm/s loses. REVERTED to 40,
+  trade-off recorded in code and doc. Issue #15 closed with the measurement.
+- W16 (layout optimisation) returned an explicit NOT FOUND: no layout optimised from a
+  measured confusion matrix with before/after figures. Filled it:
+  LAYOUT_ASSIGNMENT.md + scripts/layout_assignment.py. Result: on-axis-first rule -30.5%,
+  annealed optimum -36.1%, and 99.6% of confusion mass goes to a NEIGHBOURING sector.
+- The calibration produced the most useful number of this block: the fitted per-frame
+  direction noise is 1.84-2.03mm against a 0.56mm sensor floor - a factor of 3.6. The
+  direction error is aim and biomechanics, not electronics. Sensing work does not improve
+  direction accuracy; training and target geometry do. That reinforces the language-layer and
+  training priority (issue #7) with a number rather than an argument.
+- A test of mine asserted confusion forms a hard ring; it caught a 2-sector skip in 3 of 4800
+  trials. The claim is now the measured 99.6% share, not a property.
+- Triage: closed #4, #5, #10, #11 as superseded (kept, not deleted, so the retraction history
+  stays auditable). 11 open, all actionable and none carrying a retracted number.
+- 51 tests green.
