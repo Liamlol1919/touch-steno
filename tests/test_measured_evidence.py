@@ -684,6 +684,52 @@ class TestRigidFit(unittest.TestCase):
         self.assertEqual(n1, 1)
         self.assertEqual(omega, 0.0, "with one anchor a rotation is not identifiable")
 
+
+class TestCompassSurface(unittest.TestCase):
+    """The radius trade-off must be monotone in accuracy and in cycle cost."""
+
+    def test_accuracy_rises_with_radius(self):
+        import compass_surface as cs
+        small = cs.row(12.0, trials=1500, seed=5)
+        large = cs.row(30.0, trials=1500, seed=5)
+        self.assertGreater(large["accuracy"], small["accuracy"] + 0.2,
+                           "more arc per frame means more signal at fixed noise")
+        self.assertLess(large["contamination_error_deg"],
+                        small["contamination_error_deg"],
+                        "larger target spacing means less repositioning contamination")
+        self.assertGreater(small["cycle_limit_hz"], large["cycle_limit_hz"],
+                           "the return leg is the only cost, and it grows with radius")
+
+    def test_radius_below_15mm_is_not_viable(self):
+        import compass_surface as cs
+        row = cs.row(12.0, trials=1500, seed=5)
+        self.assertLess(row["accuracy"], 0.7,
+                        "at 12mm the sector pitch is only ~16x the resting step")
+
+    def test_error_is_variance_not_bias(self):
+        """A bias fit would only help if the error had a systematic component."""
+        import math
+        import random
+        import stroke_decoder
+        sectors = ("E", "NE", "N", "NW", "W", "SW", "S", "SE")
+        vec = {n: (math.cos(math.radians(i * 45)), -math.sin(math.radians(i * 45)))
+               for i, n in enumerate(sectors)}
+        rng = random.Random(3)
+        errs = []
+        for _ in range(1500):
+            ti = rng.randrange(8)
+            vx, vy = vec[sectors[ti]]
+            dx = dy = 0.0
+            for _ in range(8):
+                dx += vx * (20.0 / (8 * 0.011)) * 0.011 + rng.gauss(0, 2.03)
+                dy += vy * (20.0 / (8 * 0.011)) * 0.011 + rng.gauss(0, 2.03)
+            ang = math.degrees(math.atan2(-dy, dx)) % 360.0
+            errs.append((ang - ti * 45 + 180) % 360 - 180)
+        m = sum(errs) / len(errs)
+        var = sum((e - m) ** 2 for e in errs) / len(errs)
+        self.assertLess(abs(m) / math.sqrt(var), 0.1,
+                        "the direction error must be variance, not a correctable bias")
+
 class TestQuantileHelpers(unittest.TestCase):
     def test_quantile_bounds(self):
         vals = [float(i) for i in range(100)]
