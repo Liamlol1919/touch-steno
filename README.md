@@ -25,6 +25,8 @@ Research and implementation notes for high-speed text input on a continuous touc
   evidence boundaries.
 - `scripts/correction_metrics.py` and `tests/test_correction_metrics.py` — separates
   cue-to-undo-motion latency from explicitly logged text-repair latency.
+- [CORRECTION_THROUGHPUT.md](CORRECTION_THROUGHPUT.md) and
+  `scripts/correction_throughput.py` — local human repair-interval measurement.
 - [PRIVACY_TELEMETRY.md](PRIVACY_TELEMETRY.md) and `scripts/telemetry_export.py` — opt-in,
   aggregate-only telemetry export with no raw coordinates or identifiers.
 - `scripts/rest_calibration.py` and `tests/test_rest_calibration.py` — local per-user rest

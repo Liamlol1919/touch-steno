@@ -189,3 +189,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Preserved candidate provenance and explicit language-availability state.
 - [x] Added `CANDIDATE_RANKING.md` and tests; no LM or accuracy claim was added.
 - [ ] A real-radius labelled benchmark and Plover/LM adapter remain outstanding.
+
+## Iteration 20 — 2026-09-25 08:11–08:20 CEST
+
+- [x] Added local `correction_throughput.py` for human repair-interval observations.
+- [x] Added strict JSONL validation, median/P95/rate reporting and protocol documentation.
+- [x] No human correction-throughput result or WPM extrapolation was fabricated.
+- [ ] A real multi-user correction-throughput capture remains outstanding.
