@@ -193,3 +193,43 @@ Die Links in diesem ersten Stand stammen aus ACM DL, arXiv, Wacom Developer Docs
 - [ ] Lizenz- und Patentstatus der Layouts prüfen.
 - [ ] PTH-660-Eventdaten auf dem Ziel-Linux-System messen.
 - [ ] Aussagen mit „nicht belegt“ markieren, statt Schätzwerte als Fakten auszugeben.
+
+## 7. Praktische Code-Integration (verifizierte Upstream-Bausteine)
+
+### Plover als Backend
+
+Die Open-Source-Engine `opensteno/plover` trennt sinnvoll in:
+
+- `plover/steno.py` (`Stroke`, RTFCRE-Normalisierung),
+- `plover/steno_dictionary.py` (`StenoDictionaryCollection`),
+- `plover/translation.py` (`Translator.translate_stroke()`),
+- `plover/formatting.py` (Formatter und Metas),
+- `plover/machine/keyboard.py` (Chord-/Arpeggiate-Muster).
+
+Für dieses Projekt ist der stabilste Integrationsschnitt eine **eigene Touch-Machine/Source**, die plausible `down/up/hold`-Events erzeugt und an Plover übergibt. Nicht der gesamte Plover-Kern muss in eine proprietäre Anwendung kopiert werden. Plover ist GPL-2.0+; Lizenz- und Prozessgrenzen sind vor einer Veröffentlichung zu prüfen.
+
+### Linux-Eingabe
+
+Für Linux ist der rohe Weg:
+
+```text
+/dev/input/eventN
+  -> EVDEV multi-touch slots
+  -> palm/rest/intent layer
+  -> Plover stroke or gesture decoder
+  -> uinput virtual keyboard
+```
+
+Kernel MT-Slots verwenden `ABS_MT_SLOT`, `ABS_MT_TRACKING_ID`, `ABS_MT_POSITION_X/Y`, optional `ABS_MT_PRESSURE`/`ABS_MT_TOUCH_MAJOR` und `EV_SYN/SYN_REPORT`. `libinput` kann die Geräte- und Palm-Arbitration vereinfachen, ist aber **kein** Textdecoder. Unter Wayland ist ein eigener `uinput`-Sink robuster als X11-spezifische XTest-Injektion. `python-evdev` und `libevdev` sind geeignete Referenzen für die Ereignis-/Umsetzungsschicht.
+
+### DasherCore und 8VIM
+
+`DasherCore/src/dasher.h` ist als moderne C-API mit screen/mouse/key/frame/output callbacks und WPM/CPS-Zugriff ein brauchbarer Baustein für einen kontinuierlichen Fallback. `8VIM/8VIM` demonstriert eine 8-Sektor-/Zentrum-State-Machine mit Editor-Integration; der Code ist Android-spezifisch und daher eher Layout-/Erkennungsreferenz als Linux-Bibliothek.
+
+## 8. Replikations- und Sicherheitsregeln
+
+- Rohereignisse nur mit Einwilligung speichern; keineunnötigen Geräte-/Personenidentifikatoren.
+- Testdaten mit Treiber- und Kernelversion versehen.
+- Falschauslöser und Korrekturen getrennt von Korrektur-WPM berichten.
+- Layouts, Wörterbücher und Code nicht ungeprüft unter einer Lizenz zusammenführen.
+- Ein leeres oder historisches Repository nicht als Beleg für eine aktuelle Implementierung zitieren.

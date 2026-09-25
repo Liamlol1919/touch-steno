@@ -79,3 +79,62 @@ The weights must be learned or tuned on a corpus; a large LM cannot compensate f
 - [ ] preserve NOTICE files;
 - [ ] make raw sensor data opt-in and redact identifiers;
 - [ ] record hardware/OS/driver versions in experiment logs.
+
+## Verifizierte Upstream-Details (Agent-1-Recherche, 25.09.2026)
+
+### Plover
+
+- `plover/translation.py`: `Translator.translate_stroke(stroke)`, longest-key/greedy lookup and listener callback.
+- `plover/steno_dictionary.py`: `StenoDictionaryCollection.lookup(key)`, prioritized dictionaries, reverse lookup and writable user dictionary.
+- `plover/steno.py`: `Stroke.from_steno()`, `from_keys()`, RTFCRE normalization and correction/undo strokes.
+- `plover/formatting.py`: formatter parser, meta-language and backspace minimization.
+- `plover/machine/keyboard.py`: keyboard chord emulation and `first_up_chord_send` / arpeggiate patterns.
+- `plover/system/english_stenotype.py`: key maps, implicit hyphen rules, suffixes and orthography rules.
+- Tests in `test_translation.py`, `test_steno.py` and `test_formatting.py` are useful executable specifications.
+- Plover is GPL-2.0+; use as a separate process or comply with copyleft obligations.
+
+Example dictionary data remains JSON-like:
+
+```json
+{"STROKE": "translation", "K-/T-/RA": "{^en}", "H-L": "hello"}
+```
+
+The Plover stroke grammar uses slash-separated strokes, hyphen/asterisk conventions and plugin registries. Do not reimplement all of it before testing a custom machine/source.
+
+### DasherCore
+
+The modern C++17 project exposes a flat C API in `src/dasher.h`, including context creation, screen size, mouse/key events, frame output, parameters, text seeding and WPM/CPS access. Relevant data is in `Data/`, `Scripts/generate_parameters.py`, and `tests/test_capi_contracts.cpp`. It can be used as a predictive fallback or as a continuous gesture engine, with a custom touch/pen frontend.
+
+### Linux input and uinput
+
+- Kernel MT protocol B: `ABS_MT_SLOT`, `ABS_MT_TRACKING_ID`, `ABS_MT_POSITION_X/Y`, `ABS_MT_PRESSURE`, `TOUCH_MAJOR`, `EV_SYN/SYN_REPORT`.
+- `libinput` normalizes input and arbitrates touch, but its gesture engine is primarily for touchpads; a touchscreen client may still need its own MT-slot state machine.
+- `python-evdev` exposes `InputDevice` and `UInput`; `UInput.from_device()` and `grab_context()` are relevant for a dedicated virtual keyboard.
+- Linux Wacom components: `input-wacom` (kernel driver), `xf86-input-wacom` (X11), `libwacom` (device database/capabilities), and `wacom-hid-descriptors` (ODbL-1.0). On Wayland, uinput is safer than XTest-style injection.
+- `TouchEgg` is a useful gatherer/action architecture but its libinput gestures are not a substitute for raw tablet touchpoint decoding.
+
+### Chord keyboard references
+
+- `mafik/keyer` (GPL-3.0): modern Teensy/BLE chord keyboard with rolling chords, debounce and layout tutor.
+- `kmonad/kmonad` (MIT) and `jtroo/kanata` (LGPL-3.0): Linux userspace remapping layers with tap-hold/chord macros and uinput sinks.
+- `TristanTrim/asetniop-keyboard`: educational Teensy reference without a clear license; do not copy without permission.
+- QMK stenography support: NKRO, TX Bolt/GeminiPR serial protocols and Plover HID are documented in the QMK steno documentation; these solve keyboard firmware transport, not 0G sensing.
+
+### Chording implementation pattern
+
+```python
+down = set()
+stroke = set()
+
+def on_down(key):
+    down.add(key)
+    stroke.add(key)
+
+def on_up(key):
+    down.discard(key)
+    if not down and stroke:
+        emit_binding(stroke)
+        stroke.clear()
+```
+
+This release-triggered pattern avoids emitting while a chord is incomplete but is slower than first-up emission. A touch decoder should make this policy explicit and test rolling chords separately.
