@@ -222,6 +222,36 @@ with top-3 candidates plus a lexicon constraint, and *cannot* be reached by 4 cl
 
 ---
 
+## 2.3 The channel-capacity argument (the quantitative core)
+
+One certified event is 176 ms. At 224 contact reports/s that is **~39 samples**.
+
+**What the compass extracts:** one direction class, 3 bits ideal. With the measured 47.6 %
+correct and all errors landing on the exact opposite, the effective mutual information is
+
+    I_eff = 3 − H2(0.476) = 3 − 0.999 = **2.00 bits per event**
+
+**What the trajectory actually contains.** For a 2-D Gaussian position channel with
+per-axis sigma = 0.4 mm and quantiser step Δ, the capacity per sample is
+
+    C ≈ log2(1 + 1.92/Δ²)   bits/sample
+
+| Δ | bits/sample | bits per 176 ms event |
+|---|---|---|
+| 0.4 mm | 3.70 | **~146** |
+| 0.8 mm | 2.00 | ~79 |
+
+**The compass discards roughly 70× of the information present in the signal it already
+receives.** That is the quantitative statement of why every direction-classification
+variant failed: the frame is not capacity-limited, it is capacity-*destroying*.
+
+Two honest caveats on this calculation:
+- A 0.4 mm **median** jitter is not a standard deviation, and the 1.92 factor assumes a
+  Gaussian. The absolute numbers are indicative; the ORDER of magnitude gap is not.
+- Channel capacity is not usable information. It is an upper bound that assumes an
+  optimal decoder over noise-free semantics. Exploiting it requires a recogniser, which
+  does not exist yet. This is the project's central engineering bet, not a result.
+
 ## 3. The concept that survives to build
 
 **WORKING CONCEPT — "one stroke, one word, no event is a valid answer"**
