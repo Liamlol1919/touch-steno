@@ -212,6 +212,46 @@ statement about human capability. Please separate the two explicitly: "no publis
 0G-surface system reaches this rate" is true; "this rate is beyond human capability" is
 false, and a 360 WPM steno record exists.
 
+### 1.8 The caveat that matters most: nobody has shown keyless steno works
+
+1.6 established that a *human* sustains 360 WPM on a 23-key mechanical steno machine. W10
+(`W10_STENO_ON_TOUCH.md`) establishes the uncomfortable companion fact: **that performance has
+never been reproduced on a 0-force surface**, and the closest published numbers are far below
+the steno bar.
+
+| evidence | number | source |
+|---|---:|---|
+| best flat-surface **sequential** typing, two thumbs | 38 WPM, 2.3 % uncorrected error (n = 37,370) | mobile typing study |
+| best flat-surface sequential typing, ten fingers **with local haptics** | 55.1 WPM | W10 |
+| best **keyless chording** found (instrumented glove, not glass) | **16.8 WPM, 17.4 % error** | https://www.obscure.org/rosenberg/toc.pdf |
+| real steno-on-glass attempt (iStenoPad, 2012) | qualitative failure: drift, wrong keys, hit/miss indistinguishable without looking; **no numbers published** | http://plover.stenoknight.com/2012/02/istenopad-overlay-bust.html |
+| ASETNIOP (touchscreen chord keyboard) | ~30 WPM after hours; 37–50+ WPM are **vendor anecdotes**, no error rate, no peer review | https://www.asetniop.com/faq/ |
+| peer-reviewed chording **with physical keys** (Twiddler) | 47 WPM average, 67 max, after ~25 h | ISWC 2004 |
+| mechanical stenography, expert | 180–225 WPM required for certification; record 360 WPM at 97.23 % | NCRA / Guinness |
+
+So the gap is not "can a human do it" (yes) and not "is our sensor fast enough" (yes, 1.8×
+headroom over the record rate). The gap is: **does removing key travel, key force and the
+per-key depression event preserve any of it?** On the published evidence, the best keyless
+chording result is 16.8 WPM at a 17.4 % error rate, and the best flat-surface sequential
+typing is 38–55 WPM — 4–6× below the 180–225 WPM certification bar. Nobody has published a
+number between those.
+
+This reframes the project's success criterion honestly:
+
+- **Not** "reach 150–250 WPM on a 0G pad" (no precedent, and 1.6/1.7 give the headroom, but
+  nobody has closed the substitution).
+- **Rather:** how far above the published keyless-chording floor (16.8 WPM / 17.4 % error) and
+  the flat-surface sequential band (38–55 WPM) can a per-user coupling model with an
+  adaptive rest baseline get? That is measurable, falsifiable, and a real contribution
+  even if the answer is "60 WPM".
+
+The honest claim this project can make today: *we have removed the two failure modes that
+made a previous on-glass steno attempt fail* — drift (adaptive baseline, 11.96 → 5.04 mm
+residual) and neighbour enslavement (per-pair suppression, 175 followers removed at
+r² 0.55–0.93) — and the *next* measurable step is the cued chord session, which no
+published system has. That is a defensible research position, and it is a smaller claim
+than 360 WPM.
+
 ### 1.7 A concrete layout rule that follows: put the targets on the axes
 
 Kurtenbach & Buxton 1993 (verified directly, https://www.billbuxton.com/MMExpert.html,
