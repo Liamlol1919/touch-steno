@@ -97,6 +97,15 @@ def build_tasks(args) -> list[dict]:
     elif args.task == "noise":
         tasks.append({"label": "noise_rest", "cue": "REST - DO NOT MOVE",
                       "seconds": args.rest_seconds, "rest": True})
+    elif args.task == "identity":
+        # Finger-identity dataset: labelled (contact-id, anatomical label) pairs. This is
+        # the prerequisite for portable calibration, because cross-session transfer on
+        # tracking IDs fails completely (scripts/calibration_transfer.py).
+        for rep in range(args.reps):
+            for f in ("thumb", "index", "middle", "ring", "little"):
+                tasks.append({"label": f"identity_{f}",
+                              "cue": f"LIFT + REPLACE {f.upper()}",
+                              "seconds": args.identity_seconds, "finger": f})
     return tasks
 
 
@@ -175,7 +184,8 @@ def main() -> int:
     ap.add_argument("--src", default=None,
                     help="directory containing wacom_touch.py (default: probe this "
                          "repo's src/ and sibling commind* checkouts)")
-    ap.add_argument("--task", choices=("tempo", "sectors", "chord", "noise"))
+    ap.add_argument("--task", choices=("tempo", "sectors", "chord", "noise",
+                                   "identity"))
     ap.add_argument("--out", default="messung/calibration.jsonl")
     ap.add_argument("--device", default=None)
     ap.add_argument("--force", action="store_true")
@@ -187,6 +197,7 @@ def main() -> int:
     ap.add_argument("--chord-seconds", type=float, default=1.5)
     ap.add_argument("--reps", type=int, default=4)
     ap.add_argument("--rest-seconds", type=float, default=60.0)
+    ap.add_argument("--identity-seconds", type=float, default=2.0)
     args = ap.parse_args()
     if args.merge:
         return merge(args)
