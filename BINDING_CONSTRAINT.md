@@ -506,3 +506,93 @@ No WPM. No seconds-per-correction. No Plover. No universal accuracy. The Fitts c
 are assumptions. The 47.6 % is one person, one session, one thumb, n = 63, no error bars.
 The 0.4 mm jitter is a median, not a decision-error bound. Five adversarial critics of the
 previous choice (word-as-event) were still running when this was written.
+
+---
+
+## 5. FINAL VERDICT: the sprint winner is killed by its own critics
+
+Five independent critics, one per axis, were run against Thread-Rosette **after** it had
+already won. It does not survive.
+
+| Axis | Sponsor's score | Critic's score | Verdict |
+|---|---|---|---|
+| 1. Hand anatomy / biomechanics | 8/10 | **3/10** | REVISE |
+| 2. Contact identity / observability | 6/10 | **1/10** | **KILL** |
+| 3. Timing / throughput / corrections | 7/10 | *(running)* | — |
+| 4. Learnability / eyes-free ergonomics | 7/10 | **2/10** | **KILL** |
+| 5. Implementation / privacy / validation | 8/10 | **2/10** | **KILL** |
+
+**Sponsor total 36/50. Critic total on the four returned axes: 8/40.**
+
+### The one root cause behind three of the kills
+
+> The recorder stores **no slot ID**, and **94.2 % / 94.5 % of all frames in our own captures
+> contain ten simultaneous contacts.** Nothing in the logged data says which centroid is the
+> thumb.
+
+This is not a property of Thread-Rosette. It is a property of the **instrument**, and it
+invalidates every concept in this document that assumes a single identifiable thumb:
+
+- **Observability (1/10):** coordinates can define *virtual polygons*, not *physical
+  anchors*. A smooth slide across an unmarked region need not produce any discrete event at
+  all, so **nine physical anchors are unobservable on this surface.** The concept's
+  primitive does not exist in the hardware.
+- **Implementation (2/10):** a pipeline must associate contacts, pick one primary thumb,
+  handle birth/death, reject ghosts, and never reset on ambiguity — while having no ID to
+  work from. Nearest-neighbour tracking cannot establish which contact is the thumb, and
+  guessing a track is not validation.
+- **Learnability (2/10):** anchors sit **3.84 mm apart** (30.7 / 8) while a major-axis
+  reading is **2.5 mm — 65 % of the anchor pitch.** The spacing is below the size of the
+  contact that is supposed to measure it.
+
+### The internal contradiction
+
+The state machine specifies that the active pair, the mapped key and the predicted word are
+**shown continuously**. The stated operating mode is **eyes-free**. **The same-event repair
+that won the sprint depends on exactly the feedback the operating mode forbids.**
+
+### The anatomical demotion
+
+Anatomy went 8 → 3. An initial long sweep is ballistically facilitated; correcting it
+requires **deceleration, direction reversal and a short precision re-cross** — a different
+motor act, with a different error distribution and a different fatigue profile. "Correction
+inside the contact event" currently describes **software state, not a proven motor
+capability.**
+
+## 6. What the sprint actually established
+
+**No concept survived.** Twenty-two candidates, three waves, ten plus five adversarial
+critics. The highest sponsor score was 36/50 and it was killed on four of five axes.
+
+What is solid, and is the actual output of this sprint:
+
+1. **The direction-quantisation frame is closed.** Ten variants, 10–21/50, all killed. The
+   arithmetic reason: the position axis inherited from the compass yields **0,0017 effective
+   bits/event**.
+2. **The binding constraint is the hand, not the sensor** — for target-array primitives.
+   5,7 events/s is unreachable at 24 cells; 2,1–3,4/s is the realistic band.
+3. **The "1–2 strokes per 5-letter word" premise is incompatible with any fixed syllable
+   code.** German needs 1,695 syllables per 5-letter word × 2–3 events = **3,39–5,09 events
+   per word.**
+4. **Corpus arithmetic, computed not guessed:** German 9,170 phonemic / 11,230 orthographic
+   syllable types; English 9,476 and German 10,024 bits/token unigram entropy; coverage
+   ceilings of 83,8 % / 79,9 % at top-1000.
+5. **Privacy by retention:** compute at lift-off, discard raw traces immediately.
+6. **Universal accuracy is unidentifiable at n = 1 operator** — not merely unmeasured.
+
+## 7. The next action is an instrument fix, not a design
+
+Every remaining concept is blocked on the same missing signal. Before any further design
+work:
+
+1. **Extend the recorder** to store **slot/tracking ID, minor axis and orientation.** The
+   device already reports all three; the parser discards them. This cannot be done
+   retrospectively — the existing JSONL does not contain it.
+2. **Recapture** with the hand in a known, labelled pose.
+3. **Measure U**, the fraction of event frames with more than one plausible thumb. The
+   observability critic's threshold: **U ≤ 10 %** is required; above that every
+   single-thumb concept is dead regardless of design.
+4. **Only then** re-open design.
+
+**Any concept proposed before step 1 is arithmetic about a sensor that cannot report what
+the concept needs.**
