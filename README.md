@@ -17,7 +17,8 @@ Research and implementation notes for high-speed text input on a continuous touc
 - `scripts/synthetic_intent_benchmark.py`, `scripts/make_benchmark.py`, `scripts/envelope_sweep.py` and `scripts/wpm_ceiling.py` — deterministic analysis tools; synthetic results are not hardware claims.
 - `scripts/plot_models.py` and `requirements-plot.txt` — optional measured/simulated model figures; install the plotting dependencies before rendering.
 - [DESIGN_DECISION.md](DESIGN_DECISION.md), [nextgen/](nextgen/) and [tests/test_nextgen_steno.py](tests/test_nextgen_steno.py) — clean-room English steno transport and Plover boundary prototype; no German steno.
-- [AGENTIC_META_PLAN.md](AGENTIC_META_PLAN.md) and [AGENTIC_STATE.md](AGENTIC_STATE.md) — 10× autonomous product-engineering loop, evidence gates, and state ledger.
+- [AGENTIC_META_PLAN.md](AGENTIC_META_PLAN.md) — autonomous product-engineering loop and research branch registry; [AGENTIC_STATE.md](AGENTIC_STATE.md) — append-oriented evidence and decision ledger.
+- [INTEGRATION_TARGETS.md](INTEGRATION_TARGETS.md) — `REFERENCE_ONLY` touch-steno, commindv2, and commind roles, ownership matrix, one-way event boundary, privacy rules, and no-implementation policy.
 - `scripts/session_manifest.py` and `tests/test_session_manifest.py` — shared normalization
   for complete and legacy paired cue manifests.
 - `scripts/session_runner.py` and [CUED_SESSION_PROTOCOLS.md](CUED_SESSION_PROTOCOLS.md) —

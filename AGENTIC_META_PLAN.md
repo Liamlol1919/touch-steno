@@ -138,6 +138,50 @@ Every decision stores evidence, uncertainty, reversibility, and the next falsifi
 - Report raw and corrected counts, latency distributions, false activations, uncertainty, and exclusions.
 - Record hardware, driver, firmware, dictionary, code, and configuration versions.
 
+## 3A. Cross-project orchestration
+
+The external integration targets are registered in `INTEGRATION_TARGETS.md` as
+`REFERENCE_ONLY`; they are not imported runtime components and their current behavior is
+never inferred from an unavailable public checkout. The dated `touch-steno`
+`SYSTEMKOMPENDIUM.md` snapshot is secondary evidence for the source-side role, not a license
+to implement any listed target.
+
+The ownership direction is one-way:
+
+```text
+PTH-660 evdev
+  -> touch-steno capture, segmentation, [10,5,4] decode, English profile, NACK, sequencing
+  -> versioned, process-local, side-specific English steno key/NACK event
+  -> commindv2 connection, deduplication, translation/action policy, UI, graph mutation
+```
+
+`commind` is a documentation/concept canon and a future semantic/graph reference, not a
+runtime authority. Raw contacts never leave touch-steno. commindv2 must not open the same
+evdev device or run a second decoder. The archived `input_zones.json` is historical evidence,
+never an implicit layout authority or compatibility shortcut.
+
+The coordinator's next integration action is contract design, not code: specify the event
+version, side semantics, NACK representation, ordering/deduplication fields, and privacy
+exclusions; then red-team the contract for stale-layout ambiguity, duplicate events, and
+accidental raw-contact leakage. Runtime implementation requires a separate explicit decision.
+
+## 3B. Innovation branch registry
+
+The registry is intentionally a research inventory. A branch can be explored in the concept,
+mathematics, and evidence ledgers, but it is **never silently implemented** by adding code,
+tests, a device reader, or a second decoder. `AGENTIC_STATE.md` must record a branch's status
+and evidence class before it can advance.
+
+| Branch | Primitive / hypothesis | Current status | Next falsification or evidence gate |
+|---|---|---|---|
+| **Simplex-10 transport** (current branch) | The existing ten-bit transport and one-bit correction contract remain the clean-room English steno baseline. | Current design/implementation reference; not a reason to broaden ownership. | Audit the isolated `nextgen/` boundary and its replayable contract. |
+| **FCPT / Fitts-cost phoneme targets** | Place phoneme targets to minimize measured transition cost using Fitts-style distance/width terms; the layout is a motor-cost hypothesis, not a claim of a universal rate. | **RESEARCH BRANCH — not implemented.** | Fit movement coefficients on the actual hand and kill the branch if the fitted cost makes the intended event rate unattainable. |
+| **Continuous elastic word-as-event recognition** | Treat one continuous trajectory as an elastic word event, with normalization and confidence-gated rejection rather than letter-by-letter decoding. | **RESEARCH BRANCH — not implemented.** | Test held-out trajectory generalization, ambiguity/rejection behavior, correction cost, and the motor-time cost against the target array arm. |
+| **Contact-field / permutation-invariant gesture representation** | Represent a gesture by the shape of its contact field with a permutation-invariant descriptor, aiming to reduce contact-ID and finger-order sensitivity while retaining coupled-field information. | **RESEARCH BRANCH — not implemented.** | Test invariance to contact permutation and ID churn, separability under hand translation/rotation, leakage, and false-commit rates on replayable fixtures. |
+
+Branch registration does not change the `EXTERNAL`/`REFERENCE_ONLY` evidence class of the
+external repositories and does not authorize imports, device access, or runtime behavior.
+
 ## 4. Evidence classes
 
 Every claim carries exactly one class:
