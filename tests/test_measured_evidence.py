@@ -271,6 +271,38 @@ class TestBenchmarkArtefacts(unittest.TestCase):
         self.assertEqual(ev.label_at(man, 1.0)["label"], "b",
                          "a boundary timestamp belongs to the later block")
 
+
+class TestStrokeSink(unittest.TestCase):
+    def test_undo_removes_last_stroke(self):
+        import stroke_sink
+        t = stroke_sink.Transcript()
+        for s in ("T", "H", "*", "A"):
+            t.push(s)
+        self.assertEqual(t.strokes, ["T", "A"])
+        self.assertEqual(t.text(), "ta")
+
+    def test_undo_on_empty_is_safe(self):
+        import stroke_sink
+        t = stroke_sink.Transcript()
+        t.push("*")
+        self.assertEqual(t.strokes, [])
+
+    def test_plover_json_shape_and_retraction_marker(self):
+        import stroke_sink
+        t = stroke_sink.Transcript()
+        t.push("K")
+        out = t.plover_json(12.5)
+        self.assertEqual(out, {"t": 12.5, "strokes": ["K"]})
+        empty = stroke_sink.Transcript().plover_json(0.0)
+        self.assertEqual(empty["strokes"], ["*"],
+                         "an empty transcript must still emit a valid retraction")
+
+    def test_transcript_ignores_hyphen_prefixes(self):
+        import stroke_sink
+        t = stroke_sink.Transcript()
+        t.push("-T")
+        self.assertEqual(t.text(), "t")
+
 class TestWpmCeiling(unittest.TestCase):
     def test_250_wpm_two_events_per_syllable_exceeds_the_ceiling(self):
         ceiling = wpm_ceiling.event_ceiling_hz()
