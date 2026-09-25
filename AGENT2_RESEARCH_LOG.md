@@ -277,3 +277,22 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
   (40 mm/s, 8 frames, rest_worst_run 7) - the strongest cross-check so far. Its objective has
   one gap: clean only means no rest false activation, so it selects (60, 5) without noticing
   that 60 mm/s stops detecting 350-500 ms gestures. Filed as a review issue.
+
+## 07:55–08:00 — the radius is settled, and the architecture re-orders itself
+- W20 (thumb reach) triangulated with our own recordings and COMPASS_SURFACE: the design
+  radius is 12-15mm, not 20 or 30. W20's 90%-comfort patch is ~3.8x10.1mm, the 70%-box
+  ~21.9x30.4mm, and a 60mm sweep (r=30) fits in neither. Our measured envelope (24.6x18.2mm)
+  lands ON the 70% box from a completely different posture and population.
+- THE CONSEQUENCE: at an ergonomic radius the compass has 32-42% label error. The language
+  layer is no longer the speed lever (issue #7) but the CORRECTNESS lever. Filed as a new
+  issue with a three-task order: ranked-candidate decoding with an LM, correction policy,
+  and a benchmark run at the real radius with the label noise in it.
+- Also retired the 'train the larger excursion' option: it asks the hand to leave its
+  measured comfort envelope, which is not a speed/accuracy trade.
+- Reviewed agent1's rest_calibration.py: it independently reproduces my rest numbers
+  (40 mm/s, 8 frames, worst run 7) - the strongest cross-check so far. Its objective only
+  knows the rest criterion, so it selects (60,5) while 60 mm/s stops detecting 350-500ms
+  gestures; filed with the suggestion to add gesture coverage as a second column.
+- Privacy: removed hardcoded personal home paths from two shipped files; raw captures are
+  now reached only via TOUCH_STENO_SESSIONS and the test skips cleanly without it. Verified
+  0 raw jsonl files ever committed.
