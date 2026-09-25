@@ -25,6 +25,7 @@
 - [x] PTH-660 weiterhin nicht angeschlossen; keine Hardwarebehauptung ergänzt.
 
 - [x] `DECODER_DESIGN.md` mit Zustandsmaschine, Featurevertrag, Enslavement-Score und Plover-Bridge ergänzt.
+- [x] Agent-2-Commit `2a52201` mit `SYSTEMKOMPENDIUM.md` per Rebase integriert; keine fremde Datei überschrieben.
 
 ## Next iteration
 
