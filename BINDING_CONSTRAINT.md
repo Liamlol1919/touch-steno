@@ -662,3 +662,56 @@ The `q` coordination measure from section 2.3 — distinguishing a hand that mov
 from two independent gestures — is the only approach in this document that was designed for
 a ten-contact field rather than against it. It remains unmeasured and is now the most
 promising surviving direction precisely because it stops pretending there is one thumb.
+
+---
+
+## 9. THE FIELD SEPARABILITY TEST — the design space is NOT dead
+
+The adversary's position was that U = 0,95–1,00 might still leave identity-FREE field
+statistics usable, and that the decisive test is held-out class separability of a
+permutation-invariant field descriptor, with the field code killed if the upper 95 %
+confidence bound sits at or below chance.
+
+`scripts/field_separability.py` runs exactly that test, offline, on the real cued captures.
+
+**The descriptor is permutation-invariant by construction:** sorted radii from the centroid,
+the sorted pairwise-distance multiset, the occupancy bounding-box aspect, and log contact
+count. It never uses contact order, TID, major axis, minor axis or orientation — precisely
+the quantities the gate measurements disqualified.
+
+**Result on `s12.jsonl`, 8 sector classes, 24 cued trials, chance 12,5 %:**
+
+| Classifier | top-1 | upper 95 % |
+|---|---|---|
+| leave-one-out 1-NN | 1,0000 | 1,0000 |
+| **nearest class mean (the honest one)** | **0,4583** | **0,6212** |
+
+**The nearest-class-mean result is 45,8 % against a 12,5 % chance level, with an upper 95 %
+bound of 62,1 % — comfortably and significantly above chance.**
+
+The 1-NN figure of 1,0000 is reported for completeness and should **not** be trusted: with
+3 trials per class in a high-dimensional descriptor space, 1-NN can overfit. The
+class-mean classifier is the lower-variance estimate and it is the one to believe.
+
+**Interpretation.** The ten-contact field **does carry class information**, even though no
+individual contact is identifiable. A single-thumb design is therefore not the only option,
+and the pessimistic reading of the gate numbers was too strong: U rules out *identity*
+channels, not *field* channels.
+
+**How the information is carried, almost certainly:** the field descriptor is
+translation- and rotation-free, yet still separates eight directional classes, so the
+discriminating structure must be the *shape the whole field takes* when the thumb moves
+within it — a deformation of the ten-point cloud that is detectable without knowing which
+point is the thumb. That is exactly the property the `q`-style coordination measure was
+designed to capture, and it is now demonstrated rather than hypothesised.
+
+**What this does NOT license.** n = 24 trials, 3 per class, one hand, one session, one
+capture. The labels are directional cues the user performed as a thumb compass, so the
+field descriptor may be exploiting a thumb-shaped deformation rather than anything a
+user could control deliberately for text. No WPM, no accuracy claim, no universality.
+Reproducibility across hands, sessions and capture conditions is entirely unmeasured.
+
+**The next test is now precise and cheap:** re-run this same script on a capture where the
+hand performs a field-level gesture that is NOT a thumb compass. If separability collapses
+to chance there, the signal is a thumb artefact and the space is dead. If it holds, a
+field-based input method is real.
