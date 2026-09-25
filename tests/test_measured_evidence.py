@@ -351,6 +351,67 @@ class TestWpmCeiling(unittest.TestCase):
                                places=0)
 
 
+class TestEnvelopeAndMetricContract(unittest.TestCase):
+    """Pin the envelope claims and the metrics that produced them.
+
+    Three separate bugs in the evaluation harness produced three confident wrong numbers
+    (BENCHMARK_RESULTS.md addendum). These tests exist so a fourth cannot.
+    """
+
+    def _cell(self, length_s, rate_hz):
+        import tempfile
+        import envelope_sweep as es
+        frames, man = es.build(length_s, rate_hz, seed=11)
+        with tempfile.TemporaryDirectory() as td:
+            return es.measure(frames, man, Path(td))
+
+    def test_100ms_gestures_are_never_detected(self):
+        m = self._cell(0.10, 3.0)
+        self.assertEqual(m["detected"], 0,
+                         "the envelope claims a 100ms gesture is undetectable")
+
+    def test_working_range_detects_everything_with_zero_idle(self):
+        for rate in (1.0, 3.0, 6.0):
+            m = self._cell(0.25, rate)
+            self.assertEqual(m["rate_ratio"], 1.0, f"rate {rate}")
+            self.assertEqual(m["sector_acc"], 1.0, f"rate {rate}")
+            self.assertEqual(m["idle_fp"], 0, f"rate {rate}")
+
+    def test_long_gestures_lose_events_not_accuracy(self):
+        m = self._cell(0.50, 3.0)
+        self.assertLess(m["rate_ratio"], 1.0)
+        self.assertEqual(m["sector_acc"], 1.0,
+                         "500ms gestures are unreliable in count, not in direction")
+
+    def test_return_phase_changes_the_direction_estimate(self):
+        """Without a return to a common centre the error is a constant 67.5 degrees."""
+        import math
+        S = ("E", "NE", "N", "NW", "W", "SW", "S", "SE")
+        V = {n: (math.cos(math.radians(i * 45)), -math.sin(math.radians(i * 45)))
+             for i, n in enumerate(S)}
+
+        def first_step_error(reset):
+            pos = (0.0, 0.0)
+            errs = []
+            for n in S:
+                if reset:
+                    pos = (0.0, 0.0)
+                tgt = (V[n][0] * 20, V[n][1] * 20)
+                e1 = min(1.0, (1 / 22) * 1.4)
+                x = pos[0] + (tgt[0] - pos[0]) * e1
+                y = pos[1] + (tgt[1] - pos[1]) * e1
+                first = math.degrees(math.atan2(-(y - pos[1]), x - pos[0]))
+                soll = math.degrees(math.atan2(-V[n][1], V[n][0]))
+                errs.append((first - soll + 180) % 360 - 180)
+                pos = tgt
+            return errs
+        chained = [abs(e) for e in first_step_error(False)][1:]
+        self.assertTrue(all(60 < e < 75 for e in chained),
+                        f"expected a constant ~67.5deg error, got {chained}")
+        centred = [abs(e) for e in first_step_error(True)]
+        self.assertTrue(all(e < 5 for e in centred), f"got {centred}")
+
+
 class TestQuantileHelpers(unittest.TestCase):
     def test_quantile_bounds(self):
         vals = [float(i) for i in range(100)]
