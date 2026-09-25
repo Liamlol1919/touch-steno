@@ -259,3 +259,21 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
 - Filed as issue #17: the radius choice is a product decision (does the LM absorb the
   residual error?) and the reach feasibility is a measurement, not an assumption.
 - 79 tests green.
+
+## 06:58–07:05 — temporal signatures, a premise overturned, and a tool review
+- Coupling classes differ in temporal SHAPE: within-hand 64->61 r(lag0)=+0.958 half-width
+  2 frames (~22ms, sharp = immediate mechanical transmission); cross-hand 73->55 r(lag0)=-0.859
+  half-width 5 frames (~55ms, persistent = sustained coordination). BOTH peak at lag 0, so
+  there is no latency a decoder can wait out. Shipped lag_profile + half_width_frames,
+  documented as step 4b in SEPARATION_MODEL, answered issue #16.
+- Premise overturned by our own data: the measured natural gesture envelope is a ~12mm radius
+  (thumb bboxes 24.6x18.2mm and 20.6x15.9mm; index similar). The accuracy-optimal 30mm radius
+  is 2.5x larger. Stated as a LOWER BOUND because the sessions were exploratory, not cued.
+  Three resolutions offered in COMPASS_SURFACE.md; it is a product decision.
+- Hardened scripts/gh_commit.py: a non-fast-forward ref update now re-reads the remote head
+  and REBUILDS the commit on it (3 attempts, then stop). Forcing a stale-parent push would be
+  wrong, and the failure cost one addendum once.
+- Reviewed agent1's new scripts/rest_calibration.py: it independently reproduces my numbers
+  (40 mm/s, 8 frames, rest_worst_run 7) - the strongest cross-check so far. Its objective has
+  one gap: clean only means no rest false activation, so it selects (60, 5) without noticing
+  that 60 mm/s stops detecting 350-500 ms gestures. Filed as a review issue.
