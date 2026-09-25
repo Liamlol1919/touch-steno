@@ -13,6 +13,7 @@
 | [linuxwacom/input-wacom](https://github.com/linuxwacom/input-wacom) | Linux device driver, touch arbitration and event semantics | Needed to understand why PTH-660 events may be suppressed or reorganized. | GPL-2.0; avoid copying kernel code into a differently licensed userspace component without review. |
 | [linuxwacom/libwacom](https://github.com/linuxwacom/libwacom) | device capability/tablet database | Useful for identifying touch-capable PTH-660 configurations. | component license; check selected version. |
 | [wayland.freedesktop.org/libinput](https://gitlab.freedesktop.org/libinput/libinput) | event normalization, touch arbitration, debug tooling | First stop for a Linux implementation; libinput is not a text decoder. | MIT-style project; use system library, not copied code where possible. |
+| [Wacom-Developer/wacom-device-kit-linux](https://github.com/Wacom-Developer/wacom-device-kit-linux) | Linux kernel, Wayland and X event samples | First practical reference for PTH-660 event-node discovery and tablet access; use the kernel event sample before writing a custom evdev reader. | Wacom sample/repository license; verify selected commit. |
 | [Wacom-Developer/wacom-device-kit-macos-multi-touch](https://github.com/Wacom-Developer/wacom-device-kit-macos-multi-touch) | API sample patterns for multi-touch callbacks and data model | Official sample is valuable for understanding confidence, palm rejection and contact data on supported OS/API. | Wacom API/driver license; do not redistribute SDK binaries casually. |
 
 ## Useful but narrower references

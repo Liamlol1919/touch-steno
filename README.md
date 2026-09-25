@@ -8,6 +8,9 @@ Research and implementation notes for high-speed text input on a continuous touc
 - [SYSTEM_COMPARISON_MATRIX.md](SYSTEM_COMPARISON_MATRIX.md) — stenography, chord, gesture and tap-sequence systems.
 - [RECOMMENDED_ARCHITECTURES.md](RECOMMENDED_ARCHITECTURES.md) — five implementable architectures and PTH-660 deployment plan.
 - [CODE_REFERENCES.md](CODE_REFERENCES.md) — reusable open-source repositories and integration ideas.
+- [EXPERIMENT_PROTOCOL.md](EXPERIMENT_PROTOCOL.md) — reproducible PTH-660 sensor, intent and ergonomics protocol.
+- [RESEARCH_LOG.md](RESEARCH_LOG.md) — iteration TODO and GitHub progress log.
+- `scripts/audit_input.py` — safe evdev capability/event audit.
 
 ## Important evidence note
 

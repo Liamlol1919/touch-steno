@@ -232,4 +232,91 @@ Kernel MT-Slots verwenden `ABS_MT_SLOT`, `ABS_MT_TRACKING_ID`, `ABS_MT_POSITION_
 - Testdaten mit Treiber- und Kernelversion versehen.
 - Falschauslöser und Korrekturen getrennt von Korrektur-WPM berichten.
 - Layouts, Wörterbücher und Code nicht ungeprüft unter einer Lizenz zusammenführen.
-- Ein leeres oder historisches Repository nicht als Beleg für eine aktuelle Implementierung zitieren.
+
+### Palm rejection: konkrete Evidenz
+
+- **Probabilistic Palm Rejection Using Spatiotemporal Touch Filtering**, ACM IMWUT/TOC 2014, DOI [10.1145/2556288.2557056](https://doi.org/10.1145/2556288.2557056): probabilistische, räumlich-zeitliche Filterung; berichtet 0,016 unfreiwillige Palm-Eingaben pro Pen-Stroke bei 98 % korrekt durchgelassenen Stylus-Eingaben. Das ist ein Stift-System, aber die Modellidee (Blob-/Kontakt-Historie statt fester Fläche) ist übertragbar.
+- **PalmTouch**, 2018, [PDF](https://www.mmi.ifi.lmu.de/pubdb/publications/pub/le2018palmtouchusing/le2018palmtouchusing.pdf): Palm wird nicht nur verworfen, sondern als eigene Modalität modelliert; berichtet 99,53 % Genauigkeit in realistischen Szenarien. Für dieses Projekt relevant, weil ein Handballen-Auflage-basiertes Kommando den 0G-Ruhezustand explizit nutzen kann.
+- **SpeciFingers: Finger Identification and Error Correction on Capacitive Touchscreens**, IMWUT 2024, DOI [10.1145/3643559](https://doi.org/10.1145/3643559): Identifiziert Finger aus kapazitiven Rohdaten und nutzt Fingerkategorien als zusätzliche Interaktionsmerkmale. Das ist näher an der Kernfrage als reine XY-Punkte; die Verfügbarkeit auf PTH-660 ist offen.
+- **CapContact: Super-resolution Contact Areas from Capacitive Touchscreens**, CHI 2021, [ETH project page](https://inf.ethz.ch/news-and-events/spotlights/infk-news-channel/2021/05/christian-holz-capcontact.html): schätzt hochauflösende Kontaktbereiche und berichtet, dass etwa ein Drittel der Lokalisierungsfehler moderner Touchscreens auf die niedrige Sensorauflösung zurückgeht. Ein PTH-660-Prototyp sollte daher Blob-/Kontaktgeometrie speichern, auch wenn ein Modell später trainiert wird.
+- **Transferable Microgestures Across Hand Posture and Location**, CHI 2023, DOI [10.1145/3586183.3606713](https://doi.org/10.1145/3586183.3606713): Mikrogesten mit Mittel-, Ring- und kleinem Finger; relevant für Robustheit, weil die Hand nicht in einer starren Einzelpose verharren muss.
+
+### Korrigierte Benchmarkwerte
+
+Die aktuelle Quellenprüfung liefert wichtige Korrekturen:
+
+- **TapType**: Der arXiv-Abstract nennt online 19 WPM nach 30 Minuten Training und 0,6 % CER; Experten lagen bei >25 WPM. Das ist kein Beleg für 150 WPM.
+- **TypeAnywhere** zitiert Twiddler mit durchschnittlich 26 WPM nach 400 Minuten (6,67 Stunden) Training. Das ist ein wichtiger Realitätscheck gegen Marketing-Claims.
+- **TOAST**: 44,6 WPM wird in TypeAnywhere als TOAST-Resultat genannt; es darf nicht TypeAnywhere zugeschrieben werden.
+- **FineType**: 35,1 WPM und 5,1 % Character Error werden aktuell als Paper-Abstract-Werte geführt; spätere Original-PDF-Prüfung bleibt nötig.
+
+## 9. Neue Hypothese: Kontaktfläche statt Druckproxy
+
+Da PTH-660 auf einer kontinuierlichen Oberfläche keinen diskreten Tastendruck liefert, ist der **plötzliche Anstieg der effektiven Kontaktfläche** ein plausibler Ersatz für die Key-down-Phase:
+
+\[
+u_t = A_t - \min_{k \in [t-\tau,t]} A_k
+\]
+
+Ein Tap-Kandidat benötigt dann eine kurze Anstiegsflanke \(u_t > u_\text{min}\), eine Mindestbewegungsenergie und einen stabilen Vorabschnitt. Das ist robuster als ein fixer Druckwert, weil Druck bei kapazitiven Tablets je nach Treiber semantisch unzuverlässig oder gar nicht exponiert sein kann. Die Hypothese muss gegen bloßes Aufsetzen, Handrutsch und Korrektur verglichen werden.
+
+## 11. Vertiefte HCI-Evidenz: Lernkurven, Mikrogesten und Enslavement
+
+### Twiddler und Chording-Lernkurven
+
+- **Lyons et al., Twiddler Typing, CHI 2004**, DOI [10.1145/985692.985777](https://doi.org/10.1145/985692.985777): Chording hat eine steilere Lernkurve als Multi-Tap; genaue Novizen-WPM im Abstract nicht extrahiert.
+- **Lyons, Plaisted, Starner, Expert Chording Text Entry on the Twiddler, ISWC 2004**, [IEEE](https://ieeexplore.ieee.org/document/1364695): n=5 Experten, Mittel 47 WPM nach ungefähr 25 Stunden Übung. Das ist ein belastbarer Realitätscheck: selbst spezialisiertes Chording ist nicht bei 150 WPM.
+- **Lyons et al., Experimental Evaluations of the Twiddler, HCI 2006**, DOI [10.1207/s15327051hci2104_1](https://doi.org/10.1207/s15327051hci2104_1): Longitudinalstudie zu Novize→Experte, Software T-CAT/Twidor und Soukoreff/MacKenzie-Phrasenset; vollständige Block-/Fehlerraten noch zu prüfen.
+- **Clarkson et al., Typing Rates on mini-QWERTY Keyboards, CHI 2005**, [PDF](https://sites.cc.gatech.edu/home/thad/p/030_10_MTE/mini-qwerty-chi05.pdf): 20×20-Minuten-Sitzungen, Session 1 31,72 WPM, Session 20 60,03 WPM. Das ist eine nützliche Lernkurven-Referenz für Soft-/Touch-Keyboards, aber kein 0G-Nachweis.
+- **Clawson et al., Impacts of Limited Visual Feedback, ISWC 2005**, [paper information](https://dl.acm.org/doi/10.1145/1099802.1099803): fehlendes visuelles Feedback beeinträchtigt Experten-Chording nicht grundsätzlich; eyes-free ist also prinzipiell möglich, aber nicht automatisch schnell.
+
+### Flat-glass und unsichtbare Tastatur
+
+- **Typing on an Invisible Keyboard, CHI 2018**, DOI [10.1145/3173574.3174013](https://doi.org/10.1145/3173574.3174013): 31,3 → 37,9 WPM nach 3×20–25 Minuten; sichtbare Kontrolle 41,6 WPM; WER etwa 2,4–2,5 %. Adaptierte räumliche Modelle und ein LM waren entscheidend.
+- **Typing on Flat Glass, CHI 2011**, [ACM DOI](https://doi.org/10.1145/2048064.2048080): zehnfingerige Expertenmuster auf Glas; die Arbeit begründet persönliche Drift-/Zielmodelle. Die exakten Zahlen müssen im Volltext geprüft werden.
+- **Personalized Input, CHI 2012**, DOI [10.1145/2207676.2208520](https://doi.org/10.1145/2207676.2208520): automatische Anpassung an Nutzer, Tasten und Handhaltung verbessert Touch-Typing; quantitativer Gain im Volltext zu prüfen.
+- **Tinwala & MacKenzie, Eyes-Free Text Entry with Error Correction, NordiCHI 2010**, DOI [10.1145/1868914.1868972](https://doi.org/10.1145/1868914.1868972): Graffiti-Strokes plus auditive Korrektur; Mittel 10,0 WPM, maximal 21,5 WPM, Accuracy 95,7 %. Verzögerte Rückmeldung erhöhte die Rate gegenüber unmittelbarer Rückmeldung.
+
+### Palm rejection, Kontaktgröße und Vorberührung
+
+- **PalmTouch, CHI 2018**, DOI [10.1145/3173574.3173934](https://doi.org/10.1145/3173574.3173934): kapazitive Rohbilder + ML; 99,53 % mittlere Genauigkeit und 0,09 % False-Positive-Rate in realistischen Szenarien. Die Daten benötigen OEM-Rohzugang, nicht die Standard-API.
+- **Probabilistic Palm Rejection, CHI 2014**, DOI [10.1145/2556288.2557056](https://doi.org/10.1145/2556288.2557056): Features Radius-Mittelwert/-Varianz/Min/Max, Abstand zu anderen Touches, Geschwindigkeit/Beschleunigung; iterative Vorwärts-/Rückwärtsfilterung ±100 ms; 0,016 Palm-Fehltrigger pro Pen-Stroke bei 98 % korrekt akzeptierten Stylus-Eingaben.
+- **Pre-Touch Sensing, CHI 2016**, DOI [10.1145/2858036.2858582](https://doi.org/10.1145/2858036.2858582): Self-Capacitance-Sensorik erkennt Finger über der Oberfläche und Griffe um Kanten; Hover liefert Kontext/Antizipation, aber keine zuverlässige Textposition.
+- Consumer-Touch-APIs liefern normalerweise keinen Hover-State. Ein PTH-660-Prototyp darf daher nicht auf eine nicht vorhandene Hover-Funktion bauen, außer der konkrete Treiber dokumentiert sie.
+
+### Mikrogesten
+
+- **User Elicitation on Single-Hand Microgestures, CHI 2016**, DOI [10.1145/2858036.2858589](https://doi.org/10.1145/2858036.2858589): Finger-Dexterität und Mikrogesten sind stark fingerabhängig; Ring-/Kleinfinger sollten nicht als äquivalent zu Daumen/Index angenommen werden.
+- **Grasping Microgestures, CHI 2019**, DOI [10.1145/3290605.3300632](https://doi.org/10.1145/3290605.3300632): Cluster von Hook/Palmar/Cylindrical/Tip/Lateral-Gesten; ruhende Finger werden je nach Grasp unterschiedlich rekrutiert.
+- **SoloFinger, CHI 2021**, DOI [10.1145/3411764.3445197](https://doi.org/10.1145/3411764.3445197): eine einzelne bewegte Fingerbewegung gegen statische Restfinger ist ein gutes Signal gegen Alltags-Hintergrundbewegung.
+- **EFRing, IMWUT 2023**, DOI [10.1145/3569478](https://doi.org/10.1145/3569478): 9 Daumen-zu-Index-Gesten mit 89,5 % within-user und 85,2 % cross-user accuracy; kontinuierliches 1D-Tracking MSE 3,5 % generisch bzw. 2,3 % personalisiert. Das ist ein starker Beleg, dass zusätzliche Ring-/Armsensorik die Identität lösen kann, aber keine direkte PTH-660-Lösung.
+
+### Enslavement: belastbare Grenzen für das Layout
+
+Finger-Enslavement ist ein physiologisches Multi-Finger-Kraftproblem; die relevanten Befunde stammen ursprünglich aus Kraft-/Bewegungsstudien, nicht aus kapazitivem Multi-Touch:
+
+- **Kapur, Friedman, Zatsiorsky, Latash, Finger Interaction in 3D Pressing Task, Exp Brain Res 2010**, DOI [10.1007/s00221-010-2213-7](https://doi.org/10.1007/s00221-010-2213-7): Index erzeugt die kleinsten ungewollten Kräfte; der Fähigkeitsrang zum Enslaven ist etwa Index < Middle < Ring/Little. Ringfinger ist der problematischste Nebenfinger.
+- Reviews der Zatsiorsky/Latash-Linie dokumentieren Force Sharing, Force Deficit, Enslaving und Occlusion. Daraus folgt für HCI eine **Designregel**, nicht eine direkt gemessene Touch-Decoder-Genauigkeit: Ring-/Kleinfinger nicht als unabhängige, zeitkritische Tasten behandeln.
+- **BiTipText, CHI 2020**, DOI [10.1145/3313831.3376306](https://doi.org/10.1145/3313831.3376306): 23,4 WPM, 0,03 % UER; Layoutoptimierung über 67.108.864 Kandidaten und Handedness-Sequenzen reduzierte Mehrdeutigkeit.
+- **TapType, CHI 2022 / arXiv 2410.06001**, [arXiv](https://arxiv.org/abs/2410.06001): 19,2 WPM online nach 30 Minuten, CER 0,6 %, >25 WPM für Experten, OOV ca. 9 WPM. Wrist-IMU-Fingerwahrscheinlichkeiten werden mit n-Gram-Prior fusioniert.
+
+Für die Touch-Oberfläche bedeutet das: Die Matrix eines kapazitiven Decoders sollte zunächst **Index/Middle plus Daumen** priorisieren, Ringfinger-Kontakte als „dependent“ unterdrücken und eine aktive Bewegung des Nutzers als Evidence-Höhung verwenden. Individuelle Enslavement-Matrizen aus Kontaktflächen zu schätzen ist derzeit eine **Hypothese**, kein evidenzbasierter Algorithmus.
+
+## 12. Realistische Zielhierarchie
+
+| Ziel | Status | Bedingung |
+|---:|---|---|
+| 19–25 WPM | gut gestützt | zehnfingerige passive Tap-Erkennung mit 30 Minuten Training und LM |
+| 31–40 WPM | gut gestützt | unsichtbares 1–2-Finger-QWERTY-Modell, nach Stunden Training |
+| 45–60 WPM | als langfristiges Expertenziel | etwa 25 Stunden Twiddler-Chording oder starker sequenzieller Decoder |
+| 70+ WPM | experimentell möglich | TypeAnywhere-ähnliche Tap-Sequenz + starkes LM; OOV separat prüfen |
+| 150–250 WPM | derzeit nicht evidenzbelegt | kein gefundener direkter 0G-/PTH-660-Benchmark; Forschungsziel, nicht Prognose |
+
+
+1. Kann die PTH-660-Ausgabe zwischen Kontaktfläche, Kontakt-ID und anatomischer Fingerklasse überhaupt unterscheiden?
+2. Wie groß ist der Ringfinger-„enslavement gain“ \(\beta_{r\leftarrow m}\) bei verschiedenen Griffweisen?
+3. Ist ein **expliziter Armierungsmodus** schneller und ermüdungsärmer als dauerhaftes Ruhe-Tracking?
+4. Welche Overlay-Geometrie erzeugt echte propriozeptive Orientierung, ohne zusätzliche Sensorik?
+5. Wie viele Korrekturen darf ein LM verdecken, bevor eine Eingabe als „committed“ gilt?
+6. Ist QWERTY-Finger-Identität auf einer 0G-Fläche stabiler als absolute QWERTY-Zielposition?
+7. Welche Plover-Stroke-Variante maximiert WPM bei gleichzeitig minimierender Mehrdeutigkeit?
