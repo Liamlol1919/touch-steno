@@ -160,3 +160,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Production `intent_filter.py` defaults remain unchanged.
 - [x] Added calibration artifact tests and documented the local-only workflow.
 - [ ] Real per-user rest/palm captures are still required before adopting a custom point.
+
+## Iteration 16 — 2026-09-25 07:49–07:55 CEST
+
+- [x] Added `guided_calibration.py --task palm` with explicit palm-rest provenance.
+- [x] Added palm task tests and corrected cued-protocol ordering.
+- [x] Palm baseline is now separable from generic finger-rest/noise capture.
+- [ ] Real palm/rest hardware sessions remain outstanding.

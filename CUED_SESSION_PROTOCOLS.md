@@ -12,16 +12,18 @@ open question has a specific measurement attached to it.
 | `correction` | `--task correction` | cue-to-undo-motion latency; text-repair latency only with an explicit repair log | **highest unresolved speed number** (W19: NOT FOUND in literature) |
 | `chord` | `--task chord` | is a real two-finger chord separable from a mirrored drag? | chord criterion is unvalidated |
 | `noise` | `--task noise` | per-user rest floor → the per-user gate (SEPARATION_MODEL) | cheap, 60 s |
+| `palm` | `--task palm` | palm-contact rest floor and false-trigger baseline | **required companion to noise** |
 | `identity` | `--task identity` | labelled (contact-id, anatomical label) pairs for portable calibration | validate with `identity_dataset_check.py` |
 
 ## Order that maximises information per minute
 
 1. **`noise`** (60 s) — smallest unit, and it immediately yields a per-user gate from the
    table in `SEPARATION_MODEL.md`. Everything else is safer once this is known.
-2. **`sectors`** (~2 min for 4 repetitions) — the accuracy number the whole report is missing.
-3. **`tempo`** (~2 min) — the training question behind the speed target.
-4. **`correction`** (~3 min) — the open number from W19; run `scripts/correction_metrics.py`.
-5. **`chord`**, **`identity`** — only after the above, because they are the most expensive
+2. **`palm`** (60 s) — captures palm contact separately from finger rest.
+3. **`sectors`** (~2 min for 4 repetitions) — the accuracy number the whole report is missing.
+4. **`tempo`** (~2 min) — the training question behind the speed target.
+5. **`correction`** (~3 min) — the open number from W19; run `scripts/correction_metrics.py`.
+6. **`chord`**, **`identity`** — only after the above, because they are the most expensive
    interpretation per minute of capture.
 
 `correction_metrics.py --repair-log` accepts only JSONL records with numeric `t`,

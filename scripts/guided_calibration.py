@@ -108,6 +108,9 @@ def build_tasks(args) -> list[dict]:
     elif args.task == "noise":
         tasks.append({"label": "noise_rest", "cue": "REST - DO NOT MOVE",
                       "seconds": args.rest_seconds, "rest": True})
+    elif args.task == "palm":
+        tasks.append({"label": "palm_rest", "cue": "PALM ON PAD - HOLD STILL",
+                      "seconds": args.palm_seconds, "rest": True, "palm": True})
     elif args.task == "correction":
         # Correction throughput at a cued event rate. W19 found NO published number for
         # whether a 3-5 events/s input can be corrected after the fact without the undo
@@ -223,7 +226,7 @@ def main() -> int:
                     help="directory containing wacom_touch.py (default: probe this "
                          "repo's src/ and sibling commind* checkouts)")
     ap.add_argument("--task", choices=("tempo", "sectors", "chord", "noise",
-                                   "identity", "correction"))
+                                        "identity", "correction", "palm"))
     ap.add_argument("--out", default="messung/calibration.jsonl")
     ap.add_argument("--device", default=None)
     ap.add_argument("--force", action="store_true")
@@ -232,6 +235,7 @@ def main() -> int:
     ap.add_argument("--rates", type=float, nargs="+",
                     default=[1.0, 2.0, 3.0, 4.0, 5.0])
     ap.add_argument("--sector-seconds", type=float, default=1.5)
+    ap.add_argument("--palm-seconds", type=float, default=60.0)
     ap.add_argument("--chord-seconds", type=float, default=1.5)
     ap.add_argument("--reps", type=int, default=4)
     ap.add_argument("--rest-seconds", type=float, default=60.0)

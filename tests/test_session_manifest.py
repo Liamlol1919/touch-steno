@@ -88,6 +88,13 @@ class TestSessionManifest(unittest.TestCase):
         task = guided_calibration.build_tasks(args)[0]
         self.assertEqual(task["events"], [0.0, 0.5, 1.0, 1.5])
         self.assertEqual(task["event_provenance"], "expected_cue_schedule")
+    def test_guided_palm_task_is_explicit(self):
+        args = SimpleNamespace(task="palm", palm_seconds=12.0)
+        task = guided_calibration.build_tasks(args)[0]
+        self.assertEqual(task["label"], "palm_rest")
+        self.assertTrue(task["rest"])
+        self.assertTrue(task["palm"])
+        self.assertEqual(task["seconds"], 12.0)
 
     def test_guided_tempo_score_labels_expected_schedule(self):
         record = {
