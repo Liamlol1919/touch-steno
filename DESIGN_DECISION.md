@@ -164,10 +164,18 @@ scored by independent critics:
 
 ### Why, in four lines
 
-1. **Bimanual arithmetic kills it before any measurement.** Two thumbs at 47.6 % each
-   give 0.476² = **22.7 %** of jointly valid frames → **1.3 events/s**, not the 3–4 that
-   was assumed. Reaching 3 valid events/s would need 13.3 joint attempts/s, more than the
-   entire 5.7/s ceiling.
+1. **Bimanual arithmetic kills it before any measurement — with a caveat I got wrong first.**
+   If the two thumbs err independently, 0.476² = **22.7 %** of jointly valid frames →
+   **1.3 events/s**, not the 3–4 that was assumed. **But that multiplication is an
+   assumption, not a measurement.** The errors are the same 180° antipodal pattern in both
+   hands, which means they are plausibly *positively correlated*, in which case joint
+   correctness can exceed 22.7 %; if the two hands err in opposite directions it can fall
+   below. With marginal accuracy 47.6 %, the true joint accuracy is somewhere in
+   **[0 %, 47.6 %] and has never been measured.** The KILL verdict survives the uncertainty
+   — even the optimistic 47.6 % yields 2.7 correct events/s and leaves no room for
+   corrections — but the specific number is not established, and the shared antipodal bias
+   is the real threat: a common offset makes *every one of the 64 pairs* wrong while every
+   frame still validates.
 2. **Timing channels have no error budget.** Binary rhythm needs 44 ms precision on a
    single 88 ms slot. Hold Bin needs a release boundary nobody has measured. A timing error
    produces a **valid but wrong** symbol, which is the worst failure mode: it corrupts
