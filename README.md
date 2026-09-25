@@ -37,6 +37,8 @@ Research and implementation notes for high-speed text input on a continuous touc
   covariance/sweep artifact with source hashes and replay comparison.
 - [PLOVER_BRIEFS.md](PLOVER_BRIEFS.md) and `scripts/plover_dictionary_check.py` — layered
   Plover JSON outline/translation validation with collision lint.
+- [LANGUAGE_LAYER_METRICS.md](LANGUAGE_LAYER_METRICS.md) and
+ `scripts/language_layer_metrics.py` — privacy-minimized local untranslate/undo/strokes-per-word counts.
 - [CANDIDATE_RANKING.md](CANDIDATE_RANKING.md) and `scripts/candidate_ranker.py` —
   confidence/language ranked candidates without committing text.
 - [LEXICON_DECODING.md](LEXICON_DECODING.md) and `scripts/lexicon_decoder.py` —

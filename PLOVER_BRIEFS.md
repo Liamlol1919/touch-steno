@@ -22,5 +22,7 @@ Plover resolves dictionary layers by priority and uses longest-first outline loo
 collision is therefore a data-quality failure, not a harmless duplicate: the checker exits
 non-zero and leaves the source dictionaries unchanged.
 
-The checker is intentionally format validation only. Import, theory design, untranslate
-rates and speed gains require separate measurements.
+The checker is intentionally format validation only. Import, theory design, and speed gains
+require separate measurements. Runtime untranslate/undo counts are handled separately by
+[`scripts/language_layer_metrics.py`](LANGUAGE_LAYER_METRICS.md); that tool does not measure
+import time, accuracy, Plover performance, or WPM.

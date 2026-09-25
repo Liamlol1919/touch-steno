@@ -257,3 +257,11 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Closed superseded issue #20: the old greedy LM escalation and quantitative claims were explicitly retracted.
 - [x] Kept real cued hardware, correction-time, and rate measurements open in the remaining issues.
 - [x] No new hardware, WPM, or training-performance result was added.
+
+## Iteration 29 — 2026-09-25
+
+- [x] Added `language_layer_metrics.py` for local stroke/untranslate/undo/word-delta counts.
+- [x] Kept the schema privacy-minimized and rejected text, outlines, coordinates, timestamps, and identifiers.
+- [x] Added strict loader/CLI tests, zero-denominator behavior, semantic sanity checks, and aggregate-only output.
+- [x] Documented the boundary against Plover performance, human correction time, accuracy, and WPM.
+- [ ] A consented real local language-layer log and held-out translation corpus remain outstanding.

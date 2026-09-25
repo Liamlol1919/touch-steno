@@ -61,6 +61,8 @@ The synthetic 150–350 ms envelope is not a substitute for this cued gate.
 
 **Tasks:** fixed text corpus with a versioned Plover dictionary stack; add user briefs only
 after logging untranslates and correction events.
+Use `scripts/language_layer_metrics.py` for local untranslate/undo/strokes-per-word counts;
+it does not replace a held-out translation corpus or human repair-time measurement.
 
 **Gate:**
 

@@ -25,6 +25,11 @@ python3 scripts/telemetry_export.py session.jsonl [more.jsonl ...] \
 
 The explicit `--consent` flag is required; without it the CLI refuses to export.
 
+`scripts/language_layer_metrics.py` consumes a separate local event log containing only
+semantic counters/deltas (`stroke`, `untranslate`, `undo`, signed `word`). It rejects text,
+outlines, coordinates, timestamps, and identifiers. Keep that log local and apply the same
+consent, access, retention, and deletion policy before any aggregate publication.
+
 ## Consent and retention
 
 - Obtain explicit consent before recording or exporting telemetry.
