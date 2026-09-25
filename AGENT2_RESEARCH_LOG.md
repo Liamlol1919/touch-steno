@@ -48,3 +48,26 @@ Tick-based log. Each entry: what was measured/decided, what was pushed, what is 
   conflicts with agent 1. Note: do NOT `git reset --hard` after a gh commit, it silently
   reverts to a stale local copy (this happened once and cost 6 tests).
 - 29 tests green. 9 issues open for agent 1, still no replies.
+
+## 06:02–06:10 — benchmark, first accuracy numbers, closed loop
+- `scripts/make_benchmark.py` + `scripts/evaluate_session.py`: the first *scored* run in the
+  project. Synthetic session calibrated to the three real recordings, same manifest format
+  as the guided harness so synthetic and real cued data score identically.
+- RESULTS: sector accuracy 1.00 (n=32), 0 idle false events in 9.7 s, tempo tracking
+  0.97-0.99 at 1-3 Hz, COLLAPSE to 0.32 at 4-5 Hz, chord detection tp2/fp0/fn4 (reported
+  broken, not tuned).
+- KEY ENVELOPE: the 88 ms persistence window that makes the detector false-trigger-free is
+  also the minimum quiet gap needed to segment two consecutive gestures. A mechanical key
+  gives that gap by releasing; a 0-force surface cannot. => ~88 ms per gesture AND per gap,
+  theoretical ceiling ~5.5 events/s, measured reliable ~3 Hz with 250 ms gestures, i.e.
+  ~180 WPM equivalent at 1.5 syllables/word - exactly the steno certification bar.
+  CONSEQUENCE: a vector gesture must contain its own return phase. 'Move and hold in the
+  sector' cannot be segmented on this surface at any speed.
+- The benchmark found three bugs that code review AND the pipeline audit had missed, two of
+  which produced a confidently wrong accuracy number: direction labels rotated one sector
+  (timestamp lookup straddling block boundaries), ground truth off by one block (closed vs
+  half-open intervals), contacts teleporting between cues. All three pinned with tests.
+  This is the argument for a scored benchmark: the pipeline passed every other check.
+- `scripts/stroke_sink.py` closes the loop: Plover JSON, text transcript, optional uinput,
+  with a retract path (the 360 WPM source makes undo/untranslate the cheapest speed win).
+- 36 tests green, pipeline end-to-end on all three real sessions and the benchmark.
