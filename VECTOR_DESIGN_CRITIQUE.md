@@ -117,20 +117,76 @@ we estimate:
 | **142 → 141 (zeige)** | **0.61** | **−0.311** | −0.20 | 111 | **mirrored** |
 | **141 → 142 (zeige)** | **0.49** | **−0.210** | −0.16 | 89 | **mirrored** |
 
-**Long-finger neighbours are dragged parallel.** A residual
-`r = step_b − 0.65 · step_a` collapses for genuine enslavement and stays large when b
-moves on its own. The "dominance filter" from the design chat is therefore *implementable
-and testable* — and we now know its coefficient (0.55–0.69) and its quality (cos θ > 0.87).
+### 4a. How predictable is the follower, really?
 
-**Thumb↔thumb and index↔index are not.** The follower moves about as far (β 0.49–0.63)
-but in a *different, slightly opposite* direction. Subtracting a parallel estimate
-leaves a residual as large as the motion itself, i.e. the filter provides no suppression
-for exactly the pair that the 7056-state architecture is built on.
+The β column above measures magnitude only. The question the decoder actually needs
+answered is *predictability*: if the leader's motion is known, how much of the follower's
+motion can be predicted away? That is the squared Pearson correlation r² between the two
+step vectors (flattened x,y), and the residual factor after a least-squares fit is
+`sqrt(1 − r²)`.
+
+| pair | n frames | r | r² (energy explained) | residual factor `sqrt(1−r²)` |
+|---|---:|---:|---:|---:|
+| 64 → 61 (test) | 312 | **+0.958** | 91.8 % | **0.29** |
+| 56 → 57 (test) | 191 | +0.936 | 87.6 % | 0.35 |
+| 61 → 64 (test) | 305 | +0.901 | 81.2 % | 0.43 |
+| 55 → 56 (test) | 213 | +0.786 | 61.8 % | 0.62 |
+| 81 → 82 (daumen) | 418 | **−0.495** | 24.5 % | **0.87** |
+| 141 → 142 (zeige) | 118 | −0.404 | 16.3 % | 0.92 |
+| 142 → 141 (zeige) | 141 | −0.381 | 14.5 % | 0.93 |
+| 82 → 81 (daumen) | 315 | −0.323 | 10.4 % | 0.95 |
 
 Quantify the damage for the compass: at r = 20 mm one zone of an 8-way grid is a
-7.85 mm arc. A 0.55-magnitude mirrored drag displaces the other thumb by ≈ 4.3 mm, i.e.
-**more than half a zone, in an uncorrelated direction**. For a two-thumb chord that is a
-systematic, class-changing error, not a small bias.
+7.85 mm arc. The measured mirrored β of 0.55 displaces the other thumb by ≈ 4.3 mm, i.e.
+**more than half a zone**. Because the direction is only ~40 % anti-correlated, the fit
+cannot cancel it: 87–95 % of that displacement survives the subtraction. For a two-thumb
+chord this is a systematic, class-changing error, not a small bias.
+
+### 4b. The sign is not the criterion — |r| is
+
+Running the full pair sweep with `scripts/follower_predictability.py` overturned the
+simple "parallel = correctable, mirrored = not" reading. In `test.jsonl` the pairs
+**73 → 55 (r = −0.858, 73.6 % explained)** and **73 → 56 (r = −0.848, 71.8 %)** are
+strongly *mirrored* and yet suppress almost as well as the best parallel pairs,
+because the filter only needs the signed coefficient. Those two contacts sit ~100 mm
+apart in x (73 at 132 mm, 55 at 34 mm), i.e. they are the cross-hand pair, and a
+−0.86 correlation there is the signature of **whole-body/forearm motion**, not of
+neighbouring-digit enslavement. That is a nuisance signal to model first, and it is
+cheap to model: one global motion component explains it.
+
+Corrected rule, and the one the decoder should implement:
+
+> Estimate a signed regression coefficient per contact pair from calibration data and
+> suppress by `step_b − s·step_a`. Suppression quality is **r², not the sign**.
+> Parallel pairs reach r² = 0.62–0.92 (finger row) and mirrored pairs reach
+> r² = 0.72–0.74 (cross-hand body motion). The thumb↔thumb pair is the genuinely hard
+> case at r² = 0.10–0.25.
+
+This is a better outcome for the architecture than the first reading suggested: there
+is exactly **one** measured pair class that resists suppression (thumb↔thumb), and
+time-multiplexing or thumb geometry is only needed for that one.
+**Long-finger neighbours are dragged parallel, and that is predictable.** A per-frame
+least-squares fit `step_b ≈ s · step_a` reaches correlations of **r = +0.79 … +0.96**
+(0.51–0.73 slope). That means 62–92 % of the follower's motion energy is explained by
+the leader, and a single subtraction collapses the residual to 0.29–0.62 of the
+original. The "dominance filter" from the design chat is therefore *implementable* for
+the finger row, and we now know its coefficient range and its residual factor.
+
+**Thumb↔thumb and index↔index are not.** The follower moves about as far (β 0.49–0.63)
+but *anti*-correlated with the leader: **r = −0.32 … −0.50**, slope −0.19 … −0.33.
+Two things follow, and the second one corrects an earlier over-statement of ours:
+
+1. The relation is **not absent — it is mirrored and reproducible in sign** across two
+    different sessions (daumen: −0.495 / −0.323; zeige: −0.404 / −0.381). A linear
+    model is still fittable, with a *negative* coefficient.
+2. But it explains only **10–25 % of the follower's energy** versus 62–92 % for the
+    finger row. In residual terms the linear filter suppresses ≈ 91 % of finger-row
+    follower motion and only ≈ 10–24 % of thumb-pair follower motion (residual factor
+    0.29–0.62 vs 0.87–0.95). "Not correctable by linear subtraction" is the accurate
+    statement; "not correctable at all" would have been wrong. See
+    `scripts/follower_predictability.py` for the exact computation and §4a.
+
+
 
 Three ways out, in the order I would test them:
 
