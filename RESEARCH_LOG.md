@@ -35,8 +35,9 @@
 - [ ] Stabilize a versioned raw-event JSONL schema and replay path.
 - [ ] Add per-user rest/palm covariance calibration and replayable threshold sweeps.
 - [ ] Define opt-in privacy-safe telemetry and correction/undo metrics.
-- [ ] Normalize `guided_calibration.py` paired manifest records and make `evaluate_session.py`
-  use one-to-one cue/event matching for tempo and chord scoring.
+- [x] Normalize `guided_calibration.py` paired manifest records and make `evaluate_session.py`
+  use one-to-one synthetic tempo/chord matching; guided tempo is explicitly aggregate mode.
+- [ ] Add per-event timestamps to guided tempo capture before claiming per-gesture real throughput.
 
 ## Iteration 3 — 2026-09-25 06:18–06:24 CEST
 
@@ -53,3 +54,16 @@
 Agent 1 maintains the research synthesis and architecture documents. Agent 2 maintains the
 measurement/decoder/benchmark side. Shared writes are published through the authenticated
 GitHub API after checking the remote head; no local branch is assumed authoritative.
+
+## Iteration 4 — 2026-09-25 06:28–06:35 CEST
+
+- [x] Added shared manifest normalization for complete and legacy paired cue records.
+- [x] Fixed guided capture to run the reader thread and write complete per-cue records.
+- [x] Fixed guided chord labels, rest labels and peak-aligned chord scoring.
+- [x] Removed stale benchmark rows and qualified synthetic 100–218 WPM as conditional.
+- [x] Added manifest/chord regression tests; targeted tests and `py_compile` passed.
+- [ ] Cued PTH-660 data and deliberate user throughput remain unmeasured.
+
+The corrected sub-gate envelope realizes 1.01–1.48 Hz for 150–350 ms synthetic gestures.
+The separate 100–218 WPM figures are conditional fast-return cycle-model outputs, not
+measured PTH-660 throughput.

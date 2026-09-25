@@ -37,9 +37,11 @@ import math
 import sys
 import time
 from pathlib import Path
+import threading
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import kinematics  # noqa: E402
+import session_manifest  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 SECTORS_8 = ("N", "NE", "E", "SE", "S", "SW", "W", "NW")
@@ -115,34 +117,52 @@ def record(args, tasks: list[dict]) -> int:
 
     out = Path(args.out)
     manifest = out.with_suffix(".manifest.jsonl")
-    # Open the device BEFORE creating any file: a missing tablet must not leave
+    # Open the device BEFORE creating files: a missing tablet must not leave
     # zero-byte capture artefacts behind.
+    rec = None
+    log = None
     try:
-        reader = WacomTouchReader(path=args.device)
+        rec = kinematics.Recorder(out, force=args.force)
+        log = manifest.open("w", encoding="utf-8")
+
+        def on_contacts(contacts):
+            rec.frame(time.monotonic(), contacts)
+
+        reader = WacomTouchReader(path=args.device, on_contacts=on_contacts)
         dev = reader.open()
-    except SystemExit as exc:
+    except (OSError, SystemExit) as exc:
+        if log is not None:
+            log.close()
+        if rec is not None:
+            rec.close()
         print(f"FEHLER: {exc}")
         return 1
-    rec = kinematics.Recorder(out, force=args.force)
-    log = manifest.open("w", encoding="utf-8")
+
     print(f"Device: {dev.name} ({reader.path})")
     print(f"Task '{args.task}' — {len(tasks)} cues, ~"
           f"{sum(t['seconds'] for t in tasks):.0f}s. Manifest: {manifest.name}")
+    stop = threading.Event()
+    thread = threading.Thread(target=reader.run, kwargs={"stop": stop}, daemon=True)
+    thread.start()
     cue("READY", 2.0)
     try:
-        for t in tasks:
+        for task in tasks:
             t0 = time.monotonic()
-            log.write(json.dumps({"t_start": t0, "label": t["label"],
-                                  "cue": t["cue"], **t}) + "\n")
-            log.flush()
-            cue(t["cue"], t["seconds"])
-            log.write(json.dumps({"t_end": time.monotonic(), "label": t["label"]}) + "\n")
+            cue(task["cue"], task["seconds"])
+            t1 = time.monotonic()
+            # One complete object per cue. The old start/end pair was ambiguous
+            # for repeated labels and could never be consumed safely by scoring.
+            log.write(json.dumps({**task, "t_start": t0, "t_end": t1}) + "\n")
             log.flush()
             cue("...", 0.15)
     except KeyboardInterrupt:
         print("\nAbbruch.")
-    rec.close()
-    log.close()
+    finally:
+        stop.set()
+        thread.join(timeout=2.0)
+        reader.close()
+        rec.close()
+        log.close()
     print(f"\nGeschrieben: {out} + {manifest}")
     return 0
 
@@ -154,24 +174,14 @@ def merge(args) -> int:
     if not manifest_path.exists():
         print(f"FEHLER: Manifest fehlt ({manifest_path}) — erst aufnehmen.")
         return 1
-    spans: list[tuple[float, float, str]] = []
-    open_at: dict[str, float] = {}
-    for line in manifest_path.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        rec = json.loads(line)
-        if "t_start" in rec and "t_end" not in rec:
-            open_at[rec["label"]] = rec["t_start"]
-        elif "t_end" in rec and "t_start" not in rec:
-            start = open_at.pop(rec["label"], None)
-            if start is not None:
-                spans.append((start, rec["t_end"], rec["label"]))
+    records = session_manifest.load(manifest_path)
+    spans = [(r["t_start"], r["t_end"], r["label"]) for r in records]
     labelled = Path(args.merge).with_suffix(".labelled.jsonl")
     n_lab = n_tot = 0
     with labelled.open("w", encoding="utf-8") as fh:
         for fr in raw:
             t = float(fr["t"])
-            label = next((lab for s, e, lab in spans if s <= t <= e), None)
+            label = next((lab for s, e, lab in spans if s <= t < e), None)
             fh.write(json.dumps({"t": t, "c": fr["c"], "task": label}) + "\n")
             n_tot += 1
             n_lab += label is not None

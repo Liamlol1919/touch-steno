@@ -2,10 +2,10 @@
 """Score the pipeline against labelled ground truth: confusion matrix, accuracy, WPM.
 
 This is the measurement the project has been missing. Every threshold so far was justified
-by distributions (rest vs mover, coupling r^2) but never by an accuracy number. With a
-labelled session - synthetic (make_benchmark.py) or a cued real one
-(guided_calibration.py, which writes the same manifest format) - the full pipeline can be
-scored:
+by distributions (rest vs mover, coupling r²) but never by an accuracy number.
+With a labelled synthetic session (one complete record per cue) or a guided session
+(normalized complete records; aggregate tempo blocks unless per-event marks are added),
+the full pipeline can be scored:
 
   * sector confusion matrix (was the decoded direction the cued one?)
   * axis-vs-diagonal accuracy, because the literature says axes are the reliable half
@@ -30,19 +30,83 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import intent_filter  # noqa: E402
 import kinematics  # noqa: E402
 import stroke_decoder  # noqa: E402
+import session_manifest  # noqa: E402
 
 AXES = {"E", "N", "W", "S"}
 
 
 def load_manifest(path: Path) -> list[dict]:
     mpath = path.with_suffix(".manifest.jsonl")
-    if not mpath.exists():
-        raise SystemExit(f"manifest fehlt: {mpath}")
-    out = []
-    for line in mpath.read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            out.append(json.loads(line))
-    return out
+    try:
+        return session_manifest.load(mpath)
+    except FileNotFoundError:
+        raise SystemExit(f"manifest fehlt: {mpath}") from None
+
+
+def score_chords(events: list[dict], strokes: list[dict]) -> dict:
+    """Score the peak-aligned chord decision, not unexplained contact count."""
+    true_labels = {"chord_both", "chord_both_thumbs"}
+    single_labels = {"single_only", "single_left_thumb"}
+    strokes_by_start = {s["t_start"]: s for s in strokes}
+    tp = fp = fn = 0
+    for event in events:
+        label = event.get("label") or ""
+        stroke = strokes_by_start.get(event["t_start"])
+        got_chord = bool(stroke and stroke.get("chord_contacts"))
+        if label in true_labels:
+            tp += got_chord
+            fn += not got_chord
+        elif label in single_labels:
+            fp += got_chord
+    return {"tp": tp, "fp": fp, "fn": fn}
+
+
+def score_tempo(record: dict, events: list[dict]) -> dict:
+    """Score synthetic per-event marks one-to-one; label guided aggregate blocks explicitly."""
+    want = float(record.get("rate_hz") or 0.0)
+    duration = float(record.get("t_end", 0.0)) - float(record.get("t_start", 0.0))
+    inside = [e for e in events
+              if record["t_start"] <= e["t_start"] < record["t_end"]]
+    marks = record.get("events")
+    if marks is None:
+        detected = len(inside)
+        detected_hz = detected / duration if duration else 0.0
+        return {
+            "label": record.get("label"), "cued_hz": want,
+            "detected_hz": round(detected_hz, 2),
+            "events": detected, "mode": "aggregate_block_count",
+            "cued_gestures": record.get("reps"),
+            "ratio": round(detected_hz / want, 2) if want else None,
+        }
+
+    expected = [float(record["t_start"]) + float(mark) for mark in marks]
+    tolerance = max(0.12, 0.5 / want if want else 0.12)
+    unmatched = set(range(len(inside)))
+    matched_flags = []
+    for cue_time in expected:
+        candidates = [i for i in unmatched
+                      if abs(inside[i]["t_start"] - cue_time) <= tolerance]
+        if not candidates:
+            matched_flags.append(False)
+            continue
+        chosen = min(candidates, key=lambda i: abs(inside[i]["t_start"] - cue_time))
+        unmatched.remove(chosen)
+        matched_flags.append(True)
+    matched = sum(matched_flags)
+    merged = sum(
+        1 for cue_time, was_matched in zip(expected, matched_flags)
+        if not was_matched
+        and any(abs(e["t_start"] - cue_time) <= tolerance for e in inside)
+    )
+    detected_hz = matched / duration if duration else 0.0
+    return {
+        "label": record.get("label"), "cued_hz": want,
+        "detected_hz": round(detected_hz, 2),
+        "events": matched, "mode": "one_to_one_cues",
+        "cued_gestures": len(expected), "missed": len(expected) - matched,
+        "merged": merged,
+        "ratio": round(detected_hz / want, 2) if want else None,
+    }
 
 
 def label_at(manifest, t):
@@ -127,35 +191,19 @@ def main() -> int:
             diag_hits += hit
 
     # --- chord detection ---
-    chord_tp = chord_fp = chord_fn = 0
-    for e in evs:
-        lab = e["label"] or ""
-        is_true = lab in ("chord_both", "single_only")
-        got_chord = bool(e["unexplained_contacts"])
-        if lab == "chord_both":
-            chord_tp += got_chord
-            chord_fn += (not got_chord)
-        elif lab == "single_only":
-            chord_fp += got_chord
+    chord = score_chords(evs, strokes)
     # --- idle false triggers ---
     rest_blocks = [(r["t_start"], r["t_end"]) for r in manifest
-                   if (r.get("label") or "").startswith("rest_")]
+                   if r.get("rest") is True
+                   or (r.get("label") or "").startswith("rest_")]
     rest_events = sum(1 for e in evs
-                      if any(s <= e["t_start"] <= e2 for s, e2 in rest_blocks))
+                      if any(s <= e["t_start"] < e2 for s, e2 in rest_blocks))
     rest_seconds = sum(b - a for a, b in rest_blocks)
-
     # --- tempo: achieved vs cued event rate ---
     tempo = []
     for r in manifest:
-        if not (r.get("label") or "").startswith("tempo_"):
-            continue
-        want = r.get("rate_hz", 0.0)
-        n = sum(1 for e in evs if r["t_start"] <= e["t_start"] <= r["t_end"])
-        dur = r["t_end"] - r["t_start"]
-        got = n / dur if dur else 0.0
-        tempo.append({"label": r["label"], "cued_hz": want,
-                      "detected_hz": round(got, 2), "events": n,
-                      "ratio": round(got / want, 2) if want else None})
+        if (r.get("label") or "").startswith("tempo_"):
+            tempo.append(score_tempo(r, evs))
 
     sectors_total = axis_total + diag_total
     result = {
@@ -165,9 +213,7 @@ def main() -> int:
         "sector_samples": sectors_total,
         "sector_accuracy": round((axis_hits + diag_hits) / sectors_total, 3)
         if sectors_total else None,
-        "axis_accuracy": round(axis_hits / axis_total, 3) if axis_total else None,
-        "diagonal_accuracy": round(diag_hits / diag_total, 3) if diag_total else None,
-        "chord": {"tp": chord_tp, "fp": chord_fp, "fn": chord_fn},
+        "chord": chord,
         "idle_false_events": rest_events,
         "idle_seconds": round(rest_seconds, 1),
         "idle_events_per_min": round(rest_events / rest_seconds * 60, 2)

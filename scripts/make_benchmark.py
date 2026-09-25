@@ -15,8 +15,9 @@ Calibration (from MEASURED_BIOMECHANICS.md, three real sessions):
   thumb coupling      mirrored, slope -0.33
 
 Tasks generated: N-sector compass gestures (8 sectors, axis-aligned), a tempo ramp, and
-chord/single alternation. Ground truth is written as a manifest in the same format
-guided_calibration.py uses, so the same analysis path applies to real and synthetic data.
+chord/single alternation. Ground truth is written as a manifest normalized through
+`session_manifest.py`, so the same analysis path applies to synthetic and guided records;
+their tempo provenance differs.
 
 Usage:
     python3 scripts/make_benchmark.py --out /tmp/bench.jsonl

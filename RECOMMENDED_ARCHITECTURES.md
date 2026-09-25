@@ -11,6 +11,9 @@
 | E. Dasher/Predictive zoom fallback | high | low for expert typing, high accessibility value | low–medium | **Fallback, not main path** |
 
 These are engineering estimates, not literature guarantees. The required 150–250 WPM should be a stretch target only after a measured baseline shows low false-trigger rate and correction cost.
+The speed ranges in this table are unmeasured engineering hypotheses. No PTH-660 corrected
+WPM result exists yet; the current synthetic envelope realizes about 1.01–1.48 Hz for
+150–350 ms gestures with a sub-gate return.
 
 ## A. Rest-gated tap-sequence + Plover (recommended primary)
 
@@ -86,9 +89,10 @@ Never commit a character from a single ambiguous contact. Use confidence bands, 
 
 ## C. Micro-drift directional gestures
 
-### Interaction
-
-Each contact is anchored conceptually at its initial rest point. A short displacement selects a direction, sector or chord. The displacement is measured relative to the user's own neutral pose, not an absolute screen coordinate.
+Each contact is anchored conceptually at its initial rest point. A short out-stroke moves
+toward a calibrated sector or branch, followed by a sub-threshold return to the neutral
+reference. The return is part of the gesture contract, not an optional cleanup: without it,
+repositioning contaminates the next direction estimate.
 
 ### Feature vector
 
@@ -178,6 +182,7 @@ ui/            armed/idle/commit state, calibration, correction
 
 - 8 directional sectors;
 - one active contact;
+- out-and-back gesture with a sub-gate return;
 - rest calibration;
 - deadband + velocity/area gate;
 - on-screen state and `uinput` output;
@@ -200,7 +205,8 @@ ui/            armed/idle/commit state, calibration, correction
 ## Acceptance criteria for the first public prototype
 
 - no spontaneous text during 30 minutes of normal resting/typing posture;
-- 95th-percentile event latency < 80 ms for committed taps;
+- report P95 onset-to-evidence and commit latency separately; committed latency must include
+  the measured 88 ms evidence floor and is not accepted below it;
 - correction rate and false-trigger rate are published;
 - a calibration and reset path always works;
 - a full text-entry session can be recovered after any ambiguous event;

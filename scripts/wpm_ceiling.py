@@ -77,8 +77,9 @@ def main() -> int:
         },
         "event_evidence_window_is_rate_ceiling": False,
         "synthetic_sweep_note": (
-            "150-350 ms gestures were detected at every tested 1-6 Hz cue rate; "
-            "6 Hz is the tested edge, not a measured maximum"
+            "150-350 ms gestures were detected with 100% direction accuracy in the "
+            "sub-gate-return generator; realized cue rates were 1.01-1.48 Hz, while "
+            "1-6 Hz was only the requested grid"
         ),
         "wpm_if_day0_free_motion_1_event_per_syll_1_5_syll": round(
             wpm_for(MOVE_EVENT_RATE_HZ, 1.5, 1.0), 0),
@@ -111,10 +112,10 @@ def main() -> int:
         print(f"|{r['target_wpm']}|{r['syllables_per_word']}|{r['events_per_syllable']}|"
               f"{r['required_events_per_s']:.2f}|{r['vs_measured_free_motion']:.2f}x|")
     print("\nREADING: 88 ms sets evidence/latency, not a maximum event rate. The corrected")
-    print("synthetic sweep detected every 150-350 ms gesture at the tested 1-6 Hz rates;")
-    print("6 Hz is not a ceiling. Targets need 1.5-6.5x the day-0 free-motion rate, but")
-    print("trained deliberate throughput remains unmeasured and must be gated by a cued")
-    print("tempo session rather than inferred from detector latency.")
+    print("synthetic sweep realized 1.01-1.48 Hz for 150-350 ms gestures; the requested")
+    print("1-6 Hz grid is not measured throughput. Targets need 1.5-6.5x the day-0 free-")
+    print("motion rate, but trained deliberate throughput remains unmeasured and must be")
+    print("gated by a cued tempo session rather than inferred from detector latency.")
     return 0
 
 

@@ -13,9 +13,10 @@ hit-rate and undo-rate both NOT FOUND). This is the first scored run.
 `scripts/make_benchmark.py` generates a **labelled** session whose noise and motion statistics
 are taken from the three real PTH-660 recordings: 91 Hz, rest step p99 0.56 mm, rest drift
 ~0.5 mm/s, mover steps 1–2.5 mm/frame, finger coupling slope +0.65, thumb coupling −0.33.
-Cues: rest blocks, an 8-sector compass, a tempo ramp, and chord/single alternation. The
-manifest format is identical to `guided_calibration.py`, so the same evaluation path runs on
-synthetic and real cued data.
+Cues: rest blocks, an 8-sector compass, a tempo ramp, and chord/single alternation.
+The manifest is normalized through `scripts/session_manifest.py`; guided cue records and
+synthetic benchmark records can be consumed by the same evaluator, while their tempo
+provenance remains different.
 
 ## Results
 
@@ -26,8 +27,6 @@ synthetic and real cued data.
 | tempo tracking 1 Hz | 0.99 | 0.99 detected / 1.00 cued |
 | tempo tracking 2 Hz | 0.98 | |
 | tempo tracking 3 Hz | 0.97 | |
-| tempo tracking 4 Hz | 0.33 (n=3) | **RETRACTED, see correction below** |
-| tempo tracking 5 Hz | 0.67 (n=3) | **RETRACTED, see correction below** |
 | chord detection | tp 2, fp 0, **fn 4** | the weak spot, see below |
 
 ## The three findings that matter
@@ -161,20 +160,22 @@ rates, and the reason long gestures become unreliable (below).
 
 ### Corrected operating envelope
 
-`scripts/envelope_sweep.py`, ≥8 cued gestures per cell, decoded sector compared to truth:
+`scripts/envelope_sweep.py`, ≥8 cued gestures per cell, decoded sector compared to truth;
+the requested grid is shown separately from the rate actually realized by the sub-gate
+return:
 
-| gesture length | detection rate | direction accuracy | idle false events |
-|---|---|---|---|
-| **100 ms** | **0 % at 1–6 Hz** | – | 0 |
-| **150–350 ms** | **100 % at 1–6 Hz** | **100 %** | 0 |
-| **500 ms** | 75–89 % | 100 % of detected | 0 |
+| gesture length | realized cue rate | detection rate | direction accuracy | idle false events |
+|---|---:|---:|---:|---:|
+| **100 ms** | 1.01–1.58 Hz | **0 %** | – | 0 |
+| **150–350 ms** | 1.01–1.48 Hz | **100 %** | **100 %** | 0 |
+| **500 ms** | 0.96–0.97 Hz | 75–89 % | 100 % of detected | 0 |
 
-Final statement of the envelope, superseding §0 and §1:
+Final statement of the sub-gate-return envelope, superseding §0 and §1:
 
 - minimum detectable gesture: **above 100 ms**, not the nominal 88 ms
-- working range: **150–350 ms**, valid to **6 Hz**
+- working range in this generator: **150–350 ms**, at the **realized** rate above
 - **there is no measured 3 Hz ceiling** and no measured 5.5 events/s ceiling
-- long gestures (500 ms) lose events, not accuracy
+- long gestures (500 ms) lose events, not direction accuracy
 - a **sub-gate return to a common centre is mandatory** for direction to be classifiable
 
 ### Three metric bugs, all in the evaluation harness
