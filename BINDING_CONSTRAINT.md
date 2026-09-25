@@ -825,3 +825,24 @@ sponsor scores and **11/50 across five adversarial critics**. No concept survive
 surviving result is not a concept: it is that the ten-contact field carries class
 information at 45,8 % against 12,5 % chance, which reopens a design space the gate
 numbers had appeared to close.
+
+### 10.2 Weighting caveat — the German/English comparison is not yet apples-to-apples
+
+The English figures are **token-weighted**: 1,2916 syllables per word overall and 1,3965 per
+5-letter word. The type-unweighted means on the same corpus are markedly different — 2,3317
+overall and 1,6710 for 5-letter items — because rare multiword and proper-noun expansions
+dominate when every type counts once.
+
+**The German 1,695 figure may be an unweighted pyphen count.** If so, the comparison in
+section 10 is between a weighted English number and an unweighted German one, and the
+"English is materially easier" conclusion is **not safe** until the German figure is
+recomputed with the same weighting.
+
+What survives the caveat regardless: English at its own token-weighted 1,3965 needs
+`1,3965 × e` events per 5-letter word — 4,189 at 3 events per syllable, 5,586 at 4, 6,982 at
+5 — and **every one of those exceeds the 1–2 premise.** That conclusion depends only on the
+English weighting and is unaffected.
+
+What is now marked provisional: the size of the English-versus-German gap. Recomputing the
+German inventory with token weighting is a short job and should be done before any
+cross-language claim is made in a design document.
