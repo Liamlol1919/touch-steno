@@ -203,6 +203,28 @@ class TestChordCriterion(unittest.TestCase):
     def test_unmapped_descriptors_are_reported_not_guessed(self):
         self.assertNotIn("N|small|chord3", stroke_decoder.DEFAULT_MAP)
 
+    def test_confidence_flags_sector_fences(self):
+        # dead centre of the E sector (0 deg) -> max margin
+        centred = stroke_decoder.confidence(10.0, 0.0, 8.0, "E")
+        self.assertFalse(centred["on_fence"])
+        self.assertGreater(centred["edge_margin_deg"], 20)
+        # exactly on the E/NE boundary (22.5 deg) -> on the fence
+        edge = stroke_decoder.confidence(10.0, -4.142, 8.0, "E")
+        self.assertTrue(edge["on_fence"])
+        self.assertLess(edge["edge_margin_deg"], 2)
+
+    def test_confidence_arc_occupancy_is_bounded(self):
+        short = stroke_decoder.confidence(10.0, 0.0, 2.0, "E")
+        long = stroke_decoder.confidence(10.0, 0.0, 40.0, "E")
+        self.assertLess(short["arc_occupancy"], long["arc_occupancy"])
+        self.assertLessEqual(long["arc_occupancy"], 1.0)
+
+    def test_strokes_carry_confidence_and_provenance(self):
+        self.assertEqual(stroke_decoder.sector_of(1.0, 0.0), "E")
+        c = stroke_decoder.confidence(1.0, 0.0, 5.0, "E")
+        for key in ("edge_margin_deg", "on_fence", "arc_occupancy", "sector_arc_mm"):
+            self.assertIn(key, c)
+
 
 class TestWpmCeiling(unittest.TestCase):
     def test_250_wpm_two_events_per_syllable_exceeds_the_ceiling(self):

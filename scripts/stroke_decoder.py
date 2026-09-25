@@ -90,6 +90,40 @@ def event_descriptor(ev: dict, positions: dict[str, tuple[float, float]]) -> dic
             "unexplained": unexplained, "displacement_mm": round(disp, 2)}
 
 
+SECTOR_EDGE_SAFETY_DEG = 10.0   # how close to a sector edge counts as "on the fence"
+
+
+def confidence(dx, dy, disp, sector, r_mm=20.0):
+    """Per-stroke confidence from measured, geometric quantities only.
+
+    DECODER_DESIGN.md requires every emitted event to carry provenance and a confidence.
+    Four components, each independently interpretable (no opaque score):
+
+      edge_margin_deg  distance from the sector boundary; 0 = exactly on the fence.
+                       This is the dominant term: the label is geometrically ambiguous
+                       there, whatever the speed was.
+      arc_occupancy    displacement as a fraction of the expected one-sector arc
+                       (2*pi*r/8 = 15.7 mm at r=20 mm). Short strokes stay inside their
+                       sector; long ones can cross into the neighbour.
+      unexplained      how many contacts the coupling model could not explain; more means
+                       the chord reading is ambiguous.
+      mover_share      mover displacement vs the largest unexplained competitor, i.e. how
+                       clearly one finger dominated the event.
+    """
+    mag = math.hypot(dx, dy)
+    ang = math.degrees(math.atan2(-dy, dx)) % 360.0
+    local = (ang - 22.5) % 45.0 - 22.5          # signed distance to nearest sector edge
+    edge_margin = 22.5 - abs(local)
+    sector_arc = 2.0 * math.pi * r_mm / 8.0
+    arc_occupancy = min(1.0, disp / sector_arc) if sector_arc else 0.0
+    return {
+        "edge_margin_deg": round(edge_margin, 1),
+        "on_fence": edge_margin < SECTOR_EDGE_SAFETY_DEG,
+        "arc_occupancy": round(arc_occupancy, 2),
+        "sector_arc_mm": round(sector_arc, 1),
+    }
+
+
 def chord_candidates(rows, start, end, mover, peak_ratio=0.5, max_lag=2):
     """Contacts that plausibly form an intentional chord with the mover.
 
@@ -182,7 +216,6 @@ def analyse(path: Path, mapping: dict) -> dict:
         d = event_descriptor(ev, positions)
         if not d.get("descriptor"):
             continue
-        # rebuild the descriptor with the measured chord count
         sector, band = d["sector"], d["band"]
         desc = f"{sector}|{band}|{key_chord}"
         counts[desc] = counts.get(desc, 0) + 1
@@ -190,10 +223,22 @@ def analyse(path: Path, mapping: dict) -> dict:
         if key is None:
             unmapped[desc] = unmapped.get(desc, 0) + 1
             continue
+        conf = confidence(p1[0] - p0[0], p1[1] - p0[1], d["displacement_mm"], sector)
+        comp = max((u["displacement_mm"] for u in ev["unexplained_contacts"]), default=0.0)
+        mover_share = (d["displacement_mm"] /
+                       max(d["displacement_mm"], comp)) if d["displacement_mm"] else 0.0
+        conf["unexplained_contacts"] = len(chord_tids)
+        conf["mover_share"] = round(mover_share, 2)
         strokes.append({"t_start": t0, "descriptor": desc, "stroke": key,
                         "sector": sector, "displacement_mm": d["displacement_mm"],
                         "chord_contacts": chord_tids,
-                        "chord_diagnostics": diag})
+                        "chord_diagnostics": diag,
+                        "confidence": conf,
+                        "provenance": {"source": path.name,
+                                       "event_t_end": ev["t_end"],
+                                       "contacts": d["contacts"],
+                                       "suppressed": [s["tid"] for s in
+                                                      ev["suppressed_as_dragged"]]}})
     return {"session": path.name, "events": len(res["events"]),
             "decoded": len(strokes), "descriptor_counts": counts,
             "chord_histogram": chord_hist,
