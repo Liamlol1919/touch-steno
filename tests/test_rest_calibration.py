@@ -35,6 +35,28 @@ class TestRestCalibration(unittest.TestCase):
                          {"velocity_mm_s": 40.0, "persistence_frames": 8})
         self.assertTrue(replay["source_hashes_match"])
         self.assertEqual(replay["selected"], artifact["selected"])
+    def test_gesture_coverage_is_explicit_in_selection(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rest = self._session(root, moving=False)
+            mover = self._session(root, moving=True)
+            artifact = rest_calibration.calibrate_user(
+                [rest], [mover], min_frames=50,
+                gesture_coverage={(40.0, 8): 1.0, (60.0, 5): 0.7})
+        self.assertEqual(artifact["selection_basis"],
+                         "rest_clean_and_gesture_coverage")
+        self.assertTrue(any(row["gesture_coverage"] == 0.7
+                            for candidate in artifact["candidates"]
+                            for row in candidate["rows"]))
+
+    def test_missing_coverage_is_not_silently_promoted(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rest = self._session(root, moving=False)
+            mover = self._session(root, moving=True)
+            artifact = rest_calibration.calibrate_user([rest], [mover], min_frames=50)
+        self.assertEqual(artifact["selection_basis"], "rest_clean_only")
+        self.assertIsNone(artifact["selected"])
 
     def test_artifact_persists_complete_sweep_rows(self):
         with tempfile.TemporaryDirectory() as td:

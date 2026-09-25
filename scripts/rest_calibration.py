@@ -93,16 +93,32 @@ def _rest_covariance(rest_sources, min_frames):
 
 
 def calibrate_user(rest_sources, mover_sources=(), *, user_label="local",
-                   windows=rest_model.WINDOWS, min_frames=50) -> dict:
-    """Return a local calibration artifact with provenance and a deterministic choice."""
+                   windows=rest_model.WINDOWS, min_frames=50,
+                   gesture_coverage=None, min_gesture_coverage=1.0) -> dict:
+    """Return a local calibration artifact with provenance and a declared choice.
+
+    ``gesture_coverage`` is an optional mapping ``(velocity, persistence) -> fraction``.
+    Without it, selection is explicitly marked rest-clean-only; callers must not mistake
+    that for gesture-length coverage.
+    """
     rest_sources = [Path(p) for p in rest_sources]
     mover_sources = [Path(p) for p in mover_sources]
+    coverage = gesture_coverage or {}
     candidates = []
     for window in windows:
         rows = _tagged_separation(rest_sources, mover_sources, window, min_frames)
+        for row in rows:
+            row["gesture_coverage"] = coverage.get(
+                (row["velocity_mm_s"], row["persistence_frames"]))
         candidates.append({"window_frames": window, "rows": rows})
+    def eligible(row):
+        if not row["clean"]:
+            return False
+        return (gesture_coverage is None or
+                (row["gesture_coverage"] is not None and
+                 row["gesture_coverage"] >= min_gesture_coverage))
     clean = [dict(row, window_frames=window)
-             for candidate in candidates for row in candidate["rows"] if row["clean"]]
+             for candidate in candidates for row in candidate["rows"] if eligible(row)]
     selected = min(clean, key=lambda row: (row["persistence_frames"],
                                            row["velocity_mm_s"])) if clean else None
     sources = rest_sources + mover_sources
@@ -111,6 +127,9 @@ def calibrate_user(rest_sources, mover_sources=(), *, user_label="local",
         "source_count": len(sources),
         "source_sha256": {str(path): file_sha256(path) for path in sources},
         "windows": list(windows), "min_frames": min_frames,
+        "gesture_coverage_source": "caller" if gesture_coverage is not None else None,
+        "selection_basis": "rest_clean_and_gesture_coverage" if gesture_coverage is not None
+                       else "rest_clean_only",
         "rest_covariance": _rest_covariance(rest_sources, min_frames),
         "candidates": candidates, "selected": selected,
         "production_defaults_unchanged": {
@@ -122,9 +141,13 @@ def calibrate_user(rest_sources, mover_sources=(), *, user_label="local",
 
 def replay_sweep(artifact: dict, rest_sources, mover_sources=()) -> dict:
     """Recompute a calibration artifact and compare source hashes/selection."""
+    coverage = {(row["velocity_mm_s"], row["persistence_frames"]): row["gesture_coverage"]
+                for candidate in artifact["candidates"] for row in candidate["rows"]
+                if row.get("gesture_coverage") is not None}
     current = calibrate_user(rest_sources, mover_sources,
                             windows=artifact["windows"],
-                            min_frames=artifact["min_frames"])
+                            min_frames=artifact["min_frames"],
+                            gesture_coverage=coverage or None)
     return {"source_hashes_match": artifact["source_sha256"] == current["source_sha256"],
             "selected": current["selected"], "candidates": current["candidates"]}
 

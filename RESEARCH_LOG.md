@@ -175,3 +175,10 @@ mapping is collected and the resulting identity model is evaluated across sessio
 - [x] Added `PLOVER_BRIEFS.md` and tests; no translation or speed claim was added.
 - [x] Language-layer TODO now has a concrete format/collision gate before brief authoring.
 - [ ] Real brief coverage, untranslate rate and speed delta remain unmeasured.
+
+## Iteration 18 — 2026-09-25 08:00–08:08 CEST
+
+- [x] Added optional gesture-length coverage to calibration candidate rows and selection.
+- [x] Kept `selection_basis=rest_clean_only` explicit when coverage is absent.
+- [x] Added replay-safe coverage tests; no unmeasured coverage values were fabricated.
+- [ ] Real gesture-length coverage data remains required for a production operating point.

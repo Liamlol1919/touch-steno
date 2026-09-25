@@ -112,3 +112,8 @@ sweep row, the deterministic selected candidate, and the unchanged production de
 (`40 mm/s`, 8 frames). `replay_sweep()` recomputes the sweep and compares source hashes. This
 is calibration evidence, not an automatic change to `intent_filter.py`; a user-specific
 operating point must be reviewed before deployment.
+
+The artifact can also accept a caller-supplied `gesture_coverage` mapping keyed by
+`(velocity_mm_s, persistence_frames)`. If supplied, selection requires both rest-clean and
+the requested minimum gesture coverage; without it, `selection_basis` is explicitly
+`rest_clean_only` and the result must not be read as a full 150–350 ms envelope validation.
