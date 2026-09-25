@@ -92,6 +92,29 @@ What follows from that:
   session (`guided_calibration.py --task noise`) measures exactly this distribution per user,
   and the matrix above shows the rule that would be applied to it.
 
+## A second discriminator: temporal shape, not just r²
+
+`r²` says how much of a follower's motion a pair explains. It does not say whether that
+follower is a *mechanical* neighbour or a *coordinated* one. That distinction is measurable
+too, from the same data (`follower_predictability.lag_profile`):
+
+| pair | class | r(lag 0) | half-width to 50 % |
+|---|---|---:|---|
+| 64 → 61 | within-hand | +0.958 | 2 frames (~22 ms) |
+| 56 → 57 | within-hand | +0.936 | 2 frames |
+| 73 → 55 | cross-hand (~100 mm) | −0.859 | **5 frames (~55 ms)** |
+| 73 → 56 | cross-hand (~100 mm) | −0.849 | 5 frames |
+
+Both classes peak at lag 0 — there is **no latency a decoder can wait out**. But the
+within-hand coupling is *sharp* (correlation collapses within 2 frames, the signature of
+immediate mechanical transmission) while the cross-hand relation *persists* (more than half
+its peak at 5 frames, the signature of sustained coordination).
+
+So the model gains a step 4b: a pair whose suppression fit is strong but whose half-width is
+long is not a finger-slaved neighbour, and its suppression should not be trusted on
+magnitude alone. This is also why the cross-hand structure survived a rigid-body fit
+(issue #16): it is not a translation-plus-rotation signature at all.
+
 ## What this model does not cover
 
 - **Chords.** Step 5 uses an $r^2$ threshold with a single global value; the measured structure
