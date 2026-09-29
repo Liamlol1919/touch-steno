@@ -245,7 +245,7 @@ GEOMETRY_SOURCE = "declared design inputs (no hand profile loaded)"
 HAND_PROFILE: dict = {}
 
 
-def apply_profile(profile: dict) -> dict:
+def apply_profile(profile: dict, source: str = "measured hand profile") -> dict:
     """Override the declared geometry with measured values.
 
     The profile describes the RIGHT hand only; the left half is always its exact
@@ -272,7 +272,7 @@ def apply_profile(profile: dict) -> dict:
     global ENVELOPE_MM, TANGENTIAL_PENALTY, ANCHORS, JOINTS, GEOMETRY_SOURCE
     global COMFORT_RING_MM
     HAND_PROFILE.update(profile)
-    GEOMETRY_SOURCE = "measured hand profile"
+    GEOMETRY_SOURCE = source
     used = []
     if "pad_mm" in profile:
         PAD_W, PAD_H = float(profile["pad_mm"][0]), float(profile["pad_mm"][1])
@@ -1453,7 +1453,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.hand_profile:
-        used = apply_profile(load_profile(args.hand_profile, args.allow_rejected_profile))
+        source = "rejected hand profile (diagnostic)" if args.allow_rejected_profile else "measured hand profile"
+        used = apply_profile(load_profile(args.hand_profile, args.allow_rejected_profile), source=source)
         print(f"hand profile {args.hand_profile}: {', '.join(used) or 'no fields'}",
               file=sys.stderr)
 
