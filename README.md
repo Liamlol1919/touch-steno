@@ -122,6 +122,15 @@ Details: `LAYOUT_PROVENANCE_AUDIT.md`.
 Die MT-Slot-, Axis-Reihenfolge-, Palm-Span- und Step-Boundary-Invarianten sowie
 ihre Regressionstests sind in `EVDEV_TRACKER_NOTES.md` dokumentiert.
 
+## Offline-Prüflauf
+
+Alle Kernprüfungen ohne Tablet und ohne Netz in einem Befehl:
+
+```bash
+python3 run_core_checks.py --allow-stale-layout   # Exit 0, Provenance nur als Warnung
+python3 run_core_checks.py                        # Exit 2 bei stale Layout-Provenance
+```
+
 ## Werkzeuge, nicht Ergebnisse
 
 `--self-test` prüft Invarianten, keine Zahlen auf Plausibilität. Der Optimierer
