@@ -20,6 +20,15 @@ def run(name: str, args: list[str]) -> tuple[str, int]:
     return name, proc.returncode
 
 
+def overall_exit(results: list[tuple[str, int]]) -> int:
+    """Technical failures (1) take precedence over stale provenance (2)."""
+    if any(code not in (0, 2) for _, code in results):
+        return 1
+    if any(code == 2 for _, code in results):
+        return 2
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--allow-stale-layout", action="store_true",
@@ -37,12 +46,13 @@ def main() -> int:
     else:
         results.append(run("layout provenance strict", [*audit_args, "--strict"]))
     technical_failures = [name for name, code in results if code not in (0, 2)]
+    code = overall_exit(results)
     if technical_failures:
         print("\nFAILED: " + ", ".join(technical_failures), file=sys.stderr)
-        return 1
-    if any(code == 2 for _, code in results):
+    elif code == 2:
         print("\nStale layout provenance; measurement replacement required.", file=sys.stderr)
-        return 2
+    if code:
+        return code
     print("\nAll offline core checks passed.")
     return 0
 
