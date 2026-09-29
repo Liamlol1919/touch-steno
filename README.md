@@ -58,7 +58,8 @@ mit dem *gemessenen* Tangential-Aufschlag bepreist.
 ```bash
 python3 layout_optimizer.py --self-test                  # 20 Invarianten, kein Netz nötig
 python3 layout_optimizer.py --out layout.json            # voller Lauf, ~25 s
-python3 layout_optimizer.py --hand-profile messung/rom/hand_profile.json
+python3 layout_optimizer.py --hand-profile messung/rom/hand_profile.json  # akzeptiert nur freigegebene Profile
+python3 layout_optimizer.py --allow-rejected-profile --hand-profile messung/rom/hand_profile.json  # nur Diagnose
 python3 layout_optimizer.py --write-profile-template profil.json
 ```
 
