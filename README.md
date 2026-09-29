@@ -116,6 +116,11 @@ python3 audit_layout_provenance.py --strict   # gibt Exit 2 bei Provenance-Misma
 Ein Layout aus einem abgelehnten Profil darf nicht als aktuelle Messung dargestellt werden.
 Details: `LAYOUT_PROVENANCE_AUDIT.md`.
 
+## Evdev-Tracker-Dokumentation
+
+Die MT-Slot-, Axis-Reihenfolge-, Palm-Span- und Step-Boundary-Invarianten sowie
+ihre Regressionstests sind in `EVDEV_TRACKER_NOTES.md` dokumentiert.
+
 ## Werkzeuge, nicht Ergebnisse
 
 `--self-test` prüft Invarianten, keine Zahlen auf Plausibilität. Der Optimierer
