@@ -528,6 +528,38 @@ def load_corpus(n_words: int, cache: Path, offline: bool) -> Corpus:
     )
 
 
+def self_test_corpus() -> Corpus:
+    """Small deterministic corpus so ``--self-test`` never needs a network.
+
+    It is deliberately not a substitute for the real corpus in a normal run;
+    it only exercises inventory coverage, transitions and optimiser invariants.
+    """
+    words: list[tuple[str, list[str], int]] = []
+    for i, phone in enumerate(PHONEMES):
+        words.append((f"p{i:02d}", [phone], 1))
+    for i, phone in enumerate(PHONEMES):
+        nxt = PHONEMES[(i + 1) % len(PHONEMES)]
+        words.append((f"b{i:02d}", [phone, nxt], 1))
+    phones = list(PHONEMES)
+    syllables = sum(sum(1 for p in ph if p in VOWELS) for _, ph, _ in words)
+    return Corpus(
+        words=words,
+        total_tokens=len(words),
+        covered_tokens=len(words),
+        phones_seen=phones,
+        n_syllables=syllables,
+        syllables_per_token=syllables / len(words),
+        syllables_per_word=syllables / len(words),
+        provenance={
+            "source": "deterministic self-test fixture",
+            "frequency_source": None,
+            "pronunciation_source": None,
+            "words_used": len(words),
+            "phone_count": len(phones),
+        },
+    )
+
+
 def corpus_transitions(corpus: Corpus) -> None:
     """Undirected transition weights over the symbol stream
     REST p1..pn SPACE | REST p1'.. ; a word is one lift-to-rest round trip."""
@@ -1415,8 +1447,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"hand profile {args.hand_profile}: {', '.join(used) or 'no fields'}",
               file=sys.stderr)
 
-    print("loading corpus ...", file=sys.stderr)
-    corpus = load_corpus(args.words, args.cache, args.offline)
+    if args.self_test:
+        print("using deterministic self-test corpus (no network)", file=sys.stderr)
+        corpus = self_test_corpus()
+    else:
+        print("loading corpus ...", file=sys.stderr)
+        corpus = load_corpus(args.words, args.cache, args.offline)
     corpus_transitions(corpus)
     params = Params(w_phys=args.w_phys, w_err=args.w_err, w_learn=args.w_learn,
                     w_sym=args.w_sym)
