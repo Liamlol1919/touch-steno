@@ -7,7 +7,7 @@
 3. **Palm rejection uses a true contact span.** The span is computed only after the first complete XY sample; a missing axis is never substituted by zero.
 4. **A step boundary closes live contacts.** `flush()` prevents a still-down contact from being attributed to the next cued step.
 5. **A late release is idempotent.** After flush, a later `TRACKING_ID = -1` does not emit a duplicate contact.
-6. **Legacy and MT modes are separate.** Once MT events are seen, mirrored `ABS_X/ABS_Y` events are ignored.
+6. **Legacy and MT modes are separate.** Once MT events are seen, mirrored `ABS_X/ABS_Y` events are ignored; an active legacy pointer is closed before MT tracking begins.
 
 ## Regression matrix
 
@@ -19,6 +19,7 @@
 | contact still down at step end | closed exactly once at flush |
 | tracking release after flush | no duplicate contact |
 | legacy X/Y only | waits for both axes and emits one point |
+| legacy pointer followed by first MT event | legacy contact closed before MT contact |
 | wide span over 30 mm | rejected with palm/forearm reason |
 | narrow span | retained |
 
