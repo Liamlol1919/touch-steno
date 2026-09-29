@@ -102,6 +102,20 @@ verworfen.
   Tracker, Kalibrierung, Aufnahmeschleife und Auswertung sind mit synthetischen
   Events getestet.
 
+## Provenance-Gate
+
+`hand_profile.json` ist derzeit ausdrücklich als `REJECTED` markiert. Das bereits
+committete `layout.json` enthält dagegen noch eine ältere „measured hand profile“-Provenance.
+Daher vor jeder Weiterverwendung prüfen:
+
+```bash
+python3 audit_layout_provenance.py
+python3 audit_layout_provenance.py --strict   # gibt Exit 2 bei Provenance-Mismatch
+```
+
+Ein Layout aus einem abgelehnten Profil darf nicht als aktuelle Messung dargestellt werden.
+Details: `LAYOUT_PROVENANCE_AUDIT.md`.
+
 ## Werkzeuge, nicht Ergebnisse
 
 `--self-test` prüft Invarianten, keine Zahlen auf Plausibilität. Der Optimierer
