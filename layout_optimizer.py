@@ -338,7 +338,7 @@ def load_profile(path: Path, allow_rejected: bool = False) -> dict:
     if not isinstance(data, dict):
         raise SystemExit(f"{path}: hand profile must be a JSON object")
     status = data.get("_status", "")
-    if isinstance(status, str) and status.startswith("REJECTED") and not allow_rejected:
+    if isinstance(status, str) and status.upper().startswith("REJECTED") and not allow_rejected:
         reason = data.get("_rejected_because", "no reason recorded")
         raise SystemExit(
             f"{path}: hand profile is REJECTED and must not be used silently; "

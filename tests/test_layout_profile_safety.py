@@ -26,6 +26,13 @@ class ProfileSafetyTests(unittest.TestCase):
             self.assertIn("REJECTED", str(ctx.exception))
             self.assertIn("--allow-rejected-profile", str(ctx.exception))
 
+    def test_rejected_status_check_is_case_insensitive(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "rejected.json"
+            path.write_text(json.dumps({"_status": "rejected - unusable"}))
+            with self.assertRaises(SystemExit):
+                module.load_profile(path)
+
     def test_explicit_diagnostic_override_is_available(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "rejected.json"
