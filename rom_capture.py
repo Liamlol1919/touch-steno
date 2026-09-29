@@ -110,7 +110,13 @@ class ContactTracker:
         self.to_mm = to_mm
         self.saw_mt = False
         self.slots: dict[int, dict] = {}
+        self.active_slot = 0
         self.legacy: dict | None = None
+
+    def _empty_slot(self) -> dict:
+        return {"x": 0.0, "y": 0.0, "have_xy": False, "live": False,
+                "t_down": 0.0, "t_last": 0.0, "path": 0.0,
+                "minx": None, "miny": None, "maxx": None, "maxy": None}
 
     def _new_slot(self, t: float) -> dict:
         return {"x": 0.0, "y": 0.0, "have_xy": False, "live": True, "t_down": t,
@@ -142,15 +148,10 @@ class ContactTracker:
         if code in (ABS_MT_SLOT, ABS_MT_TRACKING_ID, ABS_MT_POSITION_X, ABS_MT_POSITION_Y):
             self.saw_mt = True
             if code == ABS_MT_SLOT:
-                self.slots[int(value)] = self.slots.get(0) or {
-                    "x": 0.0, "y": 0.0, "have_xy": False, "live": False, "t_down": 0.0,
-                    "t_last": 0.0, "path": 0.0, "minx": None, "miny": None,
-                    "maxx": None, "maxy": None}
+                self.active_slot = int(value)
+                self.slots.setdefault(self.active_slot, self._empty_slot())
                 return closed
-            cur = self.slots.setdefault(0, {"x": 0.0, "y": 0.0, "have_xy": False,
-                                            "live": False, "t_down": 0.0, "t_last": 0.0,
-                                            "path": 0.0, "minx": None, "miny": None,
-                                            "maxx": None, "maxy": None})
+            cur = self.slots.setdefault(self.active_slot, self._empty_slot())
             if code == ABS_MT_TRACKING_ID:
                 if value < 0:
                     if cur["live"]:
