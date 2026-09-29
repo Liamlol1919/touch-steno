@@ -1117,6 +1117,38 @@ def self_test() -> int:
     live.feed(ABS_MT_POSITION_Y, 6.0, 0.0)
     check("live point is visible while the contact is down", live.live_points() == [(5.0, 6.0)])
 
+    two = ContactTracker(lambda x, y: (x, y))
+    two.feed(ABS_MT_SLOT, 0, 0.0)
+    two.feed(ABS_MT_TRACKING_ID, 1, 0.0)
+    two.feed(ABS_MT_POSITION_X, 10, 0.0)
+    two.feed(ABS_MT_POSITION_Y, 20, 0.0)
+    two.feed(ABS_MT_SLOT, 1, 0.0)
+    two.feed(ABS_MT_TRACKING_ID, 2, 0.0)
+    two.feed(ABS_MT_POSITION_X, 100, 0.0)
+    two.feed(ABS_MT_POSITION_Y, 200, 0.0)
+    check("MT slots keep independent live points", two.live_points() == [(10, 20), (100, 200)])
+
+    order = ContactTracker(lambda x, y: (x, y))
+    ordered = []
+    for code, value in ((ABS_MT_SLOT, 0), (ABS_MT_TRACKING_ID, 1),
+                        (ABS_MT_POSITION_X, 100), (ABS_MT_POSITION_Y, 200),
+                        (ABS_MT_TRACKING_ID, -1)):
+        ordered.extend(order.feed(code, value, 0.0))
+    check("partial axis order does not fake a palm span",
+          len(ordered) == 1 and not ordered[0].rejected
+          and ordered[0].span < FINGER_MAX_SPAN_MM,
+          f"span={ordered[0].span if ordered else 'n/a'}")
+
+    boundary = ContactTracker(lambda x, y: (x, y))
+    boundary.feed(ABS_MT_SLOT, 0, 0.0)
+    boundary.feed(ABS_MT_TRACKING_ID, 1, 0.0)
+    boundary.feed(ABS_MT_POSITION_X, 5, 0.0)
+    boundary.feed(ABS_MT_POSITION_Y, 6, 0.0)
+    flushed = boundary.flush()
+    check("step boundary flush closes a live contact",
+          len(flushed) == 1 and boundary.live_points() == []
+          and boundary.feed(ABS_MT_TRACKING_ID, -1, 0.1) == [])
+
     calib = Calibration()
     calib.bl, calib.br, calib.tl = (0.0, 0.0), (1000.0, 0.0), (0.0, 500.0)
     f = calib.fit()
