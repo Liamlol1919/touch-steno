@@ -1,0 +1,38 @@
+import importlib.util
+import json
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+spec = importlib.util.spec_from_file_location("layout_optimizer", ROOT / "layout_optimizer.py")
+assert spec and spec.loader
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+
+class ProfileSafetyTests(unittest.TestCase):
+    def test_rejected_profile_is_refused_by_default(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "rejected.json"
+            path.write_text(json.dumps({
+                "_status": "REJECTED - unusable",
+                "_rejected_because": ["bad capture"],
+            }))
+            with self.assertRaises(SystemExit) as ctx:
+                module.load_profile(path)
+            self.assertIn("REJECTED", str(ctx.exception))
+            self.assertIn("--allow-rejected-profile", str(ctx.exception))
+
+    def test_explicit_diagnostic_override_is_available(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "rejected.json"
+            path.write_text(json.dumps({"_status": "REJECTED - unusable"}))
+            self.assertEqual(module.load_profile(path, allow_rejected=True)["_status"],
+                             "REJECTED - unusable")
+
+
+if __name__ == "__main__":
+    unittest.main()

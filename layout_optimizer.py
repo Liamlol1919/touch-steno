@@ -333,10 +333,18 @@ def apply_profile(profile: dict) -> dict:
     return used
 
 
-def load_profile(path: Path) -> dict:
+def load_profile(path: Path, allow_rejected: bool = False) -> dict:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise SystemExit(f"{path}: hand profile must be a JSON object")
+    status = data.get("_status", "")
+    if isinstance(status, str) and status.startswith("REJECTED") and not allow_rejected:
+        reason = data.get("_rejected_because", "no reason recorded")
+        raise SystemExit(
+            f"{path}: hand profile is REJECTED and must not be used silently; "
+            f"reason={reason}. Use --allow-rejected-profile only for a labelled "
+            f"diagnostic run."
+        )
     return data
 
 
@@ -1430,7 +1438,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--offline", action="store_true", help="fail instead of downloading")
     ap.add_argument("--self-test", action="store_true")
     ap.add_argument("--hand-profile", type=Path,
-                    help="JSON file of measured hand geometry; see apply_profile()")
+                    help="JSON file of accepted hand geometry; see apply_profile()")
+    ap.add_argument("--allow-rejected-profile", action="store_true",
+                    help="diagnostic only: allow a profile marked REJECTED")
     ap.add_argument("--write-profile-template", type=Path,
                     help="write a fillable profile template and exit")
     ap.add_argument("--out", type=Path, help="write the full result as JSON")
@@ -1443,7 +1453,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.hand_profile:
-        used = apply_profile(load_profile(args.hand_profile))
+        used = apply_profile(load_profile(args.hand_profile, args.allow_rejected_profile))
         print(f"hand profile {args.hand_profile}: {', '.join(used) or 'no fields'}",
               file=sys.stderr)
 
