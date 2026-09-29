@@ -108,22 +108,31 @@ class ContactTracker:
 
     def __init__(self, to_mm):
         self.to_mm = to_mm
+        self.ABS_X = ABS_X
+        self.ABS_Y = ABS_Y
         self.saw_mt = False
         self.slots: dict[int, dict] = {}
         self.active_slot = 0
         self.legacy: dict | None = None
 
-    def _empty_slot(self) -> dict:
-        return {"x": 0.0, "y": 0.0, "have_xy": False, "live": False,
-                "t_down": 0.0, "t_last": 0.0, "path": 0.0,
-                "minx": None, "miny": None, "maxx": None, "maxy": None}
-
     def _new_slot(self, t: float) -> dict:
-        return {"x": 0.0, "y": 0.0, "have_xy": False, "live": True, "t_down": t,
+        return {"x": 0.0, "y": 0.0, "has_x": False, "has_y": False,
+                "have_xy": False, "live": True, "t_down": t,
                 "t_last": t, "path": 0.0, "minx": None, "miny": None,
                 "maxx": None, "maxy": None}
 
+    def _empty_slot(self) -> dict:
+        return {"x": 0.0, "y": 0.0, "has_x": False, "has_y": False,
+                "have_xy": False, "live": False,
+                "t_down": 0.0, "t_last": 0.0, "path": 0.0,
+                "minx": None, "miny": None, "maxx": None, "maxy": None}
+
     def _sample(self, cur: dict) -> None:
+        # Do not measure a partial axis update as a real sample.  The kernel may
+        # deliver X and Y in either order within a frame; treating the missing
+        # axis as 0 creates a false palm-sized span.
+        if not (cur.get("has_x") and cur.get("has_y")):
+            return
         x, y = self.to_mm(cur["x"], cur["y"])
         if cur["have_xy"]:
             cur["path"] += math.dist((x, y), cur["mm"])
@@ -162,19 +171,24 @@ class ContactTracker:
             elif cur["live"]:
                 if code == ABS_MT_POSITION_X:
                     cur["x"] = value
+                    cur["has_x"] = True
                 else:
                     cur["y"] = value
+                    cur["has_y"] = True
                 cur["t_last"] = t
                 self._sample(cur)
         elif code in (self.ABS_X, self.ABS_Y) and not self.saw_mt:
             if self.legacy is None:
-                self.legacy = {"x": 0.0, "y": 0.0, "have_xy": False, "live": True,
-                               "t_down": t, "t_last": t, "path": 0.0, "minx": None,
+                self.legacy = {"x": 0.0, "y": 0.0, "has_x": False, "has_y": False,
+                               "have_xy": False, "live": True, "t_down": t,
+                               "t_last": t, "path": 0.0, "minx": None,
                                "miny": None, "maxx": None, "maxy": None}
             if code == self.ABS_X:
                 self.legacy["x"] = value
+                self.legacy["has_x"] = True
             else:
                 self.legacy["y"] = value
+                self.legacy["has_y"] = True
             self.legacy["t_last"] = t
             self._sample(self.legacy)
         return [c for c in closed if c is not None]
