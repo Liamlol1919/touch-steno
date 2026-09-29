@@ -30,7 +30,24 @@ The default and profile-explicit optimiser runs both completed successfully, but
 - The current model WPM is not a measured typing speed.
 - A rejected profile must not silently become a “measured” input to a future layout run.
 
-## Recommended repair order
+## Guard added after the audit
+
+The optimiser now refuses a profile whose JSON status starts with `REJECTED`:
+
+```bash
+python3 layout_optimizer.py --hand-profile hand_profile.json
+# exits non-zero and prints the rejection reason
+```
+
+A deliberately labelled diagnostic run is possible only with:
+
+```bash
+python3 layout_optimizer.py --hand-profile hand_profile.json \
+  --allow-rejected-profile --out diagnostic-layout.json
+```
+
+That run labels `geometry.source` as `rejected hand profile (diagnostic)`, not as a measured profile. The ROM self-test also routes through the same safe loader.
+
 
 1. Re-run the guided ROM capture with the heel of the hand off the pad, only the measured digit/index touching, and no movement during the settling and still phases.
 2. Verify the new profile is accepted by `rom_capture.py`; retain the rejected file as an archive with its reason.
