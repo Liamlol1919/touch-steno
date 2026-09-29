@@ -12,6 +12,21 @@ import json
 from pathlib import Path
 
 
+def find_issues(layout: dict, profile: dict) -> list[str]:
+    """Return provenance inconsistencies without mutating any input."""
+    source = layout.get("geometry", {}).get("source")
+    status = profile.get("_status", "unknown")
+    embedded = layout.get("geometry", {}).get("hand_profile")
+    issues: list[str] = []
+    if isinstance(status, str) and status.startswith("REJECTED") and isinstance(source, str) and "measured" in source.lower():
+        issues.append("layout.json says 'measured hand profile', but hand_profile.json is REJECTED")
+    if embedded is not None and embedded.get("_status") != profile.get("_status"):
+        issues.append("embedded profile status differs from current hand_profile.json")
+    if embedded is not None and embedded.get("_measured_by") != profile.get("_measured_by"):
+        issues.append("embedded profile provenance differs from current hand_profile.json")
+    return issues
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--layout", type=Path, default=Path("layout.json"))
@@ -26,15 +41,7 @@ def main() -> None:
 
     source = layout.get("geometry", {}).get("source")
     status = profile.get("_status", "unknown")
-    embedded = layout.get("geometry", {}).get("hand_profile")
-    issues = []
-    if isinstance(status, str) and status.startswith("REJECTED") and isinstance(source, str) and "measured" in source.lower():
-        issues.append("layout.json says 'measured hand profile', but hand_profile.json is REJECTED")
-    if embedded is not None and embedded.get("_status") != profile.get("_status"):
-        issues.append("embedded profile status differs from current hand_profile.json")
-    if embedded is not None and embedded.get("_measured_by") != profile.get("_measured_by"):
-        issues.append("embedded profile provenance differs from current hand_profile.json")
-
+    issues = find_issues(layout, profile)
     print(f"layout source : {source}")
     print(f"profile status: {status}")
     if issues:
