@@ -36,13 +36,13 @@ def main() -> int:
         results.append(("layout provenance", audit.returncode))
     else:
         results.append(run("layout provenance strict", [*audit_args, "--strict"]))
+    technical_failures = [name for name, code in results if code not in (0, 2)]
+    if technical_failures:
+        print("\nFAILED: " + ", ".join(technical_failures), file=sys.stderr)
+        return 1
     if any(code == 2 for _, code in results):
         print("\nStale layout provenance; measurement replacement required.", file=sys.stderr)
         return 2
-    failed = [name for name, code in results if code != 0]
-    if failed:
-        print("\nFAILED: " + ", ".join(failed), file=sys.stderr)
-        return 1
     print("\nAll offline core checks passed.")
     return 0
 
