@@ -155,6 +155,11 @@ class ContactTracker:
     def feed(self, code: int, value: float, t: float) -> list[Contact]:
         closed: list[Contact] = []
         if code in (ABS_MT_SLOT, ABS_MT_TRACKING_ID, ABS_MT_POSITION_X, ABS_MT_POSITION_Y):
+            # Some drivers begin in legacy mode and switch to MT after the first
+            # frame. Close the old pointer before adding MT contacts, otherwise
+            # live_points() would contain a phantom duplicate.
+            if not self.saw_mt and self.legacy is not None and self.legacy.get("live"):
+                closed.extend(self.flush())
             self.saw_mt = True
             if code == ABS_MT_SLOT:
                 self.active_slot = int(value)

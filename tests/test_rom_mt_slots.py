@@ -61,6 +61,18 @@ class MultiTouchSlotTests(unittest.TestCase):
         self.assertEqual(tracker.live_points(), [(100, 200)])
 
 
+    def test_legacy_to_mt_transition_closes_legacy_pointer(self):
+        tracker = module.ContactTracker(lambda x, y: (x, y))
+        tracker.feed(tracker.ABS_X, 10, 0.0)
+        tracker.feed(tracker.ABS_Y, 20, 0.0)
+        closed = tracker.feed(module.ABS_MT_SLOT, 0, 0.1)
+        self.assertEqual(len(closed), 1)
+        self.assertEqual((closed[0].x, closed[0].y), (10, 20))
+        tracker.feed(module.ABS_MT_TRACKING_ID, 41, 0.1)
+        tracker.feed(module.ABS_MT_POSITION_X, 100, 0.1)
+        tracker.feed(module.ABS_MT_POSITION_Y, 200, 0.1)
+        self.assertEqual(tracker.live_points(), [(100, 200)])
+
     def test_flush_closes_contact_at_step_boundary(self):
         tracker = module.ContactTracker(lambda x, y: (x, y))
         feed = tracker.feed
