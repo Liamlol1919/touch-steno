@@ -61,5 +61,20 @@ class MultiTouchSlotTests(unittest.TestCase):
         self.assertEqual(tracker.live_points(), [(100, 200)])
 
 
+    def test_flush_closes_contact_at_step_boundary(self):
+        tracker = module.ContactTracker(lambda x, y: (x, y))
+        feed = tracker.feed
+        feed(module.ABS_MT_SLOT, 0, 0.0)
+        feed(module.ABS_MT_TRACKING_ID, 31, 0.0)
+        feed(module.ABS_MT_POSITION_X, 100, 0.0)
+        feed(module.ABS_MT_POSITION_Y, 200, 0.0)
+        closed = tracker.flush()
+        self.assertEqual(len(closed), 1)
+        self.assertEqual((closed[0].x, closed[0].y), (100, 200))
+        self.assertEqual(tracker.live_points(), [])
+        # A late driver release after the boundary must not emit a duplicate.
+        self.assertEqual(feed(module.ABS_MT_TRACKING_ID, -1, 0.1), [])
+
+
 if __name__ == "__main__":
     unittest.main()

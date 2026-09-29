@@ -193,6 +193,22 @@ class ContactTracker:
             self._sample(self.legacy)
         return [c for c in closed if c is not None]
 
+    def flush(self) -> list[Contact]:
+        """Close all still-live contacts at the end of a capture step.
+
+        Without this, a contact that is still down when the cue ends is emitted
+        into the next step when its TRACKING_ID finally arrives, contaminating
+        phase boundaries.
+        """
+        out: list[Contact] = []
+        for cur in list(self.slots.values()) + ([self.legacy] if self.legacy else []):
+            if cur and cur.get("live"):
+                contact = self._finish(cur)
+                if contact is not None:
+                    out.append(contact)
+                cur["live"] = False
+        return out
+
     def live_points(self) -> list[tuple[float, float]]:
         out = []
         for cur in list(self.slots.values()) + ([self.legacy] if self.legacy else []):
@@ -864,6 +880,7 @@ def capture_step(tracker: ContactTracker, res: StepResult, seconds: float,
         now = time.monotonic()
         for x, y in tracker.live_points():
             res.points.append((x, y, now))
+    res.contacts.extend(tracker.flush())
     if res.kind == "rest" and res.points:
         res.points.append((statistics.median([p[0] for p in res.points]),
                            statistics.median([p[1] for p in res.points]), 0.0))
