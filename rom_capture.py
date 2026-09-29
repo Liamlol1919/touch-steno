@@ -1319,7 +1319,8 @@ def _profile_feeds_optimiser(prof) -> str | None:
         path = Path(tmp) / "p.json"
         path.write_text(json.dumps(prof), encoding="utf-8")
         try:
-            layout_optimizer.apply_profile(json.loads(path.read_text()))
+            profile_data = layout_optimizer.load_profile(path)
+            layout_optimizer.apply_profile(profile_data)
         except Exception as exc:                       # noqa: BLE001 - reported as a failure
             return f"{type(exc).__name__}: {exc}"
     return None
