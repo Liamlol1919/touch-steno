@@ -24,9 +24,14 @@ for node in list_devices():
 PY
 ```
 
-The `--self-test` uses synthetic events and does not validate the physical pad.
-Confirm the live node with `evtest` or a short Python `InputDevice` capability
-dump before starting the guided sequence.
+The read-only preflight is:
+
+```bash
+python3 hardware_preflight.py
+```
+
+Exit 0 means a Wacom/Intuos node is visible; exit 1 means the capture is
+blocked until the device is connected.
 
 ## Run the guided capture
 
