@@ -33,6 +33,19 @@ class ProvenanceAuditTests(unittest.TestCase):
         profile = {"_status": "ACCEPTED", "_measured_by": "rom_capture.py"}
         self.assertEqual(module.find_issues(layout, profile), [])
 
+    def test_explicit_diagnostic_source_is_not_misreported_as_measurement(self):
+        layout = {
+            "geometry": {
+                "source": "rejected hand profile (diagnostic)",
+                "hand_profile": {
+                    "_status": "REJECTED - unusable",
+                    "_measured_by": "rom_capture.py",
+                },
+            }
+        }
+        profile = {"_status": "REJECTED - unusable", "_measured_by": "rom_capture.py"}
+        self.assertEqual(module.find_issues(layout, profile), [])
+
     def test_repository_inputs_are_detected_as_stale(self):
         layout = json.loads((ROOT / "layout.json").read_text())
         profile = json.loads((ROOT / "hand_profile.json").read_text())
