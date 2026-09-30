@@ -4,7 +4,7 @@
 
 ```text
 python3 run_core_checks.py --allow-stale-layout → Exit 0
-python3 -m unittest discover -s tests -q         → 51 tests, OK
+python3 -m unittest discover -s tests -q         → 52 tests, OK
 ```
 
 The offline core run passed the layout optimiser and hand-reader self-tests. The
