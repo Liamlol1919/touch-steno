@@ -83,7 +83,8 @@ python3 rom_capture.py --self-test                          # synthetische Event
 
 Anleitung pro Schritt: Ferse der Hand **vom** Pad, nur der zu testende Finger
 berührt. Kalibrierung über die drei Pad-Ecken, Kontaktspanne > 30 mm wird als Handfläche
-verworfen.
+verworfen. Neue Profile tragen den Status `ACCEPTED`; bei nicht gemessenen Feldern
+mit deklarierten Fallbacks `ACCEPTED_WITH_DECLARED_FALLBACKS`.
 
 ## Ehrliche Grenzen
 
