@@ -12,6 +12,12 @@
 
 There is still no accepted live PTH-660 hand recording. The committed `hand_profile.json` is deliberately `REJECTED`, and the historical `layout.json` must not be presented as a current measured result. A new ROM capture must satisfy the still-phase and contact-lifecycle gates before it can feed the optimiser.
 
+## Validation snapshot
+
+At 2026-09-30 03:09 CEST, the offline core run passed with 52 unit tests.
+The strict provenance mode still fails with Exit 2 until a live, accepted ROM
+profile replaces the rejected historical profile.
+
 ## Next concrete task
 
 Run `rom_capture.py --device ...` with only the thumb/index touching and the heel off the pad, then retain the raw JSONL, diagnostic output, profile status and provenance audit together. Do not overwrite the historical layout until the new profile is accepted.
