@@ -11,10 +11,10 @@ import subprocess
 import sys
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-usb", action="store_true", help="skip lsusb and inspect evdev only")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
     found = False
     if not args.no_usb:
         try:
