@@ -14,7 +14,13 @@ This is the next blocking experiment. It has not been executed in the current en
 
 ```bash
 lsusb | grep -i -E 'wacom|056a'
-python3 rom_capture.py --device /dev/input/eventN --self-test
+python3 rom_capture.py --self-test   # synthetic; does not open the device
+python3 - <<'PY'
+from evdev import InputDevice, list_devices
+for node in list_devices():
+    if "wacom" in InputDevice(node).name.lower():
+        print(node, InputDevice(node).name)
+PY
 ```
 
 The `--self-test` uses synthetic events and does not validate the physical pad.
@@ -54,10 +60,15 @@ source label for any temporary run.
 
 ```bash
 python3 layout_optimizer.py --hand-profile messung/rom/hand_profile.json \
-  --out layout.json
-python3 audit_layout_provenance.py --strict
+  --out layout-candidate.json
+python3 audit_layout_provenance.py \
+  --layout layout-candidate.json \
+  --profile messung/rom/hand_profile.json --strict
+# only after the strict audit returns 0:
+cp layout-candidate.json layout.json
 python3 run_core_checks.py
 ```
 
-Only the last command returning 0 means the offline core gates are green. WPM
+Generate a candidate first; do not overwrite `layout.json` before the strict audit
+succeeds. Only the last command returning 0 means the offline core gates are green. WPM
 values remain model outputs until a separate typing session measures them.
