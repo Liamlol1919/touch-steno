@@ -132,6 +132,10 @@ python3 run_core_checks.py --allow-stale-layout   # Exit 0, Provenance nur als W
 python3 run_core_checks.py                        # Exit 2 bei stale Layout-Provenance
 ```
 
+## Status
+
+Der aktuelle Forschungsstand, der akzeptierte Evdev-Stand und die nächste Hardwareaufgabe stehen in `CURRENT_STATUS.md`.
+
 ## Werkzeuge, nicht Ergebnisse
 
 `--self-test` prüft Invarianten, keine Zahlen auf Plausibilität. Der Optimierer
