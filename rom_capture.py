@@ -488,11 +488,12 @@ P90, P98 = 90, 98
 QUANT = 12.5, 37.5, 62.5, 87.5      # the four sector centres of the fan
 
 
-def find_pad_node() -> tuple[str, dict]:
+def find_pad_node(preferred: str | None = None) -> tuple[str, dict]:
     """The event node of the pad's touch surface, with its axis ranges and scale."""
     from evdev import InputDevice, ecodes
     best = None
-    for path in sorted(Path("/dev/input").glob("event*")):
+    paths = [Path(preferred)] if preferred else sorted(Path("/dev/input").glob("event*"))
+    for path in paths:
         try:
             dev = InputDevice(str(path))
         except OSError:
@@ -841,7 +842,7 @@ def run_auto(args) -> tuple[dict, dict]:
     print(f"\n{n} Positions ueber {len(rec.contacts())} Kontakten aufgenommen.")
     if n < 50:
         raise SystemExit(f"only {n} positions recorded - is the pad actually touched?")
-    out = Path("messung/rom")
+    out = Path(getattr(args, "out_dir", None) or "messung/rom")
     out.mkdir(parents=True, exist_ok=True)
     with (out / "gesture.jsonl").open("w", encoding="utf-8") as f:
         for t, slot, x, y in rec.stream:
@@ -1343,6 +1344,8 @@ def _profile_feeds_optimiser(prof) -> str | None:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Lies 20 s deine Hand auf dem Pad aus.")
     ap.add_argument("--seconds", type=float, default=20.0)
+    ap.add_argument("--out-dir", type=Path, default=Path("messung/rom"),
+                    help="directory for raw gesture JSONL")
     ap.add_argument("--profile", type=Path, default=Path("hand_profile.json"))
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args(argv)
