@@ -33,6 +33,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--allow-stale-layout", action="store_true",
                     help="treat the known rejected-profile layout mismatch as a warning")
+    ap.add_argument("--require-hardware", action="store_true",
+                    help="also require a visible Wacom/Intuos input device")
     args = ap.parse_args()
     results = [
         run("layout optimiser offline self-test", ["layout_optimizer.py", "--self-test", "--offline", "--quiet"]),
@@ -45,6 +47,8 @@ def main() -> int:
         results.append(("layout provenance", audit.returncode))
     else:
         results.append(run("layout provenance strict", [*audit_args, "--strict"]))
+    if args.require_hardware:
+        results.append(run("hardware preflight", ["hardware_preflight.py"]))
     technical_failures = [name for name, code in results if code not in (0, 2)]
     code = overall_exit(results)
     if technical_failures:
