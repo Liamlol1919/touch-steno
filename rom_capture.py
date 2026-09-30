@@ -819,7 +819,7 @@ def analyse_gesture(stream, windows, pad=(PAD_W, PAD_H)) -> tuple[dict, dict]:
 
 def run_auto(args) -> tuple[dict, dict]:
     from evdev import InputDevice, ecodes
-    node, axes, dev_name = find_pad_node()
+    node, axes, dev_name = find_pad_node(getattr(args, "device", None))
     (min_x, max_x, res_x) = axes["x"]
     (min_y, max_y, res_y) = axes["y"]
     span_x, span_y = max_x - min_x, max_y - min_y
@@ -1343,6 +1343,9 @@ def _profile_feeds_optimiser(prof) -> str | None:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Lies 20 s deine Hand auf dem Pad aus.")
+    ap.add_argument("--device", type=Path, default=None,
+                    help="explicit /dev/input/eventN; default: largest ABS_MT surface")
+    ap.add_argument("--device", type=Path, help="evdev node of the pad (e.g. /dev/input/event19)")
     ap.add_argument("--seconds", type=float, default=20.0)
     ap.add_argument("--out-dir", type=Path, default=Path("messung/rom"),
                     help="directory for raw gesture JSONL")
