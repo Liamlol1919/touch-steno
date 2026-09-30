@@ -47,6 +47,18 @@ class ProfileSafetyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             module.apply_profile({"_status": "REJECTED - unusable"})
 
+    def test_rejected_override_requires_diagnostic_source_label(self):
+        with self.assertRaises(ValueError):
+            module.apply_profile(
+                {"_status": "REJECTED - unusable"},
+                allow_rejected=True,
+            )
+        module.apply_profile(
+            {"_status": "REJECTED - unusable"},
+            source="rejected hand profile (diagnostic)",
+            allow_rejected=True,
+        )
+
     def test_explicit_diagnostic_override_is_available(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "rejected.json"

@@ -277,8 +277,16 @@ def apply_profile(profile: dict, source: str = "measured hand profile",
     global ENVELOPE_MM, TANGENTIAL_PENALTY, ANCHORS, JOINTS, GEOMETRY_SOURCE
     global COMFORT_RING_MM
     status = profile.get("_status", "")
-    if isinstance(status, str) and status.upper().startswith("REJECTED") and not allow_rejected:
-        raise ValueError("apply_profile refused a REJECTED profile; pass allow_rejected=True only for diagnostics")
+    if isinstance(status, str) and status.upper().startswith("REJECTED"):
+        if not allow_rejected:
+            raise ValueError(
+                "apply_profile refused a REJECTED profile; "
+                "pass allow_rejected=True only for diagnostics"
+            )
+        if source == "measured hand profile":
+            raise ValueError(
+                "a REJECTED profile requires an explicit diagnostic source label"
+            )
     HAND_PROFILE.update(profile)
     GEOMETRY_SOURCE = source
     used = []
