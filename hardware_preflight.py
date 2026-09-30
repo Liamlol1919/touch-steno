@@ -32,7 +32,9 @@ def main() -> int:
         return 0 if found else 1
     for node in list_devices():
         try:
-            name = InputDevice(node).name
+            dev = InputDevice(node)
+            name = dev.name
+            dev.close()
         except (OSError, PermissionError):
             continue
         if "wacom" in name.lower() or "intuos" in name.lower():
