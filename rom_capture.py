@@ -779,6 +779,8 @@ def analyse_gesture(stream, windows, pad=(PAD_W, PAD_H)) -> tuple[dict, dict]:
             "tangential_penalty": 1.0,
         },
     }
+    prof["_status"] = ("ACCEPTED" if idx_measured and fan_ok
+                       else "ACCEPTED_WITH_DECLARED_FALLBACKS")
     diag = {
         "rest_mm": [round(rest[0], 1), round(rest[1], 1)],
         "index_rest_mm": [round(idx_rest[0], 1), round(idx_rest[1], 1)],
