@@ -32,7 +32,7 @@ The default and profile-explicit optimiser runs both completed successfully, but
 
 ## Guard added after the audit
 
-The optimiser now refuses a profile whose JSON status starts with `REJECTED`:
+The optimiser now refuses a profile whose JSON status starts with `REJECTED`, both when loading a file and when `apply_profile()` is called directly:
 
 ```bash
 python3 layout_optimizer.py --hand-profile hand_profile.json
