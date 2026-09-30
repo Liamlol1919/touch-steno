@@ -24,4 +24,5 @@ correctly returns Exit 2.
 - core-check exit-code precedence;
 - explicit diagnostic source labels (`rejected hand profile (diagnostic)`);
 - accepted vs. declared-fallback profile statuses;
-- accepted-profile loading and case-insensitive REJECTED checks.
+- accepted-profile loading and case-insensitive REJECTED checks;
+- read-only hardware preflight and optional `--require-hardware` gate.
