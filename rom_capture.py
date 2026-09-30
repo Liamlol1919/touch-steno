@@ -1331,7 +1331,7 @@ def _profile_feeds_optimiser(prof) -> str | None:
         try:
             profile_data = layout_optimizer.load_profile(path)
             layout_optimizer.apply_profile(profile_data)
-        except Exception as exc:                       # noqa: BLE001 - reported as a failure
+        except (Exception, SystemExit) as exc:              # reported as a failure
             return f"{type(exc).__name__}: {exc}"
     return None
 
