@@ -1306,6 +1306,9 @@ def self_test() -> int:
           dg2["index_slot"] is None, f"index_slot={dg2['index_slot']}")
     check("thumb-only recording: the profile still feeds the optimiser",
           _profile_feeds_optimiser(prof2) is None)
+    check("declared fallback fields are visible in profile status",
+          prof2.get("_status") == "ACCEPTED_WITH_DECLARED_FALLBACKS",
+          prof2.get("_status", "missing"))
 
     # a still hand must be refused rather than turned into numbers
     try:
