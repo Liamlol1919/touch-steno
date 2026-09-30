@@ -129,6 +129,7 @@ Alle Kernprüfungen ohne Tablet und ohne Netz in einem Befehl:
 
 ```bash
 python3 run_core_checks.py --allow-stale-layout   # Exit 0, Provenance nur als Warnung
+python3 run_core_checks.py --require-hardware    # Exit 1, wenn kein Wacom-Gerät sichtbar ist
 python3 run_core_checks.py                        # Exit 2 bei stale Layout-Provenance
 ```
 
