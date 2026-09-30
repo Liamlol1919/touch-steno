@@ -18,7 +18,7 @@ def find_issues(layout: dict, profile: dict) -> list[str]:
     status = profile.get("_status", "unknown")
     embedded = layout.get("geometry", {}).get("hand_profile")
     issues: list[str] = []
-    if isinstance(status, str) and status.startswith("REJECTED") and isinstance(source, str) and "measured" in source.lower():
+    if isinstance(status, str) and status.upper().startswith("REJECTED") and isinstance(source, str) and "measured" in source.lower():
         issues.append("layout.json says 'measured hand profile', but hand_profile.json is REJECTED")
     if embedded is not None and embedded.get("_status") != profile.get("_status"):
         issues.append("embedded profile status differs from current hand_profile.json")

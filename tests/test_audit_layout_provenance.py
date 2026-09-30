@@ -20,6 +20,11 @@ class ProvenanceAuditTests(unittest.TestCase):
         profile = {"_status": "REJECTED - not a usable measurement"}
         self.assertTrue(module.find_issues(layout, profile))
 
+    def test_rejected_status_check_is_case_insensitive(self):
+        layout = {"geometry": {"source": "measured hand profile"}}
+        profile = {"_status": "rejected - unusable"}
+        self.assertTrue(module.find_issues(layout, profile))
+
     def test_matching_provenance_is_clean(self):
         layout = {
             "geometry": {
