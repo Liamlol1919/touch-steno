@@ -14,7 +14,7 @@ There is still no accepted live PTH-660 hand recording. The committed `hand_prof
 
 ## Validation snapshot
 
-At 2026-09-30 03:46 CEST, the offline core run passed with 54 unit tests.
+At 2026-09-30 16:41 CEST, the offline core run passed with 54 unit tests.
 The strict provenance mode still fails with Exit 2 until a live, accepted ROM
 profile replaces the rejected historical profile.
 
