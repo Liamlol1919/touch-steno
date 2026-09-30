@@ -13,6 +13,7 @@ This is the next blocking experiment. It has not been executed in the current en
 ## Identify the device
 
 ```bash
+python3 hardware_preflight.py
 lsusb | grep -i -E 'wacom|056a'
 python3 rom_capture.py --self-test   # synthetic; does not open the device
 python3 - <<'PY'

@@ -135,7 +135,7 @@ python3 run_core_checks.py                        # Exit 2 bei stale Layout-Prov
 ## Status
 
 Der aktuelle Forschungsstand, der akzeptierte Evdev-Stand und die nächste Hardwareaufgabe stehen in `CURRENT_STATUS.md`.
-Die konkrete PTH-660-Aufnahmeprozedur steht in `HARDWARE_RUNBOOK.md`.
+Die konkrete PTH-660-Aufnahmeprozedur steht in `HARDWARE_RUNBOOK.md`; der read-only Preflight ist `hardware_preflight.py`.
 
 ## Werkzeuge, nicht Ergebnisse
 
