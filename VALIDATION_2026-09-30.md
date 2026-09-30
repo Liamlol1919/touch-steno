@@ -1,4 +1,4 @@
-# Validation Snapshot — 2026-09-30 02:14 CEST
+# Validation Snapshot — 2026-09-30 02:28 CEST
 
 ## Core checks
 
@@ -21,4 +21,7 @@ correctly returns Exit 2.
 - legacy-to-MT transition;
 - rejected profile refusal and case-insensitive status checks;
 - accepted/fallback profile status semantics;
-- core-check exit-code precedence.
+- core-check exit-code precedence;
+- explicit diagnostic source labels (`rejected hand profile (diagnostic)`);
+- accepted vs. declared-fallback profile statuses;
+- accepted-profile loading and case-insensitive REJECTED checks.
