@@ -246,7 +246,11 @@ HAND_PROFILE: dict = {}
 
 
 def apply_profile(profile: dict, source: str = "measured hand profile") -> dict:
-    """Override the declared geometry with measured values.
+    """Override declared geometry and record an explicit provenance source.
+
+    ``source`` is written verbatim into the emitted layout. Callers that pass a
+    rejected profile must use a diagnostic source label, never
+    ``"measured hand profile"``.
 
     The profile describes the RIGHT hand only; the left half is always its exact
     mirror, so the symmetry term of the objective stays well defined. Returns the
