@@ -14,10 +14,12 @@ There is still no accepted live PTH-660 hand recording. The committed `hand_prof
 
 ## Validation snapshot
 
-At 2026-09-30 03:09 CEST, the offline core run passed with 52 unit tests.
+At 2026-09-30 03:32 CEST, the offline core run passed with 53 unit tests.
 The strict provenance mode still fails with Exit 2 until a live, accepted ROM
 profile replaces the rejected historical profile.
 
 ## Next concrete task
 
-Run `rom_capture.py --device ...` with only the thumb/index touching and the heel off the pad, then retain the raw JSONL, diagnostic output, profile status and provenance audit together. Do not overwrite the historical layout until the new profile is accepted.
+The read-only preflight is `python3 hardware_preflight.py`; the guided capture accepts `--device` and `--out-dir`.
+
+Run `rom_capture.py --device ... --out-dir messung/rom` with only the thumb/index touching and the heel off the pad. Retain raw JSONL, diagnostic output, profile status and the provenance audit together. Do not overwrite the historical layout until the new profile is accepted.
