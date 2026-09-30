@@ -35,6 +35,7 @@ class RomCliTests(unittest.TestCase):
             module.run_auto = old_run_auto
             module.print_diag = old_print_diag
         self.assertEqual(captured["out_dir"], expected)
+        self.assertEqual(captured["device"], Path("/dev/input/event19"))
 
 
 if __name__ == "__main__":

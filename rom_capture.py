@@ -1345,7 +1345,6 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Lies 20 s deine Hand auf dem Pad aus.")
     ap.add_argument("--device", type=Path, default=None,
                     help="explicit /dev/input/eventN; default: largest ABS_MT surface")
-    ap.add_argument("--device", type=Path, help="evdev node of the pad (e.g. /dev/input/event19)")
     ap.add_argument("--seconds", type=float, default=20.0)
     ap.add_argument("--out-dir", type=Path, default=Path("messung/rom"),
                     help="directory for raw gesture JSONL")
