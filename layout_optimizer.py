@@ -245,7 +245,8 @@ GEOMETRY_SOURCE = "declared design inputs (no hand profile loaded)"
 HAND_PROFILE: dict = {}
 
 
-def apply_profile(profile: dict, source: str = "measured hand profile") -> dict:
+def apply_profile(profile: dict, source: str = "measured hand profile",
+                  allow_rejected: bool = False) -> dict:
     """Override declared geometry and record an explicit provenance source.
 
     ``source`` is written verbatim into the emitted layout. Callers that pass a
@@ -275,6 +276,9 @@ def apply_profile(profile: dict, source: str = "measured hand profile") -> dict:
     global PAD_W, PAD_H, THUMB_RING_R, THUMB_FAN, INDEX_CENTRE, INDEX_PITCH
     global ENVELOPE_MM, TANGENTIAL_PENALTY, ANCHORS, JOINTS, GEOMETRY_SOURCE
     global COMFORT_RING_MM
+    status = profile.get("_status", "")
+    if isinstance(status, str) and status.upper().startswith("REJECTED") and not allow_rejected:
+        raise ValueError("apply_profile refused a REJECTED profile; pass allow_rejected=True only for diagnostics")
     HAND_PROFILE.update(profile)
     GEOMETRY_SOURCE = source
     used = []
@@ -1458,7 +1462,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.hand_profile:
         source = "rejected hand profile (diagnostic)" if args.allow_rejected_profile else "measured hand profile"
-        used = apply_profile(load_profile(args.hand_profile, args.allow_rejected_profile), source=source)
+        used = apply_profile(load_profile(args.hand_profile, args.allow_rejected_profile), source=source,
+                             allow_rejected=args.allow_rejected_profile)
         print(f"hand profile {args.hand_profile}: {', '.join(used) or 'no fields'}",
               file=sys.stderr)
 
